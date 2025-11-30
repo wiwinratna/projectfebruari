@@ -24,15 +24,15 @@ class EventController extends Controller
 
         $events = Event::with([
                 'sports',
-                'volunteerOpenings' => function ($query) {
+                'workerOpenings' => function ($query) {
                     $query->select('id', 'event_id', 'status', 'slots_total', 'slots_filled');
                 },
             ])
             ->withCount([
-                'volunteerOpenings',
+                'workerOpenings',
                 'applications',
             ])
-            ->withSum('volunteerOpenings as slots_total_sum', 'slots_total')
+            ->withSum('workerOpenings as slots_total_sum', 'slots_total')
             ->orderBy('start_at')
             ->get();
 
@@ -41,7 +41,7 @@ class EventController extends Controller
             'active_events' => $events->where('status', 'active')->count(),
             'upcoming_events' => $events->where('status', 'upcoming')->count(),
             'planning_events' => $events->where('status', 'planning')->count(),
-            'volunteer_openings' => $events->sum('volunteer_openings_count'),
+            'worker_openings' => $events->sum('worker_openings_count'),
             'total_applications' => $events->sum('applications_count'),
         ];
 
@@ -89,9 +89,9 @@ class EventController extends Controller
 
         $data = $this->validatedEventData($request);
 
-        Event::create($data);
+        $event = Event::create($data);
 
-        return redirect()->route('events.index')->with('status', 'Event created successfully.');
+        return redirect()->route('events.index', ['flash' => 'created', 'name' => $event->title]);
     }
 
     /**
@@ -131,7 +131,7 @@ class EventController extends Controller
 
         $event->update($data);
 
-        return redirect()->route('events.index')->with('status', 'Event updated successfully.');
+        return redirect()->route('events.index', ['flash' => 'updated', 'name' => $event->title]);
     }
 
     /**
@@ -140,12 +140,32 @@ class EventController extends Controller
     public function destroy(Event $event)
     {
         if (!session('authenticated')) {
-            return redirect('/login');
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
         }
 
+        // Check if event has related data that prevents deletion
+        $applicationsCount = $event->applications()->count();
+        $workerOpeningsCount = $event->workerOpenings()->count();
+        
+        if ($applicationsCount > 0 || $workerOpeningsCount > 0) {
+            $issues = [];
+            if ($applicationsCount > 0) {
+                $issues[] = $applicationsCount . ' applications';
+            }
+            if ($workerOpeningsCount > 0) {
+                $issues[] = $workerOpeningsCount . ' worker openings';
+            }
+            
+            return response()->json([
+                'success' => false, 
+                'message' => 'Cannot delete event that has ' . implode(' and ', $issues)
+            ], 422);
+        }
+
+        $eventName = $event->title;
         $event->delete();
 
-        return redirect()->route('events.index')->with('status', 'Event deleted successfully.');
+        return response()->json(['success' => true, 'message' => 'Event "' . $eventName . '" deleted successfully']);
     }
 
     private function validatedEventData(Request $request, ?Event $event = null): array

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('applications', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('volunteer_opening_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('worker_opening_id')->constrained()->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->text('motivation')->nullable();
             $table->text('experience')->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->timestamp('reviewed_at')->nullable();
             $table->timestamps();
 
-            $table->unique(['volunteer_opening_id', 'user_id']);
+            $table->unique(['worker_opening_id', 'user_id']);
             $table->index(['status', 'created_at']);
         });
     }

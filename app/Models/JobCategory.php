@@ -15,6 +15,7 @@ class JobCategory extends Model
         'requires_certification',
         'default_shift_hours',
         'is_active',
+        'worker_type_id',
     ];
 
     protected $casts = [
@@ -22,8 +23,13 @@ class JobCategory extends Model
         'is_active' => 'boolean',
     ];
 
-    public function volunteerOpenings()
+    public function workerOpenings()
     {
-        return $this->hasMany(VolunteerOpening::class);
+        return $this->hasMany(WorkerOpening::class);
+    }
+
+    public function workerType()
+    {
+        return $this->belongsTo(WorkerType::class);
     }
 }

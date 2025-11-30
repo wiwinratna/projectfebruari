@@ -1,27 +1,27 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Event - KOI')
+@section('title', 'Edit Worker Opening - NOCIS')
 @section('page-title')
-    Edit Event
+    Edit Worker Opening
 @endsection
 
 @section('content')
 <div class="space-y-6">
     <div class="bg-white p-6 rounded-lg shadow">
-        <form method="POST" action="{{ route('events.update', $event) }}" class="space-y-6">
+        <form method="POST" action="{{ route('workers.update', $opening) }}" class="space-y-6">
             @csrf
             @method('PUT')
-            @include('menu.events.partials.form-fields')
+            @include('menu.workers.partials.form-fields')
 
             <div class="flex items-center justify-between">
-                <a href="{{ route('events.index') }}"
+                <a href="{{ route('workers.index') }}"
                    class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
-                    Back to Events
+                    Back to Openings
                 </a>
                 <div class="flex items-center gap-3">
                     <button type="submit"
                             class="px-5 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600">
-                        Update Event
+                        Update Opening
                     </button>
                 </div>
             </div>
@@ -119,12 +119,12 @@
         const name = urlParams.get('name');
         
         if (flash === 'created' && name) {
-            showFlashMessage(`Event "${name}" created successfully!`, 'status');
+            showFlashMessage(`Worker opening "${name}" created successfully!`, 'status');
             // Remove parameters from URL without reload
             const newUrl = window.location.pathname;
             window.history.replaceState({}, document.title, newUrl);
         } else if (flash === 'updated' && name) {
-            showFlashMessage(`Event "${name}" updated successfully!`, 'status');
+            showFlashMessage(`Worker opening "${name}" updated successfully!`, 'status');
             const newUrl = window.location.pathname;
             window.history.replaceState({}, document.title, newUrl);
         }
@@ -134,4 +134,3 @@
     document.addEventListener('DOMContentLoaded', checkUrlFlashMessages);
 </script>
 @endsection
-

@@ -6,7 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 
-class VolunteerOpeningSeeder extends Seeder
+class WorkerOpeningSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -94,7 +94,7 @@ class VolunteerOpeningSeeder extends Seeder
                 continue;
             }
 
-            DB::table('volunteer_openings')->updateOrInsert(
+            DB::table('worker_openings')->updateOrInsert(
                 [
                     'event_id' => $eventId,
                     'title' => $opening['title'],

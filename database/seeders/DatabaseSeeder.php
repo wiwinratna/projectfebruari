@@ -17,8 +17,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             JobCategorySeeder::class,
             SportSeeder::class,
+            WorkerTypeSeeder::class,
             EventSeeder::class,
-            VolunteerOpeningSeeder::class,
         ]);
     }
 }

@@ -2,15 +2,15 @@
     $messages = [
         'status' => [
             'icon' => 'fas fa-check-circle',
-            'classes' => 'bg-green-500 text-white',
+            'classes' => 'bg-red-500 text-white shadow-lg',
         ],
         'error' => [
             'icon' => 'fas fa-exclamation-circle',
-            'classes' => 'bg-red-500 text-white',
+            'classes' => 'bg-red-600 text-white shadow-lg',
         ],
         'warning' => [
             'icon' => 'fas fa-exclamation-triangle',
-            'classes' => 'bg-yellow-500 text-white',
+            'classes' => 'bg-orange-500 text-white shadow-lg',
         ],
     ];
 @endphp

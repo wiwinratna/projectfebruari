@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'NOCIS')</title>
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -19,11 +20,12 @@
         
         @include('components.sidebar')
 
-        <div class="main-content min-h-screen"> 
+        <div class="main-content min-h-screen transition-all duration-300" id="main-content"> 
             
             @include('components.header')
 
             @include('components.flash')
+    @include('components.confirm-modal')
 
             <main class="page-content p-4 lg:p-6">
                 @yield('content') {{-- Ini tempat konten Dashboard, Events, dll. akan dimasukkan --}}
@@ -31,7 +33,7 @@
         </div>
     </div>
 
-    <script src="{{ asset('js/app.js') }}"></script>
+    {{-- JavaScript files are loaded via Vite --}}
     @stack('scripts')
 </body>
 </html>

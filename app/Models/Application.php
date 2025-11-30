@@ -10,7 +10,7 @@ class Application extends Model
     use HasFactory;
 
     protected $fillable = [
-        'volunteer_opening_id',
+        'worker_opening_id',
         'user_id',
         'motivation',
         'experience',
@@ -30,7 +30,7 @@ class Application extends Model
 
     public function opening()
     {
-        return $this->belongsTo(VolunteerOpening::class, 'volunteer_opening_id');
+        return $this->belongsTo(WorkerOpening::class, 'worker_opening_id');
     }
 
     public function user()

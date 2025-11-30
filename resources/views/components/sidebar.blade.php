@@ -18,11 +18,19 @@
         </div>
         <ul class="sidebar-menu mt-8">
             
-            {{-- Dashboard --}}
+            {{-- General Dashboard --}}
             <li class="menu-item {{ Request::is('dashboard') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ url('/dashboard') }}">
                     <i class="fas fa-home mr-3"></i>
-                    <span>Dashboard</span>
+                    <span>General Dashboard</span>
+                </a>
+            </li>
+
+            {{-- Analytics Dashboard --}}
+            <li class="menu-item {{ Request::is('analytics') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ url('/analytics') }}">
+                    <i class="fas fa-chart-line mr-3"></i>
+                    <span>Analytics Dashboard</span>
                 </a>
             </li>
 
@@ -34,11 +42,27 @@
                 </a>
             </li>
             
-            {{-- Volunteers (SUKARELAWAN) --}}
-            <li class="menu-item {{ Request::is('volunteers*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ url('volunteers') }}">
+            {{-- Workers (SUKARELAWAN) --}}
+            <li class="menu-item {{ Request::is('workers*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ url('/workers') }}">
                     <i class="fas fa-users mr-3"></i>
-                    <span>Volunteers</span>
+                    <span>Workers</span>
+                </a>
+            </li>
+
+            {{-- Job Categories --}}
+            <li class="menu-item {{ Request::is('categories*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ url('/categories') }}">
+                    <i class="fas fa-tags mr-3"></i>
+                    <span>Categories</span>
+                </a>
+            </li>
+
+            {{-- Sports --}}
+            <li class="menu-item {{ Request::is('sports*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ url('/sports') }}">
+                    <i class="fas fa-running mr-3"></i>
+                    <span>Sports</span>
                 </a>
             </li>
             

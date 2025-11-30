@@ -278,3 +278,102 @@ span.bg-red-600:contains("High Priority") {
     }
 }
 
+/* ===== MODAL STYLES ===== */
+
+#confirm-modal .bg-white {
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    border: 1px solid #e5e7eb;
+}
+
+/* Removed extreme backdrop animation for subtle effect */
+
+/* CSS for modal card - cleaned up */
+
+/* Enhanced Loading Overlay */
+#loading-overlay {
+    background: rgba(0, 0, 0, 0.4);
+}
+
+#loading-overlay .bg-white {
+    box-shadow: 
+        0 20px 25px -5px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(229, 231, 235, 0.5);
+}
+
+/* Enhanced Button Effects */
+#confirm-yes {
+    position: relative;
+    overflow: hidden;
+}
+
+#confirm-yes::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+#confirm-yes:hover::before {
+    left: 100%;
+}
+
+#confirm-yes:hover {
+    transform: translateY(-2px);
+    box-shadow: 
+        0 10px 25px rgba(220, 38, 38, 0.4),
+        0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+#confirm-cancel:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Table row removal animation */
+tbody tr {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modal focus management */
+#confirm-modal:focus-within {
+    outline: none;
+}
+
+/* Responsive modal adjustments */
+@media (max-width: 640px) {
+    #confirm-modal .bg-white {
+        margin: 1rem;
+        max-width: calc(100vw - 2rem);
+    }
+}
+
+/* Flash Message Animations */
+.flash-message {
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease-out;
+}
+
+.flash-message.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.flash-message.removing {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+/* Flash Container Styles */
+#flash-container {
+    pointer-events: none;
+}
+
+#flash-container .flash-message {
+    pointer-events: auto;
+}
+

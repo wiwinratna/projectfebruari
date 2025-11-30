@@ -1,8 +1,8 @@
 @extends('layouts.app') {{-- Memperluas master layout --}}
 
-@section('title', 'Dashboard - KOI')
+@section('title', 'General Dashboard - KOI')
 @section('page-title')
-    Dashboard
+    General Dashboard
 @endsection
 
 @section('content')

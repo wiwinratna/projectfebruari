@@ -45,13 +45,13 @@ class Event extends Model
             ->withTimestamps();
     }
 
-    public function volunteerOpenings()
+    public function workerOpenings()
     {
-        return $this->hasMany(VolunteerOpening::class);
+        return $this->hasMany(WorkerOpening::class);
     }
 
     public function applications()
     {
-        return $this->hasManyThrough(Application::class, VolunteerOpening::class);
+        return $this->hasManyThrough(Application::class, WorkerOpening::class);
     }
 }
