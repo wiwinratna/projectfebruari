@@ -25,14 +25,11 @@ class SportSeeder extends Seeder
         ];
 
         foreach ($sports as $sport) {
-            DB::table('sports')->updateOrInsert(
-                ['code' => $sport['code']],
-                array_merge($sport, [
-                    'is_active' => true,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ])
-            );
+            DB::table('sports')->insert(array_merge($sport, [
+                'is_active' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]));
         }
     }
 }

@@ -17,8 +17,7 @@ class WorkerOpening extends Model
         'requirements',
         'slots_total',
         'slots_filled',
-        'shift_start',
-        'shift_end',
+        'application_deadline',
         'benefits',
         'status',
     ];
@@ -27,8 +26,7 @@ class WorkerOpening extends Model
     {
         return [
             'requirements' => 'array',
-            'shift_start' => 'datetime',
-            'shift_end' => 'datetime',
+            'application_deadline' => 'datetime',
         ];
     }
 

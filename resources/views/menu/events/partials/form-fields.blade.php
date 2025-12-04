@@ -1,5 +1,4 @@
 @php
-    $contact = (array) ($event->contact_info ?? []);
     $startValue = old(
         'start_at',
         optional($event->start_at)->format('Y-m-d\TH:i')
@@ -8,11 +7,17 @@
         'end_at',
         optional($event->end_at)->format('Y-m-d\TH:i')
     );
+    
+    // Get all available sports
+    $availableSports = \App\Models\Sport::where('is_active', true)->orderBy('name')->get();
+    
+    // Get currently selected sports for edit mode
+    $selectedSports = old('sports', $event->sports->pluck('id')->toArray() ?? []);
 @endphp
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Event Title</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Event Title *</label>
         <input type="text" name="title" value="{{ old('title', $event->title) }}"
                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
         @error('title')
@@ -20,10 +25,11 @@
         @enderror
     </div>
     <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Slug (optional)</label>
-        <input type="text" name="slug" value="{{ old('slug', $event->slug) }}"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
-        @error('slug')
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Penyelenggara *</label>
+        <input type="text" name="penyelenggara" value="{{ old('penyelenggara', $event->penyelenggara) }}"
+               placeholder="e.g., PBSI, PSSI, KONI"
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+        @error('penyelenggara')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
     </div>
@@ -40,7 +46,7 @@
 
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Start Date & Time</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Start Date & Time *</label>
         <input type="datetime-local" name="start_at" value="{{ $startValue }}"
                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
         @error('start_at')
@@ -68,17 +74,38 @@
     </div>
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">City</label>
-        <input type="text" name="city" value="{{ old('city', $event->city) }}"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
-        @error('city')
+        <select name="city_id"
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+            <option value="">-- Select City --</option>
+            @php
+                $currentProvince = '';
+            @endphp
+            @foreach ($cities as $city)
+                @if($city->province !== $currentProvince)
+                    @if($currentProvince !== '')
+                        </optgroup>
+                    @endif
+                    <optgroup label="{{ $city->province }}">
+                    @php $currentProvince = $city->province; @endphp
+                @endif
+                <option value="{{ $city->id }}" 
+                        @selected(old('city_id', $event->city_id) == $city->id)>
+                    {{ $city->name }}
+                </option>
+            @endforeach
+            @if($currentProvince !== '')
+                </optgroup>
+            @endif
+        </select>
+        @error('city_id')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Status</label>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
         <select name="status"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
             @foreach ($statuses as $status)
@@ -92,56 +119,70 @@
         @enderror
     </div>
     <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Priority</label>
-        <select name="priority"
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Stage *</label>
+        <select name="stage"
                 class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
-            @foreach ($priorities as $priority)
-                <option value="{{ $priority }}" @selected(old('priority', $event->priority) === $priority)>
-                    {{ ucfirst($priority) }}
+            @foreach ($stages as $stage)
+                <option value="{{ $stage }}" @selected(old('stage', $event->stage) === $stage)>
+                    @if($stage === 'province') Daerah/antar kota kabupaten
+                    @elseif($stage === 'national') 02SN,PON,Pekan olahraga nasional
+                    @elseif($stage === 'asean/sea') Southeast Asia (SEA Games)
+                    @elseif($stage === 'asia') Asian Games
+                    @elseif($stage === 'world') World Cup, Olympic
+                    @else {{ ucfirst($stage) }} @endif
                 </option>
             @endforeach
         </select>
-        @error('priority')
+        @error('stage')
+            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+        @enderror
+    </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Instagram</label>
+        <input type="text" name="instagram" value="{{ old('instagram', $event->instagram) }}"
+               placeholder="@username or full URL"
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+        @error('instagram')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
     </div>
     <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Capacity</label>
-        <input type="number" name="capacity" min="0" value="{{ old('capacity', $event->capacity) }}"
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
+        <input type="email" name="email" value="{{ old('email', $event->email) }}"
+               placeholder="contact@example.com"
                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
-        @error('capacity')
+        @error('email')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
     </div>
 </div>
 
-<div class="border border-gray-200 rounded-lg p-4 space-y-4">
-    <h4 class="text-sm font-semibold text-gray-700">Contact Information (optional)</h4>
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div>
-            <label class="block text-xs uppercase text-gray-500 mb-1">PIC Name</label>
-            <input type="text" name="contact_pic" value="{{ old('contact_pic', $contact['pic'] ?? '') }}"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
-            @error('contact_pic')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-        <div>
-            <label class="block text-xs uppercase text-gray-500 mb-1">Phone</label>
-            <input type="text" name="contact_phone" value="{{ old('contact_phone', $contact['phone'] ?? '') }}"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
-            @error('contact_phone')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
-        <div>
-            <label class="block text-xs uppercase text-gray-500 mb-1">Email</label>
-            <input type="email" name="contact_email" value="{{ old('contact_email', $contact['email'] ?? '') }}"
-                   class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
-            @error('contact_email')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-            @enderror
-        </div>
+<div>
+    <label class="block text-sm font-semibold text-gray-700 mb-2">Sports *</label>
+    <div class="border border-gray-300 rounded-lg p-4 max-h-48 overflow-y-auto">
+        @foreach ($availableSports as $sport)
+            <label class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
+                <input type="checkbox" 
+                       name="sports[]" 
+                       value="{{ $sport->id }}"
+                       @checked(in_array($sport->id, $selectedSports))
+                       class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                <div class="flex-1">
+                    <span class="text-sm font-medium text-gray-700">{{ $sport->name }}</span>
+                    @if($sport->code)
+                        <span class="text-xs text-gray-500 ml-2">({{ $sport->code }})</span>
+                    @endif
+                </div>
+            </label>
+        @endforeach
     </div>
+    @error('sports')
+        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+    @enderror
+    @error('sports.*')
+        <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+    @enderror
 </div>
-

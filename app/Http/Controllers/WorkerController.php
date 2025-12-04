@@ -19,7 +19,7 @@ class WorkerController extends Controller
         $openings = WorkerOpening::with(['event', 'jobCategory'])
             ->withCount('applications')
             ->orderByDesc('status')
-            ->orderBy('shift_start')
+            ->orderBy('application_deadline')
             ->get();
 
         $stats = [
@@ -47,7 +47,10 @@ class WorkerController extends Controller
         }
 
         $categories = JobCategory::orderBy('name')->get();
-        $events = Event::orderBy('start_at')->get(['id', 'title', 'venue']);
+        // Only show events that are not closed for new worker openings
+        $events = Event::whereIn('status', ['planning', 'upcoming', 'active'])
+                      ->orderBy('start_at')
+                      ->get(['id', 'title', 'venue']);
         $opening = new WorkerOpening(['status' => 'planned', 'slots_filled' => 0]);
 
         return view('menu.workers.create', [
@@ -68,8 +71,7 @@ class WorkerController extends Controller
             'job_category_id' => 'required|exists:job_categories,id',
             'event_id' => 'required|exists:events,id',
             'description' => 'nullable|string',
-            'shift_start' => 'required|date',
-            'shift_end' => 'nullable|date|after_or_equal:shift_start',
+            'application_deadline' => 'required|date',
             'slots_total' => 'required|integer|min:1',
             'slots_filled' => 'nullable|integer|min:0',
             'status' => 'required|in:planned,open,closed',
@@ -87,8 +89,7 @@ class WorkerController extends Controller
             'job_category_id' => $validated['job_category_id'],
             'event_id' => $validated['event_id'],
             'description' => $validated['description'],
-            'shift_start' => $validated['shift_start'],
-            'shift_end' => $validated['shift_end'],
+            'application_deadline' => $validated['application_deadline'],
             'slots_total' => $validated['slots_total'],
             'slots_filled' => $validated['slots_filled'] ?? 0,
             'status' => $validated['status'],
@@ -106,10 +107,13 @@ class WorkerController extends Controller
         }
 
         $categories = JobCategory::orderBy('name')->get();
+        // For editing, show all events (including closed) in case user needs to see current assignment
+        $events = Event::orderBy('start_at')->get(['id', 'title', 'venue', 'status']);
 
         return view('menu.workers.edit', [
             'opening' => $opening,
             'categories' => $categories,
+            'events' => $events,
         ]);
     }
 
@@ -122,9 +126,9 @@ class WorkerController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'job_category_id' => 'required|exists:job_categories,id',
+            'event_id' => 'required|exists:events,id',
             'description' => 'nullable|string',
-            'shift_start' => 'required|date',
-            'shift_end' => 'nullable|date|after_or_equal:shift_start',
+            'application_deadline' => 'required|date',
             'slots_total' => 'required|integer|min:1',
             'slots_filled' => 'nullable|integer|min:0',
             'status' => 'required|in:planned,open,closed',
@@ -140,9 +144,9 @@ class WorkerController extends Controller
         $opening->update([
             'title' => $validated['title'],
             'job_category_id' => $validated['job_category_id'],
+            'event_id' => $validated['event_id'],
             'description' => $validated['description'],
-            'shift_start' => $validated['shift_start'],
-            'shift_end' => $validated['shift_end'],
+            'application_deadline' => $validated['application_deadline'],
             'slots_total' => $validated['slots_total'],
             'slots_filled' => $validated['slots_filled'] ?? 0,
             'status' => $validated['status'],

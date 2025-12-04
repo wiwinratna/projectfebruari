@@ -15,8 +15,8 @@
         
         {{-- Logo --}}
         <div class="text-center mb-8">
-            <img src="{{ asset('images/indonesia-olympic-logo.png') }}?v={{ time() }}" 
-                 alt="Indonesia Olympic Committee" 
+            <img src="{{ asset('images/Logo NOA Indonesia.png') }}?v={{ time() }}"
+                 alt="NOA Indonesia"
                  class="h-20 w-auto mx-auto mb-4">
             <h1 class="text-2xl font-bold text-gray-800 mb-2">Register Account</h1>
             <p class="text-gray-600">Create your NOCIS account</p>
@@ -121,6 +121,8 @@
     </div>
 </body>
 </html>
+
+
 
 
 

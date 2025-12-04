@@ -17,17 +17,17 @@ Route::get('/login', function () {
     return view('auth.login');
 })->name('login');
 
+// Login processing
 Route::post('/login', function () {
-    // Simple login logic for demo
     $credentials = request()->only('username', 'password');
     
     if ($credentials['username'] === 'admin' && $credentials['password'] === 'admin123') {
-        session(['authenticated' => true, 'user' => 'admin']);
+        session(['authenticated' => true, 'user' => 'admin', 'login_time' => now()]);
         return redirect('/dashboard');
     }
     
-    return back()->withErrors(['username' => 'Invalid credentials']);
-})->name('login.post');
+    return back()->withErrors(['username' => 'Invalid credentials'])->withInput();
+})->middleware('web')->name('login.submit');
 
 Route::get('/register', function () {
     return view('auth.register');
@@ -53,15 +53,27 @@ Route::post('/flash-message', function () {
 // Protected Routes (require authentication)
 Route::middleware(['web'])->group(function () {
     Route::get('/dashboard', function () {
+        \Log::info('Dashboard access attempt', [
+            'authenticated' => session('authenticated'),
+            'user' => session('user'),
+            'session_data' => session()->all(),
+            'session_id' => session()->getId(),
+            'request_method' => request()->method(),
+            'user_agent' => request()->userAgent(),
+        ]);
+        
         if (!session('authenticated')) {
-            return redirect('/login');
+            \Log::warning('Dashboard access denied - not authenticated');
+            return redirect('/login')->with('error', 'Please login to access dashboard');
         }
+        
+        \Log::info('Dashboard access granted');
         return view('menu.dashboard.dashboard');
     })->name('dashboard');
 
     Route::get('/analytics', [AnalyticsDashboardController::class, 'index'])->name('analytics');
 
-    Route::resource('events', EventController::class)->except(['show']);
+    Route::resource('events', EventController::class);
 
     Route::get('/workers', [WorkerController::class, 'index'])->name('workers.index');
     Route::get('/workers/create', [WorkerController::class, 'create'])->name('workers.create');

@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\WorkerType;
+use Illuminate\Support\Facades\DB;
 
 class WorkerTypeSeeder extends Seeder
 {
@@ -25,10 +25,7 @@ class WorkerTypeSeeder extends Seeder
         ];
 
         foreach ($workerTypes as $workerType) {
-            WorkerType::firstOrCreate(
-                ['name' => $workerType['name']],
-                $workerType
-            );
+            DB::table('worker_types')->insert($workerType);
         }
     }
 }

@@ -14,17 +14,17 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->id();
             $table->string('title');
-            $table->string('slug')->unique();
             $table->text('description')->nullable();
             $table->dateTime('start_at');
             $table->dateTime('end_at')->nullable();
             $table->string('venue')->nullable();
-            $table->string('city')->nullable();
+            $table->unsignedBigInteger('city_id')->nullable();
             $table->string('status')->default('draft');
-            $table->string('priority')->default('medium');
-            $table->unsignedInteger('capacity')->default(0);
-            $table->foreignId('owner_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->json('contact_info')->nullable();
+            $table->string('stage')->default('province'); // province, national, asean/sea, asia, world
+            $table->string('penyelenggara')->nullable();
+            $table->string('instagram')->nullable();
+            $table->string('email')->nullable();
+
             $table->timestamps();
 
             $table->index(['status', 'start_at']);

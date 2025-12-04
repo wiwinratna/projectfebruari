@@ -3,27 +3,92 @@
 namespace App\Http\Controllers;
 
 use App\Models\Event;
+use App\Models\Sport;
+use App\Models\City;
+use App\Services\EventStatusService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class EventController extends Controller
 {
     private const STATUS_OPTIONS = ['planning', 'upcoming', 'active', 'completed'];
-    private const PRIORITY_OPTIONS = ['high', 'medium', 'low'];
+    private const STAGE_OPTIONS = ['province', 'national', 'asean/sea', 'asia', 'world'];
 
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         if (!session('authenticated')) {
             return redirect('/login');
         }
 
-        $events = Event::with([
+        // Automatically update all event statuses based on current date
+        EventStatusService::updateAllStatuses();
+
+        $searchQuery = $request->get('search');
+        $statusFilter = $request->get('status');
+        $showCompleted = $request->get('show_completed', false);
+        
+        // Set default status filter
+        // If there's a search query, default to 'all' to search across all statuses
+        if (empty($statusFilter) && !$showCompleted) {
+            if (!empty($searchQuery)) {
+                $statusFilter = 'all';
+            } else {
+                $statusFilter = 'active';
+            }
+        }
+
+        $query = Event::forAdmin()
+            ->with([
                 'sports',
+                'city',
+                'workerOpenings' => function ($query) {
+                    $query->select('id', 'event_id', 'status', 'slots_total', 'slots_filled');
+                },
+            ])
+            ->withCount([
+                'workerOpenings',
+                'applications',
+            ])
+            ->withSum('workerOpenings as slots_total_sum', 'slots_total');
+
+        // Apply status filter if provided
+        if (!empty($statusFilter) && $statusFilter !== 'all') {
+            $query->where('status', $statusFilter);
+        } elseif (!$showCompleted && $statusFilter !== 'all') {
+            // By default, exclude completed events unless explicitly requested
+            $query->where('status', '!=', 'completed');
+        }
+        // If show_completed is true OR statusFilter is 'all', we include all events (no additional where clause needed)
+
+        // Apply search filter if provided
+        if (!empty($searchQuery)) {
+            $query->where(function ($q) use ($searchQuery) {
+                $q->where('title', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('penyelenggara', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('venue', 'like', '%' . $searchQuery . '%')
+                  ->orWhere('description', 'like', '%' . $searchQuery . '%')
+                  ->orWhereHas('city', function ($cityQuery) use ($searchQuery) {
+                      $cityQuery->where('name', 'like', '%' . $searchQuery . '%')
+                               ->orWhere('province', 'like', '%' . $searchQuery . '%');
+                  })
+                  ->orWhereHas('sports', function ($sportQuery) use ($searchQuery) {
+                      $sportQuery->where('name', 'like', '%' . $searchQuery . '%')
+                               ->orWhere('code', 'like', '%' . $searchQuery . '%');
+                  });
+            });
+        }
+
+        $events = $query->orderBy('start_at')->get();
+
+        // Get all events for consistent stats (regardless of filters)
+        $allEvents = Event::forAdmin()
+            ->with([
+                'sports',
+                'city',
                 'workerOpenings' => function ($query) {
                     $query->select('id', 'event_id', 'status', 'slots_total', 'slots_filled');
                 },
@@ -33,26 +98,51 @@ class EventController extends Controller
                 'applications',
             ])
             ->withSum('workerOpenings as slots_total_sum', 'slots_total')
-            ->orderBy('start_at')
             ->get();
 
         $stats = [
-            'total_events' => $events->count(),
-            'active_events' => $events->where('status', 'active')->count(),
-            'upcoming_events' => $events->where('status', 'upcoming')->count(),
-            'planning_events' => $events->where('status', 'planning')->count(),
-            'worker_openings' => $events->sum('worker_openings_count'),
-            'total_applications' => $events->sum('applications_count'),
+            'total_events' => $allEvents->count(),
+            'active_events' => $allEvents->where('status', 'active')->count(),
+            'upcoming_events' => $allEvents->where('status', 'upcoming')->count(),
+            'planning_events' => $allEvents->where('status', 'planning')->count(),
+            'completed_events' => $allEvents->where('status', 'completed')->count(),
+            'worker_openings' => $allEvents->sum('worker_openings_count'),
+            'total_applications' => $allEvents->sum('applications_count'),
         ];
 
-        $calendarDays = collect(range(1, now()->daysInMonth()));
-        $calendarMonth = now()->translatedFormat('F Y');
+        $calendarMonth = now()->copy();
+        $calendarDays = collect(range(1, $calendarMonth->daysInMonth()));
+        
+        // Prepare event data untuk calendar (group events by date) - include ALL events for calendar
+        $eventsByDate = [];
+        $allEventsForCalendar = Event::forAdmin()
+            ->with(['sports', 'city'])
+            ->get();
+            
+        foreach ($allEventsForCalendar as $event) {
+            if ($event->start_at) {
+                $dateKey = $event->start_at->format('Y-m-d');
+                if (!isset($eventsByDate[$dateKey])) {
+                    $eventsByDate[$dateKey] = [];
+                }
+                $eventsByDate[$dateKey][] = [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'status' => $event->status,
+                    'time' => $event->start_at->format('H:i'),
+                ];
+            }
+        }
 
         return view('menu.events.index', [
             'events' => $events,
             'stats' => $stats,
             'calendarMonth' => $calendarMonth,
             'calendarDays' => $calendarDays,
+            'eventsByDate' => $eventsByDate,
+            'searchQuery' => $searchQuery,
+            'statusFilter' => $statusFilter,
+            'showCompleted' => $showCompleted,
         ]);
     }
 
@@ -67,14 +157,14 @@ class EventController extends Controller
 
         $event = new Event([
             'status' => 'planning',
-            'priority' => 'medium',
-            'capacity' => 0,
+            'stage' => 'province',
         ]);
 
         return view('menu.events.create', [
             'event' => $event,
             'statuses' => self::STATUS_OPTIONS,
-            'priorities' => self::PRIORITY_OPTIONS,
+            'stages' => self::STAGE_OPTIONS,
+            'cities' => City::active()->orderBy('province')->orderBy('name')->get(),
         ]);
     }
 
@@ -88,8 +178,17 @@ class EventController extends Controller
         }
 
         $data = $this->validatedEventData($request);
+        $sports = $data['sports'] ?? [];
+        unset($data['sports']);
 
         $event = Event::create($data);
+        
+        // Automatically calculate and update status based on dates
+        EventStatusService::updateStatus($event);
+
+        if (!empty($sports)) {
+            $event->sports()->sync($sports);
+        }
 
         return redirect()->route('events.index', ['flash' => 'created', 'name' => $event->title]);
     }
@@ -99,7 +198,25 @@ class EventController extends Controller
      */
     public function show(Event $event)
     {
-        //
+        if (!session('authenticated')) {
+            return redirect('/login');
+        }
+
+        // Load event with all relationships
+        $event->load([
+            'sports',
+            'city',
+            'workerOpenings' => function ($query) {
+                $query->with('jobCategory');
+            },
+            'applications' => function ($query) {
+                $query->with('opening');
+            }
+        ]);
+
+        return view('menu.events.show', [
+            'event' => $event,
+        ]);
     }
 
     /**
@@ -114,7 +231,8 @@ class EventController extends Controller
         return view('menu.events.edit', [
             'event' => $event,
             'statuses' => self::STATUS_OPTIONS,
-            'priorities' => self::PRIORITY_OPTIONS,
+            'stages' => self::STAGE_OPTIONS,
+            'cities' => City::active()->orderBy('province')->orderBy('name')->get(),
         ]);
     }
 
@@ -128,8 +246,17 @@ class EventController extends Controller
         }
 
         $data = $this->validatedEventData($request, $event);
+        $sports = $data['sports'] ?? [];
+        unset($data['sports']);
 
         $event->update($data);
+
+        if (isset($data['sports'])) {
+            $event->sports()->sync($sports);
+        }
+
+        // Automatically calculate and update status based on updated dates
+        EventStatusService::updateStatus($event);
 
         return redirect()->route('events.index', ['flash' => 'updated', 'name' => $event->title]);
     }
@@ -170,57 +297,39 @@ class EventController extends Controller
 
     private function validatedEventData(Request $request, ?Event $event = null): array
     {
-        $id = $event?->id;
-
         $validated = $request->validate([
             'title' => ['required', 'string', 'max:255'],
-            'slug' => ['nullable', 'string', 'max:255', Rule::unique('events', 'slug')->ignore($id)],
             'description' => ['nullable', 'string'],
             'start_at' => ['required', 'date'],
             'end_at' => ['nullable', 'date', 'after_or_equal:start_at'],
             'venue' => ['nullable', 'string', 'max:255'],
-            'city' => ['nullable', 'string', 'max:255'],
+            'city_id' => ['nullable', 'exists:cities,id'],
             'status' => ['required', Rule::in(self::STATUS_OPTIONS)],
-            'priority' => ['required', Rule::in(self::PRIORITY_OPTIONS)],
-            'capacity' => ['nullable', 'integer', 'min:0'],
-            'contact_pic' => ['nullable', 'string', 'max:255'],
-            'contact_phone' => ['nullable', 'string', 'max:255'],
-            'contact_email' => ['nullable', 'email', 'max:255'],
+            'stage' => ['required', Rule::in(self::STAGE_OPTIONS)],
+            'penyelenggara' => ['required', 'string', 'max:255'],
+            'instagram' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'sports' => ['nullable', 'array'],
+            'sports.*' => ['exists:sports,id'],
         ]);
 
         $data = collect($validated)
             ->only([
                 'title',
-                'slug',
                 'description',
                 'start_at',
                 'end_at',
                 'venue',
-                'city',
+                'city_id',
                 'status',
-                'priority',
-                'capacity',
+                'stage',
+                'penyelenggara',
+                'instagram',
+                'email',
             ])->toArray();
-
-        if (blank($data['slug'] ?? null)) {
-            $data['slug'] = Str::slug($data['title']);
-        }
-
-        if (blank($data['slug'])) {
-            $data['slug'] = Str::random(8);
-        }
 
         $data['start_at'] = Carbon::parse($data['start_at']);
         $data['end_at'] = isset($data['end_at']) ? Carbon::parse($data['end_at']) : null;
-        $data['capacity'] = $data['capacity'] ?? 0;
-
-        $contactInfo = array_filter([
-            'pic' => $validated['contact_pic'] ?? null,
-            'phone' => $validated['contact_phone'] ?? null,
-            'email' => $validated['contact_email'] ?? null,
-        ], fn ($value) => filled($value));
-
-        $data['contact_info'] = $contactInfo ?: null;
 
         return $data;
     }

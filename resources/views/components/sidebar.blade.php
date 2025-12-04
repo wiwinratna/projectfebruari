@@ -7,8 +7,8 @@
         <div class="sidebar-brand p-4 border-b border-gray-200 relative">
             <div class="flex items-center justify-center">
                 <a href="{{ url('dashboard') }}" class="flex items-center justify-center">
-                    <img src="{{ asset('images/indonesia-olympic-logo.png') }}?v={{ time() }}" 
-                         alt="Indonesia Olympic Committee" 
+                    <img src="{{ asset('images/Logo NOA Indonesia.png') }}?v={{ time() }}"
+                         alt="NOA Indonesia"
                          class="logo-img block">
                 </a>
             </div>

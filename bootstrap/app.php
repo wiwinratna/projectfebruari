@@ -11,7 +11,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Exclude login route from CSRF protection for mobile compatibility
+        $middleware->validateCsrfTokens(except: [
+            'login',
+        ]);
+        
+        // Configure session for mobile browsers
+        $middleware->encryptCookies();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

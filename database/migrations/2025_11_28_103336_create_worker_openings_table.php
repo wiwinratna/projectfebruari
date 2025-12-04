@@ -20,8 +20,7 @@ return new class extends Migration
             $table->json('requirements')->nullable();
             $table->unsignedSmallInteger('slots_total')->default(0);
             $table->unsignedSmallInteger('slots_filled')->default(0);
-            $table->dateTime('shift_start')->nullable();
-            $table->dateTime('shift_end')->nullable();
+            $table->dateTime('application_deadline')->nullable();
             $table->text('benefits')->nullable();
             $table->string('status')->default('draft');
             $table->timestamps();

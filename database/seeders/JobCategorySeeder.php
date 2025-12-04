@@ -75,14 +75,11 @@ class JobCategorySeeder extends Seeder
         ];
 
         foreach ($categories as $category) {
-            DB::table('job_categories')->updateOrInsert(
-                ['name' => $category['name']],
-                array_merge($category, [
-                    'is_active' => true,
-                    'updated_at' => $now,
-                    'created_at' => $now,
-                ])
-            );
+            DB::table('job_categories')->insert(array_merge($category, [
+                'is_active' => true,
+                'updated_at' => $now,
+                'created_at' => $now,
+            ]));
         }
     }
 }

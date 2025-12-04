@@ -71,8 +71,7 @@
                     <div class="flex items-center">
                         <i class="fas fa-calendar mr-2 text-gray-400"></i>
                         <span>
-                            Shift: {{ optional($opening->shift_start)->translatedFormat('d M Y') ?? 'TBD' }} -
-                            {{ optional($opening->shift_end)->translatedFormat('d M Y') ?? 'TBD' }}
+                            Deadline: {{ optional($opening->application_deadline)->translatedFormat('d M Y H:i') ?? 'TBD' }}
                         </span>
                     </div>
                     <div class="flex items-center">
