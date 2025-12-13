@@ -26,17 +26,17 @@
         <form method="POST" action="{{ route('login.submit') }}" class="space-y-6">
             @csrf
             
-            {{-- Username Field --}}
+            {{-- Email Field --}}
             <div>
-                <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Username</label>
-                <input type="text"
-                       id="username"
-                       name="username"
-                       value="{{ old('username') }}"
-                       placeholder="Enter your username"
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                <input type="email"
+                       id="email"
+                       name="email"
+                       value="{{ old('email') }}"
+                       placeholder="Enter your email"
                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors"
                        required>
-                @error('username')
+                @error('email')
                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
@@ -157,11 +157,11 @@
 
         // Auto-focus on first empty field
         document.addEventListener('DOMContentLoaded', function() {
-            const usernameInput = document.getElementById('username');
+            const emailInput = document.getElementById('email');
             const passwordInput = document.getElementById('password');
             
-            if (!usernameInput.value) {
-                usernameInput.focus();
+            if (!emailInput.value) {
+                emailInput.focus();
             } else {
                 passwordInput.focus();
             }

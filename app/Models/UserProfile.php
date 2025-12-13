@@ -16,18 +16,27 @@ class UserProfile extends Model
      */
     protected $fillable = [
         'user_id',
+        'name',
+        'professional_headline',
         'phone',
         'date_of_birth',
         'address',
         'linkedin',
         'instagram',
         'twitter',
-        'github',
+        'tiktok',
         'website',
         'cv_file',
         'cv_updated_at',
         'profile_photo',
         'summary',
+        // Education & Preferences
+        'last_education',
+        'field_of_study',
+        'university',
+        'graduation_year',
+        'skills',
+        'languages',
     ];
 
     /**

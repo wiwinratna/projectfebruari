@@ -14,7 +14,7 @@ class CustomerDashboardController extends Controller
         $customerId = session('customer_id');
         
         // Get customer's applications
-        $applications = Application::with(['workerOpening.event', 'workerOpening.jobCategory'])
+        $applications = Application::with(['opening.event', 'opening.jobCategory'])
             ->where('user_id', $customerId)
             ->latest()
             ->take(5)
@@ -66,15 +66,22 @@ class CustomerDashboardController extends Controller
         $customerId = session('customer_id');
         $user = \App\Models\User::find($customerId);
         
-        // Validate email separately since it's always required
-        $request->validate([
-            'email' => 'required|email|unique:users,email,'.$customerId,
-        ]);
+        // Validate and update email only if provided (e.g. from Personal Data tab)
+        if ($request->has('email')) {
+            $request->validate([
+                'email' => 'required|email|unique:users,email,'.$customerId,
+                'username' => 'required|string|max:255|unique:users,username,'.$customerId,
+            ]);
 
-        // Update user email
-        $user->update([
-            'email' => $request->email
-        ]);
+            // Update user email and username
+            $user->update([
+                'email' => $request->email,
+                'username' => $request->username
+            ]);
+
+            // Update session username
+            session(['customer_username' => $request->username]);
+        }
 
         // Get or create user profile
         $userProfile = $user->profile()->first();
@@ -95,16 +102,37 @@ class CustomerDashboardController extends Controller
         }
 
         // Handle personal data updates (from personal data tab)
-        if ($request->has('phone') || $request->has('date_of_birth') || $request->has('address')) {
+        if ($request->has('professional_headline') || $request->has('phone') || $request->has('date_of_birth') || $request->has('address')) {
             $request->validate([
+                'professional_headline' => 'nullable|string|max:100',
                 'phone' => 'nullable|string|max:20',
                 'date_of_birth' => 'nullable|date',
                 'address' => 'nullable|string|max:500',
             ]);
 
+            $profileData['professional_headline'] = $request->professional_headline;
             if ($request->filled('phone')) $profileData['phone'] = $request->phone;
             if ($request->filled('date_of_birth')) $profileData['date_of_birth'] = $request->date_of_birth;
             if ($request->filled('address')) $profileData['address'] = $request->address;
+        }
+
+        // Handle Education & Preferences
+        if ($request->has('last_education')) {
+            $request->validate([
+                'last_education' => 'nullable|string|max:50',
+                'field_of_study' => 'nullable|string|max:100',
+                'university' => 'nullable|string|max:100',
+                'graduation_year' => 'nullable|integer|min:1900|max:'.(date('Y')+10),
+                'skills' => 'nullable|string|max:1000',
+                'languages' => 'nullable|string|max:500',
+            ]);
+
+            $profileData['last_education'] = $request->last_education;
+            $profileData['field_of_study'] = $request->field_of_study;
+            $profileData['university'] = $request->university;
+            $profileData['graduation_year'] = $request->graduation_year;
+            $profileData['skills'] = $request->skills;
+            $profileData['languages'] = $request->languages;
         }
 
         // Save profile data if any exists
@@ -113,18 +141,36 @@ class CustomerDashboardController extends Controller
             $userProfile->save();
         }
 
+        // Handle CV upload
+        if ($request->hasFile('cv_file')) {
+            $request->validate([
+                'cv_file' => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB max
+            ]);
+            
+            // Remove old CV if exists
+            if ($userProfile->cv_file && \Storage::exists($userProfile->cv_file)) {
+                \Storage::delete($userProfile->cv_file);
+            }
+            
+            // Store new CV
+            $cvPath = $request->file('cv_file')->store('cv_files', 'public');
+            $userProfile->cv_file = $cvPath;
+            $userProfile->cv_updated_at = now();
+            $userProfile->save();
+        }
+
         return redirect()->back()->with('success', 'Pengaturan berhasil diperbarui!');
     }
 
     public function updateProfilePhoto(Request $request)
     {
+        $request->validate([
+            'profile_photo' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+        ]);
+
         $customerId = session('customer_id');
         $user = \App\Models\User::find($customerId);
         
-        $request->validate([
-            'profile_photo' => 'required|image|mimes:jpeg,jpg,png|max:2048', // 2MB max
-        ]);
-
         // Get or create user profile
         $userProfile = $user->profile()->first();
         if (!$userProfile) {
@@ -132,18 +178,25 @@ class CustomerDashboardController extends Controller
             $userProfile->user_id = $customerId;
         }
 
-        // Remove old photo if exists
-        if ($userProfile->profile_photo && \Storage::exists($userProfile->profile_photo)) {
-            \Storage::delete($userProfile->profile_photo);
+        // Delete old photo if exists
+        if ($userProfile->profile_photo && \Storage::exists('public/' . $userProfile->profile_photo)) {
+            \Storage::delete('public/' . $userProfile->profile_photo);
         }
 
         // Store new photo
-        $photoPath = $request->file('profile_photo')->store('profile_photos', 'public');
+        // Note: The cropper sends a blob, which Laravel treats as a file upload
+        $path = $request->file('profile_photo')->store('profile_photos', 'public');
         
-        $userProfile->profile_photo = $photoPath;
+        $userProfile->profile_photo = $path;
         $userProfile->save();
 
-        return redirect()->back()->with('success', 'Foto profil berhasil diperbarui!');
+        // Update session
+        session(['customer_profile_photo' => $path]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profile photo updated successfully!'
+        ]);
     }
 
     public function removeProfilePhoto()
@@ -159,6 +212,9 @@ class CustomerDashboardController extends Controller
         if ($userProfile) {
             $userProfile->profile_photo = null;
             $userProfile->save();
+            
+            // Update session
+            session()->forget('customer_profile_photo');
         }
 
         return redirect()->back()->with('success', 'Foto profil berhasil dihapus!');
@@ -227,68 +283,104 @@ class CustomerDashboardController extends Controller
         return redirect()->back()->with('success', 'Profile updated successfully!');
     }
 
-    public function updateSocialMedia(Request $request)
+    public function uploadCv(Request $request)
     {
+        $request->validate([
+            'cv_file' => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB max
+        ]);
+
         $customerId = session('customer_id');
         $user = \App\Models\User::find($customerId);
+        $userProfile = $user->profile ?? new \App\Models\UserProfile(['user_id' => $user->id]);
 
-        // Debug: Log all request data
-        \Log::info('Social media request data:', [
-            'all_data' => $request->all(),
-            'platform' => $request->input('platform'),
-            'social_link' => $request->input('social_link'),
-            'user_id' => $customerId
+        // Remove old CV if exists
+        if ($userProfile->cv_file && \Storage::exists($userProfile->cv_file)) {
+            \Storage::delete($userProfile->cv_file);
+        }
+
+        // Store new CV
+        $cvPath = $request->file('cv_file')->store('cv_files', 'public');
+        $userProfile->cv_file = $cvPath;
+        $userProfile->cv_updated_at = now();
+        $userProfile->save();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'CV uploaded successfully!',
+            'cv_url' => asset('storage/' . $cvPath),
+            'filename' => basename($cvPath)
         ]);
+    }
 
-        // Validate the request
-        $request->validate([
-            'platform' => 'required|in:linkedin,instagram,twitter,github,website',
-            'social_link' => 'required|string|max:255',
-        ]);
-
+    public function updateSocialMedia(Request $request)
+    {
         try {
-            // Get the platform and social link from request
-            $platform = $request->input('platform');
-            $socialLink = $request->input('social_link');
+            $customerId = session('customer_id');
+            if (!$customerId) {
+                return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+            }
 
-            \Log::info('Processing social media update:', [
-                'platform' => $platform,
-                'social_link' => $socialLink,
-                'user_id' => $customerId
-            ]);
+            $user = \App\Models\User::find($customerId);
+            if (!$user) {
+                return response()->json(['success' => false, 'message' => 'User not found'], 404);
+            }
+
+            // Validate inputs
+            $socialFields = ['linkedin', 'instagram', 'twitter', 'tiktok', 'website'];
+            $rules = [];
+            foreach ($socialFields as $field) {
+                $rules[$field] = 'nullable|url|max:255';
+            }
+            
+            $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
+            
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Validation error', 
+                    'errors' => $validator->errors()
+                ], 422);
+            }
 
             // Get or create user profile
-            $userProfile = $user->profile()->first();
+            $userProfile = $user->profile;
             if (!$userProfile) {
                 $userProfile = new \App\Models\UserProfile();
                 $userProfile->user_id = $customerId;
-                $userProfile->save();
-                \Log::info('Created new user profile', ['profile_id' => $userProfile->id]);
             }
 
-            // Update the specific social media field
-            $userProfile->{$platform} = $socialLink;
-            $userProfile->save();
+            $updatedCount = 0;
+            foreach ($socialFields as $field) {
+                if ($request->has($field)) {
+                    // Handle empty strings as null
+                    $value = $request->input($field);
+                    if ($value === null || $value === '') {
+                        $value = null;
+                    }
+                    
+                    $userProfile->{$field} = $value;
+                    $updatedCount++;
+                }
+            }
 
-            \Log::info('Social media update successful:', [
-                'platform' => $platform,
-                'social_link' => $socialLink,
-                'profile_id' => $userProfile->id
-            ]);
+            if ($updatedCount > 0) {
+                $userProfile->save();
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Social media links updated successfully!'
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
-                'message' => 'Akun sosial media berhasil ditambahkan!'
+                'message' => 'No changes made.'
             ]);
 
         } catch (\Exception $e) {
-            \Log::error('Social media update error: ' . $e->getMessage(), [
-                'trace' => $e->getTraceAsString(),
-                'request_data' => $request->all()
-            ]);
+            \Illuminate\Support\Facades\Log::error('Social media update failed: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
-                'message' => 'Gagal memperbarui akun sosial media: ' . $e->getMessage()
+                'message' => 'Server error: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -314,7 +406,7 @@ class CustomerDashboardController extends Controller
     {
         $customerId = session('customer_id');
         
-        $applications = Application::with(['workerOpening.event', 'workerOpening.jobCategory'])
+        $applications = Application::with(['opening.event', 'opening.jobCategory'])
             ->where('user_id', $customerId)
             ->latest()
             ->paginate(10);
@@ -362,12 +454,12 @@ public function savedJobs()
 {
 $customerId = session('customer_id');
 
-$savedJobs = WorkerOpening::with(['event.city', 'jobCategory'])
-    ->whereHas('savedByUsers', function($query) use ($customerId) {
-        $query->where('user_id', $customerId);
-    })
-    ->orderBy('created_at', 'desc')
-    ->paginate(10);
+    $user = \App\Models\User::find($customerId);
+
+    $savedJobs = $user->savedJobs()
+        ->with(['event.city', 'jobCategory'])
+        ->orderByPivot('created_at', 'desc')
+        ->paginate(10);
 
 return view('menu.customer.saved-jobs', compact('savedJobs'));
 }

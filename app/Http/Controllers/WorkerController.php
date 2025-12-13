@@ -17,37 +17,78 @@ class WorkerController extends Controller
         }
 
         $statusFilter = $request->input('status', 'active');
+        $now = now();
 
-        // Get ALL openings for statistics calculation (not filtered)
+        // Get ALL openings for statistics calculation
         $allOpenings = WorkerOpening::with(['event', 'jobCategory'])
             ->withCount('applications')
             ->get();
 
-        // Calculate statistics from ALL openings (consistent across all views)
+        // Calculate statistics consistent with new logic
+        $openCount = $allOpenings->filter(function ($opening) use ($now) {
+            return $opening->status === 'open' && 
+                   $opening->application_deadline > $now && 
+                   $opening->slots_filled < $opening->slots_total;
+        })->count();
+
+        $closedCount = $allOpenings->filter(function ($opening) use ($now) {
+            return $opening->status === 'closed' || 
+                   ($opening->status === 'open' && $opening->application_deadline <= $now) ||
+                   ($opening->status === 'open' && $opening->slots_filled >= $opening->slots_total);
+        })->count();
+
         $stats = [
             'total_openings' => $allOpenings->count(),
-            'active_openings' => $allOpenings->where('status', 'open')->count(),
-            'closed_openings' => $allOpenings->where('status', 'closed')->count(),
+            'active_openings' => $openCount,
+            'closed_openings' => $closedCount,
             'total_applications' => Application::count(),
             'positions_filled' => $allOpenings->sum('slots_filled'),
         ];
 
-        // Apply status filtering for the display list
+        // Apply filtering for display
         $query = WorkerOpening::with(['event', 'jobCategory'])
             ->withCount('applications');
 
-        if ($statusFilter === 'active') {
-            $query->where('status', 'open');
-        } elseif ($statusFilter === 'closed') {
-            $query->where('status', 'closed');
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', '%'.$search.'%')
+                  ->orWhereHas('event', function($sq) use ($search) {
+                      $sq->where('title', 'like', '%'.$search.'%');
+                  });
+            });
+            
+            // When searching, we ignore status filter to show ALL matches
+            // But we can conceptually treat it as 'all' for the view
+            $statusFilter = 'all'; 
+        } else {
+            // Only apply status filter if NOT searching
+            if ($statusFilter === 'active') {
+                $query->where('status', 'open')
+                      ->where('application_deadline', '>', $now)
+                      ->whereColumn('slots_filled', '<', 'slots_total');
+            } elseif ($statusFilter === 'closed') {
+                $query->where(function($q) use ($now) {
+                    $q->where('status', 'closed')
+                      ->orWhere(function($subQ) use ($now) {
+                          $subQ->where('status', 'open')
+                               ->where('application_deadline', '<=', $now);
+                      })
+                      ->orWhere(function($subQ) {
+                          $subQ->where('status', 'open')
+                               ->whereColumn('slots_filled', '>=', 'slots_total');
+                      });
+                });
+            }
         }
-        // 'all' shows everything, no additional filtering needed
+        // 'all' shows everything
 
         $openings = $query->orderByDesc('status')
             ->orderBy('application_deadline')
             ->get();
 
         $categories = JobCategory::orderBy('name')->get();
+        // Show events that are active/upcoming for filter (or all) - keeping simple for now
         $events = Event::orderBy('start_at')->get(['id', 'title', 'venue']);
 
         return view('menu.workers.index', [
@@ -174,5 +215,19 @@ class WorkerController extends Controller
         ]);
 
         return redirect()->route('admin.workers.index', ['flash' => 'updated', 'name' => $worker->title]);
+    }
+
+    public function show(WorkerOpening $worker)
+    {
+        if (!session('admin_authenticated')) {
+            return redirect('/admin/login');
+        }
+
+        $worker->load(['event', 'jobCategory', 'applications.user.profile']);
+
+        return view('menu.workers.show', [
+            'opening' => $worker,
+            'applications' => $worker->applications()->latest()->get()
+        ]);
     }
 }

@@ -12,7 +12,10 @@ use Illuminate\Support\Facades\Route;
 
 // Landing page route
 Route::get('/', function () {
-    return view('landing');
+    $jobController = new \App\Http\Controllers\JobController();
+    $recentJobs = $jobController->getRecentJobs();
+    
+    return view('landing', compact('recentJobs'));
 })->name('landing');
 
 // Public Job Routes (accessible without login)
@@ -26,15 +29,15 @@ Route::get('/login', function () {
 
 // Customer Login processing - redirect back to jobs after login
 Route::post('/login', function () {
-    $credentials = request()->only('username', 'password');
+    $credentials = request()->only('email', 'password');
 
     // Database-backed authentication
-    $user = \App\Models\User::where('username', $credentials['username'])->first();
+    $user = \App\Models\User::where('email', $credentials['email'])->first();
 
     if ($user && \Hash::check($credentials['password'], $user->password)) {
         // Only allow non-admin users to login via customer login
         if ($user->role === 'admin') {
-            return back()->withErrors(['username' => 'Admin users must login via admin portal'])->withInput();
+            return back()->withErrors(['email' => 'Admin users must login via admin portal'])->withInput();
         }
 
         session([
@@ -42,7 +45,8 @@ Route::post('/login', function () {
             'customer_id' => $user->id,
             'customer_username' => $user->username,
             'customer_role' => $user->role,
-            'customer_login_time' => now()
+            'customer_login_time' => now(),
+            'customer_profile_photo' => $user->profile?->profile_photo
         ]);
 
         // Redirect back to jobs page or to intended URL
@@ -52,12 +56,49 @@ Route::post('/login', function () {
         return redirect($redirectTo);
     }
 
-    return back()->withErrors(['username' => 'Invalid credentials'])->withInput();
+    return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
 })->middleware('web')->name('login.submit');
 
 Route::get('/register', function () {
     return view('auth.register');
 })->name('register');
+
+Route::post('/register', function () {
+    $validated = request()->validate([
+        'first_name' => 'required|string|max:255',
+        'last_name' => 'required|string|max:255',
+        'email' => 'required|string|email|max:255|unique:users',
+        'username' => 'required|string|max:255|unique:users',
+        'password' => 'required|string|min:8|confirmed',
+        'terms' => 'accepted',
+    ]);
+
+    // Create User
+    $user = \App\Models\User::create([
+        'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+        'username' => $validated['username'],
+        'email' => $validated['email'],
+        'password' => \Hash::make($validated['password']),
+        'role' => 'customer',
+    ]);
+
+    // Create Empty Profile
+    \App\Models\UserProfile::create([
+        'user_id' => $user->id,
+    ]);
+
+    // Login User
+    session([
+        'customer_authenticated' => true,
+        'customer_id' => $user->id,
+        'customer_username' => $user->username,
+        'customer_role' => $user->role,
+        'customer_login_time' => now(),
+        'customer_profile_photo' => null
+    ]);
+
+    return redirect('/jobs')->with('success', 'Registration successful! Welcome to NOCIS.');
+});
 
 Route::get('/password/reset', function () {
     return view('auth.forgot-password');
@@ -79,6 +120,7 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
     Route::get('/', [CustomerDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [CustomerDashboardController::class, 'profile'])->name('profile');
     Route::post('/profile', [CustomerDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/upload-cv', [CustomerDashboardController::class, 'uploadCv'])->name('profile.upload-cv');
     Route::post('/profile/update-social', [CustomerDashboardController::class, 'updateSocialMedia'])->name('profile.update-social');
     Route::delete('/profile/remove-cv', [CustomerDashboardController::class, 'removeCV'])->name('profile.remove-cv');
     Route::get('/settings', [CustomerDashboardController::class, 'settings'])->name('settings');
@@ -145,9 +187,7 @@ Route::post('/flash-message', function () {
 // Protected Admin Routes (require admin authentication)
 Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(function () {
     // Admin Dashboard - Protected
-    Route::get('/dashboard', function () {
-        return view('menu.dashboard.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Analytics Dashboard - Protected
     Route::get('/analytics', [AnalyticsDashboardController::class, 'index'])->name('analytics');
@@ -167,6 +207,17 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     // Reviews Management - Protected
     Route::get('/reviews', [\App\Http\Controllers\ReviewController::class, 'index'])->name('reviews.index');
     Route::post('/reviews/{application}', [\App\Http\Controllers\ReviewController::class, 'updateStatus'])->name('reviews.update');
+
+    // Dedicated Application Review (Full Page)
+    Route::prefix('applications')->name('applications.')->group(function () {
+        Route::get('/{application}', [\App\Http\Controllers\ApplicationController::class, 'show'])->name('show');
+        Route::post('/{application}', [\App\Http\Controllers\ApplicationController::class, 'update'])->name('update');
+    });
+
+    // Admin Profile & Settings
+    Route::get('/profile', [\App\Http\Controllers\AdminProfileController::class, 'index'])->name('profile');
+    Route::post('/profile', [\App\Http\Controllers\AdminProfileController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/password', [\App\Http\Controllers\AdminProfileController::class, 'updatePassword'])->name('profile.password');
 });
 
 // Prevent customer users from accessing admin routes directly

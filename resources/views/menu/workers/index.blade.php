@@ -8,15 +8,26 @@
 @section('content')
 <div class="space-y-6">
 
-    {{-- Search Bar & Create Job Opening --}}
+    {{-- Header with Add Button --}}
     <div class="flex items-center justify-between">
-        <div class="relative flex items-center border border-gray-300 rounded-lg py-2 px-4 pl-10 bg-white">
-            <i class="fas fa-search absolute left-3 text-gray-400"></i>
-            <input type="text" placeholder="Search job openings..." class="focus:outline-none w-64 ml-2" disabled>
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Manage Recruitments</h2>
+            <p class="text-gray-600 mt-1">Oversee job openings and staffing requirements</p>
         </div>
         <a href="{{ route('admin.workers.create') }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-plus mr-2"></i> Create Job Opening
         </a>
+    </div>
+
+    {{-- Search Bar --}}
+    <div class="flex items-center justify-between">
+        <form action="{{ route('admin.workers.index') }}" method="GET" id="search-form" class="relative flex items-center border border-gray-300 rounded-lg py-2 px-4 pl-10 bg-white">
+            <i class="fas fa-search absolute left-3 text-gray-400"></i>
+            <input type="text" name="search" id="search-input" value="{{ request('search') }}" placeholder="Search job openings..." class="focus:outline-none w-64 ml-2">
+            @if(request('status'))
+                <input type="hidden" name="status" value="{{ request('status') }}">
+            @endif
+        </form>
     </div>
 
     {{-- Stats Cards --}}
@@ -170,8 +181,8 @@
                                 </div>
 
                                 <div class="flex lg:flex-col gap-2 mt-4 lg:mt-0 lg:ml-6">
-                    <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm">View Applications</button>
-                    <a href="{{ route('admin.workers.edit', $opening) }}" class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm">Edit</a>
+                                    <a href="{{ route('admin.workers.show', $opening) }}" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded text-sm text-center">View Applications</a>
+                                    <a href="{{ route('admin.workers.edit', $opening) }}" class="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded text-sm text-center">Edit</a>
                                 </div>
                             </div>
                         </div>
@@ -199,4 +210,98 @@
         </div>
     </div>
 </div>
+
+</script>
+<script>
+    // Real-time search with debounce
+    let searchTimeout;
+    document.getElementById('search-input')?.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        const query = e.target.value.trim();
+        const form = document.getElementById('search-form');
+        
+        // Auto-submit after 500ms pause in typing
+        if (query.length >= 2) {
+            searchTimeout = setTimeout(() => {
+                form.submit();
+            }, 500);
+        } else if (query.length === 0) {
+            // Clear search immediately when input is empty
+            searchTimeout = setTimeout(() => {
+                window.location.href = '{{ route("admin.workers.index") }}';
+            }, 300);
+        }
+    });
+
+    // Handle Enter key to submit immediately
+    document.getElementById('search-input')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            clearTimeout(searchTimeout);
+            document.getElementById('search-form').submit();
+        }
+    });
+
+    // Search Results Toast Functionality
+    function showSearchToast(resultsCount, query) {
+        // Remove existing search toast
+        const existingToast = document.getElementById('search-results-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create new toast
+        const toast = document.createElement('div');
+        toast.id = 'search-results-toast';
+        toast.className = 'fixed top-4 right-4 z-50 max-w-sm bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 shadow-lg transform transition-all duration-300 ease-out';
+        toast.innerHTML = `
+            <div class="flex items-start gap-3">
+                <i class="fas fa-search text-blue-600 mt-0.5"></i>
+                <div class="flex-1">
+                    <p class="text-sm text-blue-800">
+                        Found <strong>${resultsCount}</strong> result${resultsCount !== 1 ? 's' : ''} for "<strong>${query}</strong>"
+                    </p>
+                </div>
+                <button type="button" onclick="clearSearch()" class="text-blue-600 hover:text-blue-800 p-1">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+        `;
+        
+        // Add to page
+        document.body.appendChild(toast);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+
+    // Helper to clear search
+    function clearSearch() {
+        document.getElementById('search-input').value = '';
+        window.location.href = '{{ route("admin.workers.index") }}';
+    }
+
+    // Show search results toast on page load if there's a search query
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchQuery = '{{ request('search') }}';
+        const resultsCount = {{ $openings->count() }};
+        
+        if (searchQuery && searchQuery.length > 0) {
+            // Small delay to ensure page is fully loaded
+            setTimeout(() => {
+                showSearchToast(resultsCount, searchQuery);
+            }, 300);
+        }
+    });
+</script>
 @endsection

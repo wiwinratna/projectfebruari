@@ -3,402 +3,346 @@
 @section('title', 'Profile Saya - NOCIS')
 
 @section('content')
-<!-- Customer Profile -->
-<div class="container mx-auto px-4 py-8">
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">Profile Saya</h1>
-        <p class="text-gray-600">Kelola informasi profil Anda.</p>
-    </div>
-
-    <!-- Dashboard Navigation -->
+<!-- Modern Profile Page -->
+<div class="min-h-screen bg-white">
     
+    <!-- 1. Notification Banner (Top) -->
+    @php
+        $percentage = $user->profile_completion;
+    @endphp
 
-    <!-- Profile Content -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Left Column - Profile Info -->
-        <div class="lg:col-span-2 space-y-6">
-            <!-- Profile Header -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div class="flex items-start space-x-6">
-                    <!-- Profile Photo -->
-                    <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
-                        @if($user->profile_photo)
-                            <img src="{{ asset('storage/' . $user->profile_photo) }}" alt="Profile" class="w-full h-full object-cover">
-                        @else
-                            <div class="w-full h-full bg-red-500 flex items-center justify-center text-white font-bold text-2xl">
-                                {{ strtoupper(substr($user->name ?? $user->username ?? 'U', 0, 2)) }}
-                            </div>
-                        @endif
+
+
+    <!-- 2. Profile Header with Aurora Gradient -->
+    <div class="relative bg-white pt-24 pb-12 overflow-hidden">
+        
+        <!-- Aurora Background Effect -->
+        <div class="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-red-50 via-white to-white z-0"></div>
+        <div class="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] bg-red-100/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
+        <div class="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-50/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
+
+        <div class="container mx-auto px-4 relative z-10 max-w-7xl">
+            
+            <!-- Notification Banner (Bar Style) -->
+            @if($percentage < 50)
+            <div class="w-full bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in-down">
+                <div class="flex items-center gap-3 text-center sm:text-left">
+                    <i class="fas fa-info-circle text-xl sm:text-lg opacity-90"></i>
+                    <p class="text-sm font-medium leading-tight">
+                        Get job offers by completing your profile (skills, portfolio, CV/Resume, and supporting documents).
+                    </p>
+                </div>
+                <a href="{{ route('customer.settings') }}" class="whitespace-nowrap px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-md text-xs font-bold transition-colors border border-white/20">
+                    Complete Now
+                </a>
+            </div>
+            @endif
+
+            <div class="flex flex-col lg:flex-row items-start gap-8 lg:gap-10">
+                
+                <!-- Avatar Section -->
+                <div class="relative group flex-shrink-0 mx-auto lg:mx-0">
+                    <div class="w-32 h-32 lg:w-40 lg:h-40 rounded-full p-1 bg-white ring-4 ring-gray-50 shadow-lg relative z-10">
+                        <div class="w-full h-full rounded-full overflow-hidden relative group-hover:ring-4 ring-red-100 transition-all">
+                            @if($user->profile && $user->profile->profile_photo)
+                                <img src="{{ asset('storage/' . $user->profile->profile_photo) }}" alt="Profile" class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold text-4xl">
+                                    {{ strtoupper(substr($user->name ?? $user->username ?? 'U', 0, 2)) }}
+                                </div>
+                            @endif
+                        </div>
+                        <a href="{{ route('customer.settings') }}" class="absolute bottom-1 right-1 w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-md z-20" title="Edit Photo">
+                            <i class="fas fa-pen text-xs"></i>
+                        </a>
                     </div>
+                </div>
+
+                <!-- Info Section -->
+                <div class="flex-1 w-full text-center lg:text-left">
                     
-                    <!-- Profile Info -->
-                    <div class="flex-1">
-                        <h2 class="text-2xl font-bold text-gray-900 mb-1">{{ $user->name ?? $user->username }}</h2>
+                    <!-- Name & Role -->
+                    <div class="mb-6 flex flex-col lg:flex-row justify-between items-center lg:items-start gap-4">
+                        <div>
+                            <div class="flex items-center justify-center lg:justify-start gap-2 mb-1">
+                                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
+                                    {{ $user->name ?? $user->username }}
+                                </h1>
+                                <a href="{{ route('customer.settings') }}" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-pen text-xs"></i></a>
+                            </div>
+                            <p class="text-gray-500 font-medium text-lg">{{ $user->profile->professional_headline ?? 'Job Seeker / Candidate' }}</p>
+                        </div>
                         
-                        <!-- Summary Section -->
-                        @if($user->profile && $user->profile->summary)
-                            <div class="mb-4">
-                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Ringkasan</h3>
-                                <p class="text-gray-700 leading-relaxed">
+                        <!-- Percentage Badge (Minimal) -->
+                        <div class="bg-white border border-gray-200 rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
+                            <div class="relative w-10 h-10 flex items-center justify-center">
+                                <svg class="transform -rotate-90 w-10 h-10">
+                                    <circle cx="20" cy="20" r="16" stroke="#f3f4f6" stroke-width="3" fill="transparent" />
+                                    <circle cx="20" cy="20" r="16" stroke="{{ $percentage == 100 ? '#10B981' : '#EF4444' }}" stroke-width="3" fill="transparent" stroke-dasharray="100" stroke-dashoffset="{{ 100 - $percentage }}" class="transition-all duration-1000" />
+                                </svg>
+                                <span class="absolute text-[10px] font-bold text-gray-700">{{ number_format($percentage, 0) }}%</span>
+                            </div>
+                            <div class="text-left leading-tight">
+                                <span class="block text-[10px] text-gray-400 font-bold uppercase">Completion Status</span>
+                                <span class="block text-xs font-bold text-gray-800">{{ $percentage == 100 ? 'Completed' : 'Incomplete' }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Details Grid -->
+                    <div class="grid lg:grid-cols-12 gap-8 border-t border-gray-100 pt-6">
+                        
+                        <!-- Summary (Left 8 cols) -->
+                        <div class="lg:col-span-8 space-y-3">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-align-left text-red-500"></i>
+                                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide">Summary</h3>
+                            </div>
+                            @if($user->profile && $user->profile->summary)
+                                <p class="text-gray-600 text-sm leading-relaxed">
                                     {{ $user->profile->summary }}
                                 </p>
-                                <button onclick="toggleSummary()" id="summary-toggle" class="text-red-600 hover:text-red-700 font-medium text-sm mt-2">
-                                    Lihat lebih banyak
-                                </button>
+                                <a href="{{ route('customer.settings') }}" class="inline-block text-xs font-bold text-red-600 hover:underline mt-1">See more</a>
+                            @else
+                                <div class="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-6 text-center">
+                                    <p class="text-gray-400 italic text-sm mb-3">No profile summary added yet.</p>
+                                    <a href="{{ route('customer.settings') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-md text-xs font-bold hover:bg-red-700 transition-colors">
+                                        <i class="fas fa-plus"></i> Add Summary
+                                    </a>
+                                </div>
+                            @endif
+                        </div>
+
+                        <!-- Personal Info (Right 4 cols) -->
+                        <div class="lg:col-span-4 space-y-5 lg:border-l lg:border-gray-100 lg:pl-8">
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3 flex items-center gap-2">
+                                    <i class="fas fa-user-shield text-red-500"></i> Personal Info
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Email</p>
+                                        <p class="text-gray-900 font-medium text-sm break-all">{{ $user->email }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Location</p>
+                                        <p class="text-gray-900 font-medium text-sm">{{ optional($user->profile)->address ?? '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Phone Number</p>
+                                        <p class="text-gray-900 font-medium text-sm">{{ optional($user->profile)->phone ? '+62 ' . $user->profile->phone : '-' }}</p>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] uppercase font-bold text-gray-400 mb-0.5">Date of Birth</p>
+                                        <p class="text-gray-900 font-medium text-sm">{{ optional($user->profile)->date_of_birth ? \Carbon\Carbon::parse($user->profile->date_of_birth)->translatedFormat('d F Y') : '-' }}</p>
+                                    </div>
+                                </div>
                             </div>
-                        @else
-                            <div class="mb-4">
-                                <p class="text-gray-500 italic">Belum ada ringkasan. <a href="{{ route('customer.settings') }}" class="text-red-600 hover:text-red-700">Tambahkan ringkasan</a></p>
-                            </div>
-                        @endif
                     </div>
                 </div>
             </div>
+            </div>
+        </div>
+    </div> <!-- End of Header Wrapper -->
 
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Personal Info</h3>
-                    <a href="{{ route('customer.settings') }}" class="text-red-600 hover:text-red-700 text-sm font-medium">
-                        Edit
-                    </a>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="flex items-center space-x-3">
-                        <i class="fas fa-envelope text-gray-400 w-5"></i>
-                        <div>
-                            <p class="text-sm text-gray-500">Email</p>
-                            <p class="font-medium text-gray-900">{{ $user->email }}</p>
-                        </div>
-                    </div>
-                    
-                    @if($user->profile && $user->profile->phone)
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-phone text-gray-400 w-5"></i>
-                            <div>
-                                <p class="text-sm text-gray-500">Nomor telepon</p>
-                                <p class="font-medium text-gray-900">🇮🇩 +62{{ $user->profile->phone }}</p>
-                            </div>
-                        </div>
+    <!-- 3. Body Content (Full Width) -->
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- CV/Resume Section -->
+        <section class="mb-12">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">My CV/Resume</h2>
+                <button onclick="triggerCvUpload()" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all" id="topUploadBtn">
+                    @if($user->profile && $user->profile->cv_file)
+                        <i class="fas fa-sync-alt"></i> Update CV
+                    @else
+                        <i class="fas fa-upload"></i> Upload
                     @endif
-                    
-                    @if($user->profile && $user->profile->address)
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-map-marker-alt text-gray-400 w-5"></i>
-                            <div>
-                                <p class="text-sm text-gray-500">Domisili</p>
-                                <p class="font-medium text-gray-900">{{ $user->profile->address }}</p>
-                            </div>
-                        </div>
-                    @endif
-                    
-                    @if($user->profile && $user->profile->date_of_birth)
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-calendar text-gray-400 w-5"></i>
-                            <div>
-                                <p class="text-sm text-gray-500">Tanggal lahir</p>
-                                <p class="font-medium text-gray-900">{{ $user->profile->date_of_birth->format('d F Y') }}</p>
-                            </div>
-                        </div>
-                    @endif
-                </div>
+                </button>
             </div>
 
-            <!-- Social Media Section -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Sosial Media</h3>
-                    <button onclick="openSocialMediaModal()" class="text-red-600 hover:text-red-700 text-sm font-medium">
-                        Tambah Akun
+            @if($user->profile && $user->profile->cv_file)
+                <div class="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 h-[600px] relative group">
+                    <iframe src="{{ asset('storage/' . $user->profile->cv_file) }}" class="w-full h-full" frameborder="0"></iframe>
+                    
+                    <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-black/50 rounded-lg backdrop-blur-sm">
+                        <a href="{{ asset('storage/' . $user->profile->cv_file) }}" target="_blank" class="p-2 text-white hover:text-red-400 transition-colors" title="Open in New Tab">
+                            <i class="fas fa-external-link-alt"></i>
+                        </a>
+                        <a href="{{ asset('storage/' . $user->profile->cv_file) }}" download class="p-2 text-white hover:text-green-400 transition-colors" title="Download">
+                            <i class="fas fa-download"></i>
+                        </a>
+                    </div>
+                </div>
+            @else
+                <div class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-xl p-12 text-center hover:bg-gray-100 transition-colors cursor-pointer group">
+                    <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
+                        <i class="fas fa-file-pdf text-3xl text-gray-400 group-hover:text-red-500"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900">No CV uploaded yet</h3>
+                    <p class="text-gray-500 mb-6">Upload your CV so recruiters can see your full qualifications.</p>
+                    <button onclick="triggerCvUpload()" class="inline-block bg-red-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all hover:-translate-y-0.5" id="mainUploadBtn">
+                        Upload CV Now
                     </button>
                 </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @if($user->profile && $user->profile->linkedin)
-                        <div class="flex items-center space-x-3">
-                            <i class="fab fa-linkedin text-blue-600 w-5"></i>
-                            <span class="text-blue-600 font-medium">
-                                LinkedIn
-                            </span>
-                        </div>
-                    @endif
-                    
-                    @if($user->profile && $user->profile->instagram)
-                        <div class="flex items-center space-x-3">
-                            <i class="fab fa-instagram text-pink-600 w-5"></i>
-                            <span class="text-pink-600 font-medium">
-                                Instagram
-                            </span>
-                        </div>
-                    @endif
-                    
-                    @if($user->profile && $user->profile->twitter)
-                        <div class="flex items-center space-x-3">
-                            <i class="fab fa-twitter text-blue-400 w-5"></i>
-                            <span class="text-blue-400 font-medium">
-                                Twitter
-                            </span>
-                        </div>
-                    @endif
-                    
-                    @if($user->profile && $user->profile->github)
-                        <div class="flex items-center space-x-3">
-                            <i class="fab fa-github text-gray-800 w-5"></i>
-                            <span class="text-gray-800 font-medium">
-                                GitHub
-                            </span>
-                        </div>
-                    @endif
-                    
-                    @if($user->profile && $user->profile->website)
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-globe text-green-600 w-5"></i>
-                            <span class="text-green-600 font-medium">
-                                Portfolio Website
-                            </span>
-                        </div>
-                    @endif
-                    
-                    @if(!$user->profile || (!$user->profile->linkedin && !$user->profile->instagram && !$user->profile->twitter && !$user->profile->github && !$user->profile->website))
-                        <div class="col-span-full text-center py-4">
-                            <p class="text-gray-500">Belum ada sosial media yang ditambahkan.</p>
-                            <button onclick="openSocialMediaModal()" class="text-red-600 hover:text-red-700 font-medium text-sm">
-                                Tambahkan sosial media
+            @endif
+        </section>
+
+        <!-- Hidden File Input -->
+        <input type="file" id="cvFileInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleCvUpload(this)">
+
+        <script>
+            function triggerCvUpload() {
+                document.getElementById('cvFileInput').click();
+            }
+
+            function handleCvUpload(input) {
+                if (input.files && input.files[0]) {
+                    const file = input.files[0];
+                    const formData = new FormData();
+                    formData.append('cv_file', file);
+                    formData.append('_token', '{{ csrf_token() }}');
+
+                    // Show loading state
+                    const originalText = document.getElementById('mainUploadBtn') ? document.getElementById('mainUploadBtn').innerHTML : '';
+                    if(document.getElementById('mainUploadBtn')) {
+                        document.getElementById('mainUploadBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+                        document.getElementById('mainUploadBtn').disabled = true;
+                    }
+                    if(document.getElementById('topUploadBtn')) {
+                        document.getElementById('topUploadBtn').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                        document.getElementById('topUploadBtn').disabled = true;
+                    }
+
+                    fetch('{{ route("customer.profile.upload-cv") }}', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success toast or alert
+                            // Reload to show the new CV
+                            window.location.reload();
+                        } else {
+                            alert('Upload failed: ' + (data.message || 'Unknown error'));
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred during upload.');
+                    })
+                    .finally(() => {
+                        // Reset buttons if needed (though reload happens usually)
+                        if(document.getElementById('mainUploadBtn')) {
+                            document.getElementById('mainUploadBtn').innerHTML = originalText;
+                            document.getElementById('mainUploadBtn').disabled = false;
+                        }
+                    });
+                }
+            }
+        </script>
+
+
+
+        <!-- Social Media Section -->
+        <section class="border-t border-gray-200 pt-12">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900">Social Accounts</h2>
+                <button onclick="openSocialMediaModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                @php
+                    $socials = [
+                        ['key' => 'linkedin', 'icon' => 'fab fa-linkedin', 'color' => 'text-gray-900', 'bg' => 'bg-gray-100', 'label' => 'LinkedIn'],
+                        ['key' => 'instagram', 'icon' => 'fab fa-instagram', 'color' => 'text-gray-900', 'bg' => 'bg-gray-100', 'label' => 'Instagram'],
+                        ['key' => 'tiktok', 'icon' => 'fab fa-tiktok', 'color' => 'text-gray-900', 'bg' => 'bg-gray-100', 'label' => 'TikTok'],
+                        ['key' => 'twitter', 'icon' => 'fab fa-twitter', 'color' => 'text-gray-900', 'bg' => 'bg-gray-100', 'label' => 'Twitter/X'],
+                        ['key' => 'website', 'icon' => 'fas fa-globe', 'color' => 'text-gray-900', 'bg' => 'bg-gray-100', 'label' => 'Website']
+                    ];
+                    $hasSocial = false;
+                @endphp
+
+                @foreach($socials as $social)
+                    @if($user->profile && $user->profile->{$social['key']})
+                        @php $hasSocial = true; @endphp
+                        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-shadow group">
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 {{ $social['bg'] }} rounded-lg flex items-center justify-center group-hover:bg-red-50 transition-colors">
+                                    <i class="{{ $social['icon'] }} {{ $social['color'] }} text-xl group-hover:text-red-600 transition-colors"></i>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-bold text-gray-400 uppercase">{{ $social['label'] }}</p>
+                                    <p class="font-bold text-gray-900 truncate max-w-[150px]">{{ $user->profile->{$social['key']} }}</p>
+                                </div>
+                            </div>
+                            <button class="text-gray-300 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     @endif
-                </div>
-            </div>
+                @endforeach
 
-            <!-- CV/Resume Section -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">CV/Resume</h3>
-                    <a href="{{ route('customer.settings') }}" class="text-red-600 hover:text-red-700 text-sm font-medium">
-                        Edit
-                    </a>
-                </div>
-                
-                @if($user->profile && $user->profile->cv_file)
-                    <div class="flex items-center justify-between p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <div class="flex items-center space-x-3">
-                            <i class="fas fa-file-pdf text-green-600 text-xl"></i>
-                            <div>
-                                <p class="font-medium text-green-800">CV berhasil diupload</p>
-                                <p class="text-sm text-green-600">Terakhir diperbarui: {{ $user->profile->cv_updated_at ? $user->profile->cv_updated_at->format('d M Y H:i') : 'N/A' }}</p>
-                            </div>
-                        </div>
-                        <div class="flex space-x-2">
-                            <a href="{{ asset('storage/' . $user->profile->cv_file) }}" target="_blank"
-                               class="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors">
-                                <i class="fas fa-eye mr-1"></i>Lihat
-                            </a>
-                        </div>
-                    </div>
-                @else
-                    <div class="text-center py-8">
-                        <i class="fas fa-file-upload text-gray-400 text-3xl mb-4"></i>
-                        <p class="text-gray-500 mb-4">Belum ada CV yang diupload</p>
-                        <a href="{{ route('customer.settings') }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
-                            Upload CV
-                        </a>
+                @if(!$hasSocial)
+                    <div class="col-span-full py-8 text-center bg-gray-50 rounded-xl border border-dashed border-gray-300">
+                        <p class="text-gray-500 font-medium">No social media accounts added yet.</p>
                     </div>
                 @endif
             </div>
-        </div>
-
-        <!-- Right Column - Quick Stats -->
-        <div class="space-y-6">
-            <!-- Profile Completion -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Kelengkapan Profil</h3>
-                
-                @php
-                    $completionScore = 0;
-                    $totalFields = 6;
-                    
-                    if($user->profile_photo) $completionScore++;
-                    if($user->profile && $user->profile->summary) $completionScore++;
-                    if($user->profile && $user->profile->phone) $completionScore++;
-                    if($user->profile && $user->profile->address) $completionScore++;
-                    if($user->profile && $user->profile->date_of_birth) $completionScore++;
-                    if($user->profile && $user->profile->cv_file) $completionScore++;
-                    
-                    $percentage = ($completionScore / $totalFields) * 100;
-                @endphp
-                
-                <div class="mb-4">
-                    <div class="flex justify-between text-sm font-medium text-gray-900 mb-1">
-                        <span>{{ $completionScore }}/{{ $totalFields }} selesai</span>
-                        <span>{{ number_format($percentage, 0) }}%</span>
-                    </div>
-                    <div class="w-full bg-gray-200 rounded-full h-2">
-                        <div class="bg-red-600 h-2 rounded-full transition-all duration-300" style="width: {{ $percentage }}%"></div>
-                    </div>
-                </div>
-                
-                <div class="space-y-2 text-sm">
-                    @if(!$user->profile_photo)
-                        <div class="flex items-center text-gray-500">
-                            <i class="fas fa-times text-red-500 mr-2"></i>
-                            Upload foto profil
-                        </div>
-                    @else
-                        <div class="flex items-center text-green-600">
-                            <i class="fas fa-check text-green-500 mr-2"></i>
-                            Foto profil
-                        </div>
-                    @endif
-                    
-                    @if(!$user->profile || !$user->profile->summary)
-                        <div class="flex items-center text-gray-500">
-                            <i class="fas fa-times text-red-500 mr-2"></i>
-                            Tulis ringkasan
-                        </div>
-                    @else
-                        <div class="flex items-center text-green-600">
-                            <i class="fas fa-check text-green-500 mr-2"></i>
-                            Ringkasan
-                        </div>
-                    @endif
-                    
-                    @if(!$user->profile || !$user->profile->phone)
-                        <div class="flex items-center text-gray-500">
-                            <i class="fas fa-times text-red-500 mr-2"></i>
-                            Nomor telepon
-                        </div>
-                    @else
-                        <div class="flex items-center text-green-600">
-                            <i class="fas fa-check text-green-500 mr-2"></i>
-                            Nomor telepon
-                        </div>
-                    @endif
-                    
-                    @if(!$user->profile || !$user->profile->address)
-                        <div class="flex items-center text-gray-500">
-                            <i class="fas fa-times text-red-500 mr-2"></i>
-                            Alamat domisili
-                        </div>
-                    @else
-                        <div class="flex items-center text-green-600">
-                            <i class="fas fa-check text-green-500 mr-2"></i>
-                            Alamat domisili
-                        </div>
-                    @endif
-                    
-                    @if(!$user->profile || !$user->profile->date_of_birth)
-                        <div class="flex items-center text-gray-500">
-                            <i class="fas fa-times text-red-500 mr-2"></i>
-                            Tanggal lahir
-                        </div>
-                    @else
-                        <div class="flex items-center text-green-600">
-                            <i class="fas fa-check text-green-500 mr-2"></i>
-                            Tanggal lahir
-                        </div>
-                    @endif
-                    
-                    @if(!$user->profile || !$user->profile->cv_file)
-                        <div class="flex items-center text-gray-500">
-                            <i class="fas fa-times text-red-500 mr-2"></i>
-                            Upload CV
-                        </div>
-                    @else
-                        <div class="flex items-center text-green-600">
-                            <i class="fas fa-check text-green-500 mr-2"></i>
-                            CV/Resume
-                        </div>
-                    @endif
-                </div>
-                
-                @if($percentage < 100)
-                    <a href="{{ route('customer.settings') }}" class="block w-full text-center bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors mt-4">
-                        Lengkapi Profil
-                    </a>
-                @endif
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-semibold text-gray-900 mb-4">Statistik</h3>
-                
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <span class="text-sm text-gray-600">Total Aplikasi</span>
-                        </div>
-                        <span class="font-semibold text-gray-900">{{ $user->applications()->count() }}</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <span class="text-sm text-gray-600">Disetujui</span>
-                        </div>
-                        <span class="font-semibold text-gray-900">{{ $user->applications()->where('status', 'approved')->count() }}</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                            <span class="text-sm text-gray-600">Menunggu</span>
-                        </div>
-                        <span class="font-semibold text-gray-900">{{ $user->applications()->where('status', 'pending')->count() }}</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                            <span class="text-sm text-gray-600">Ditolak</span>
-                        </div>
-                        <span class="font-semibold text-gray-900">{{ $user->applications()->where('status', 'rejected')->count() }}</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+        </section>
+    </div> <!-- End of Body Content -->
 
 <!-- Social Media Modal -->
-<div id="socialMediaModal" class="fixed inset-0 hidden overflow-y-auto h-full w-full z-50 transition-all duration-300" onclick="closeSocialMediaModal(event)" style="background-color: rgba(255, 255, 255, 0.1); backdrop-filter: blur(2px);">
-    <div class="relative top-20 mx-auto p-5 w-96 shadow-lg rounded-md bg-white transform scale-95 transition-all duration-300 opacity-0" id="modalContent" onclick="event.stopPropagation()">
-        <div class="mt-3">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Tambah Akun Sosial</h3>
-                <button onclick="closeSocialMediaModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <i class="fas fa-times"></i>
+<div id="socialMediaModal" class="fixed inset-0 z-[60] hidden overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-900/50 backdrop-blur-sm transition-opacity" aria-hidden="true" onclick="closeSocialMediaModal()"></div>
+
+    <!-- Modal Panel -->
+    <div class="flex min-h-screen items-center justify-center p-4">
+        <div class="relative w-full max-w-lg transform rounded-2xl bg-white p-6 text-left shadow-xl transition-all">
+            
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl font-bold text-gray-900" id="modal-title">Edit Social Links</h3>
+                <button type="button" onclick="closeSocialMediaModal()" class="text-gray-400 hover:text-gray-500 focus:outline-none w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             
-            <form id="socialMediaForm">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Platform*</label>
-                    <select id="platform" name="platform" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors">
-                        <option value="">Pilih platform akun sosial</option>
-                        <option value="linkedin">LinkedIn</option>
-                        <option value="instagram">Instagram</option>
-                        <option value="twitter">Twitter</option>
-                        <option value="github">GitHub</option>
-                        <option value="website">Portfolio Website</option>
-                    </select>
+            <form id="socialMediaForm" onsubmit="event.preventDefault(); submitSocialMedia();" class="space-y-4">
+                @php
+                    $socialsForm = [
+                        ['key' => 'linkedin', 'label' => 'LinkedIn', 'icon' => 'fab fa-linkedin', 'placeholder' => 'https://linkedin.com/in/username'],
+                        ['key' => 'instagram', 'label' => 'Instagram', 'icon' => 'fab fa-instagram', 'placeholder' => 'https://instagram.com/username'],
+                        ['key' => 'tiktok', 'label' => 'TikTok', 'icon' => 'fab fa-tiktok', 'placeholder' => 'https://tiktok.com/@username'],
+                        ['key' => 'twitter', 'label' => 'Twitter/X', 'icon' => 'fab fa-twitter', 'placeholder' => 'https://twitter.com/username'],
+                        ['key' => 'website', 'label' => 'Website', 'icon' => 'fas fa-globe', 'placeholder' => 'https://yourwebsite.com']
+                    ];
+                @endphp
+
+                @foreach($socialsForm as $social)
+                <div>
+                    <label for="social_{{ $social['key'] }}" class="block text-sm font-bold text-gray-700 mb-1 flex items-center gap-2">
+                        <i class="{{ $social['icon'] }} text-gray-400 w-5 text-center"></i> {{ $social['label'] }}
+                    </label>
+                    <div class="relative">
+                        <input type="url" 
+                               id="social_{{ $social['key'] }}" 
+                               name="{{ $social['key'] }}" 
+                               value="{{ $user->profile->{$social['key']} ?? '' }}"
+                               class="block w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm placeholder-gray-400"
+                               placeholder="{{ $social['placeholder'] }}">
+                    </div>
                 </div>
-                
-                <div class="mb-6">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Nama Sosial Media*</label>
-                    <input type="text" id="socialLink" name="socialLink" required
-                           placeholder="Masukkan nama username akun sosial"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors">
-                </div>
-                
-                <div class="flex justify-end space-x-3">
-                    <button type="button" onclick="closeSocialMediaModal()" 
-                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-md transition-all duration-200 transform hover:scale-105">
-                        Batal
+                @endforeach
+
+                <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" onclick="closeSocialMediaModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-bold transition-all text-sm">
+                        Cancel
                     </button>
-                    <button type="submit" 
-                            class="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-700 rounded-md transition-all duration-200 transform hover:scale-105">
-                        Tambah
+                    <button type="submit" class="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold shadow-lg shadow-red-500/30 transition-all hover:-translate-y-0.5 text-sm">
+                        Save Changes
                     </button>
                 </div>
             </form>
@@ -407,171 +351,52 @@
 </div>
 
 <script>
-    function toggleSummary() {
-        const summaryElement = document.querySelector('.text-gray-700.leading-relaxed');
-        const toggleButton = document.getElementById('summary-toggle');
-        
-        if (summaryElement && summaryElement.classList.contains('line-clamp-3')) {
-            summaryElement.classList.remove('line-clamp-3');
-            toggleButton.textContent = 'Lihat lebih sedikit';
-        } else if (summaryElement) {
-            summaryElement.classList.add('line-clamp-3');
-            toggleButton.textContent = 'Lihat lebih banyak';
-        }
-    }
-
     function openSocialMediaModal() {
-        const modal = document.getElementById('socialMediaModal');
-        const modalContent = document.getElementById('modalContent');
-        
-        // Remove hidden class and start animations
-        modal.classList.remove('hidden');
-        modalContent.classList.remove('opacity-0', 'scale-95');
-        modalContent.classList.add('opacity-100', 'scale-100');
-        
-        // Force backdrop to be visible
-        modal.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
-        modal.style.backdropFilter = 'blur(8px)';
-        
-        // Lock body scroll
+        document.getElementById('socialMediaModal').classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
 
-    function closeSocialMediaModal(event) {
-        if (!event || event.target.id === 'socialMediaModal') {
-            const modal = document.getElementById('socialMediaModal');
-            const modalContent = document.getElementById('modalContent');
-            
-            // Start closing animations
-            modalContent.classList.remove('opacity-100', 'scale-100');
-            modalContent.classList.add('opacity-0', 'scale-95');
-            
-            // Hide backdrop
-            modal.style.backgroundColor = 'transparent';
-            
-            // Hide after animation
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                document.body.style.overflow = 'auto';
-                
-                // Reset form
-                const form = document.getElementById('socialMediaForm');
-                if (form) {
-                    form.reset();
-                }
-            }, 300);
-        }
+    function closeSocialMediaModal() {
+        document.getElementById('socialMediaModal').classList.add('hidden');
+        document.body.style.overflow = '';
     }
 
-    // Handle form submission
-    document.addEventListener('DOMContentLoaded', function() {
+    function submitSocialMedia() {
         const form = document.getElementById('socialMediaForm');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                const platform = document.getElementById('platform').value;
-                const socialLink = document.getElementById('socialLink').value;
-                
-                console.log('Form data before submission:', {
-                    platform: platform,
-                    social_link: socialLink
-                });
-                
-                if (!platform || !socialLink) {
-                    alert('Silakan lengkapi semua field yang wajib diisi.');
-                    return;
-                }
-                
-                // Show loading state
-                const submitButton = form.querySelector('button[type="submit"]');
-                const originalText = submitButton.textContent;
-                submitButton.textContent = 'Menyimpan...';
-                submitButton.disabled = true;
-                
-                // Prepare data for submission
-                const formData = {
-                    platform: platform,
-                    social_link: socialLink,
-                    _token: '{{ csrf_token() }}'
-                };
-                
-                console.log('Sending data:', formData);
-                
-                // Make AJAX request to save social media
-                fetch('{{ route("customer.profile.update-social") }}', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: JSON.stringify(formData)
-                })
-                .then(response => {
-                    console.log('Response status:', response.status);
-                    console.log('Response headers:', response.headers);
-                    return response.text().then(text => {
-                        console.log('Raw response:', text);
-                        try {
-                            return JSON.parse(text);
-                        } catch (e) {
-                            console.error('Failed to parse JSON:', e);
-                            throw new Error('Invalid JSON response: ' + text);
-                        }
-                    });
-                })
-                .then(data => {
-                    console.log('Parsed response data:', data);
-                    if (data.success) {
-                        closeSocialMediaModal();
-                        
-                        // Show success message
-                        const successDiv = document.createElement('div');
-                        successDiv.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded shadow-lg z-50';
-                        successDiv.textContent = 'Akun sosial berhasil ditambahkan!';
-                        document.body.appendChild(successDiv);
-                        
-                        // Remove success message after 3 seconds
-                        setTimeout(() => {
-                            successDiv.remove();
-                        }, 3000);
-                        
-                        // Reload page to show updated social media
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        alert('Terjadi kesalahan: ' + (data.message || 'Gagal menyimpan data'));
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Terjadi kesalahan saat menyimpan data: ' + error.message);
-                })
-                .finally(() => {
-                    // Reset button state
-                    submitButton.textContent = originalText;
-                    submitButton.disabled = false;
-                });
-            });
-        }
-    });
-</script>
+        const updateButton = form.querySelector('button[type="submit"]');
+        const originalText = updateButton.innerText;
+        
+        updateButton.disabled = true;
+        updateButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
 
-<style>
-    .line-clamp-3 {
-        display: -webkit-box;
-        -webkit-line-clamp: 3;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
+        const formData = new FormData(form);
+        formData.append('_token', '{{ csrf_token() }}');
+
+        fetch('{{ route("customer.profile.update-social") }}', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Determine if we need to reload or just show success
+                // Since the page shows the social links, it's safer to reload to see updates
+                window.location.reload();
+            } else {
+                alert('Update failed: ' + (data.message || 'Unknown error'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred during update.');
+        })
+        .finally(() => {
+            updateButton.disabled = false;
+            updateButton.innerHTML = originalText;
+        });
     }
-    
-    /* Light backdrop with blur */
-    #socialMediaModal {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(1px) !important;
-        -webkit-backdrop-filter: blur(2px) !important;
-    }
-</style>
+</script>
 @endsection

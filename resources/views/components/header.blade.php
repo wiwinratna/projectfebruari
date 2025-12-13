@@ -40,8 +40,8 @@
                 $profilePhoto = $user->profile_photo ? asset('storage/' . $user->profile_photo) : null;
                 $initials = strtoupper(substr($user->name ?? $user->username ?? 'U', 0, 2));
             @endphp
-            <div class="relative group">
-                <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full overflow-hidden bg-red-500 flex items-center justify-center text-white font-semibold text-sm cursor-pointer border-2 border-gray-200 hover:border-red-300 transition-colors">
+            <div class="relative">
+                <div class="profile-dropdown-trigger w-8 h-8 lg:w-10 lg:h-10 rounded-full overflow-hidden bg-red-500 flex items-center justify-center text-white font-semibold text-sm cursor-pointer border-2 border-gray-200 hover:border-red-300 transition-colors">
                     @if($profilePhoto)
                         <img src="{{ $profilePhoto }}" alt="Profile" class="w-full h-full object-cover">
                     @else
@@ -49,7 +49,7 @@
                     @endif
                 </div>
                 <!-- Dropdown Menu -->
-                <div class="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="profile-dropdown-menu absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible transition-all duration-200 z-50">
                     <div class="py-2">
                         <div class="px-4 py-3 border-b border-gray-100">
                             <div class="flex items-center">
@@ -88,21 +88,21 @@
                 $adminName = session('admin_username') ?? 'A';
                 $initials = strtoupper(substr($adminName, 0, 2));
             @endphp
-            <div class="relative group">
-                <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-red-500 flex items-center justify-center text-white font-semibold text-sm cursor-pointer">
+            <div class="relative">
+                <div class="profile-dropdown-trigger w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-red-500 flex items-center justify-center text-white font-semibold text-sm cursor-pointer border-2 border-transparent hover:border-red-300">
                     {{ $initials }}
                 </div>
                 <!-- Dropdown Menu -->
-                <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="profile-dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible transition-all duration-200 z-50">
                     <div class="py-2">
                         <div class="px-4 py-2 border-b border-gray-100">
                             <p class="text-sm font-semibold text-gray-800">Admin</p>
                             <p class="text-xs text-gray-500">{{ session('admin_username') ?? 'admin@nocis.id' }}</p>
                         </div>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="{{ route('admin.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <i class="fas fa-user mr-2"></i>Profile
                         </a>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="{{ route('admin.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <i class="fas fa-cog mr-2"></i>Settings
                         </a>
                         <div class="border-t border-gray-100 mt-1">
@@ -117,12 +117,12 @@
                 </div>
             </div>
         @else
-            <div class="relative group">
-                <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gray-500 flex items-center justify-center text-white font-semibold text-sm cursor-pointer">
+            <div class="relative">
+                <div class="profile-dropdown-trigger w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gray-500 flex items-center justify-center text-white font-semibold text-sm cursor-pointer border-2 border-transparent hover:border-gray-400">
                     G
                 </div>
                 <!-- Dropdown Menu -->
-                <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div class="profile-dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible transition-all duration-200 z-50">
                     <div class="py-2">
                         <div class="px-4 py-2 border-b border-gray-100">
                             <p class="text-sm font-semibold text-gray-800">Guest</p>
@@ -139,4 +139,39 @@
             </div>
         @endif
     </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const triggers = document.querySelectorAll('.profile-dropdown-trigger');
+            
+            triggers.forEach(trigger => {
+                trigger.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // Get the corresponding menu
+                    const menu = this.nextElementSibling;
+                    const isVisible = !menu.classList.contains('invisible');
+                    
+                    // Close all other menus first
+                    document.querySelectorAll('.profile-dropdown-menu').forEach(d => {
+                        d.classList.add('invisible', 'opacity-0');
+                    });
+                    
+                    // Toggle current menu
+                    if (!isVisible) {
+                        menu.classList.remove('invisible', 'opacity-0');
+                    }
+                });
+            });
+            
+            // Close when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.profile-dropdown-menu') && !e.target.closest('.profile-dropdown-trigger')) {
+                    document.querySelectorAll('.profile-dropdown-menu').forEach(d => {
+                        d.classList.add('invisible', 'opacity-0');
+                    });
+                }
+            });
+        });
+    </script>
 </header>

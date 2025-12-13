@@ -14,18 +14,39 @@ class ReviewController extends Controller
             return redirect('/admin/login');
         }
 
-        // Get all applications with user and job opening data
-        $applications = Application::with(['user', 'opening.jobCategory', 'opening.event'])
-            ->orderBy('created_at', 'desc')
-            ->get();
-
-        // Calculate statistics
+        // Calculate statistics independently of search
         $stats = [
-            'total_applicants' => $applications->count(),
-            'pending_review' => $applications->where('status', 'pending')->count(),
-            'approved_members' => $applications->where('status', 'approved')->count(),
-            'rejected_members' => $applications->where('status', 'rejected')->count(),
+            'total_applicants' => Application::count(),
+            'pending_review' => Application::where('status', 'pending')->count(),
+            'approved_members' => Application::where('status', 'approved')->count(),
+            'rejected_members' => Application::where('status', 'rejected')->count(),
         ];
+
+        // Get query builder
+        $query = Application::with(['user.profile', 'opening.jobCategory', 'opening.event'])
+            ->orderBy('created_at', 'desc');
+
+        // Apply search if present
+        if (request('search')) {
+            $search = request('search');
+            $query->where(function($q) use ($search) {
+                $q->whereHas('user', function($uq) use ($search) {
+                    $uq->where('username', 'like', '%'.$search.'%')
+                       ->orWhere('email', 'like', '%'.$search.'%');
+                })
+                ->orWhereHas('opening', function($oq) use ($search) {
+                    $oq->where('title', 'like', '%'.$search.'%')
+                       ->orWhereHas('event', function($eq) use ($search) {
+                           $eq->where('title', 'like', '%'.$search.'%');
+                       })
+                       ->orWhereHas('jobCategory', function($jcq) use ($search) {
+                           $jcq->where('name', 'like', '%'.$search.'%');
+                       });
+                });
+            });
+        }
+
+        $applications = $query->get();
 
         return view('menu.reviews.index', [
             'applications' => $applications,
@@ -54,7 +75,7 @@ class ReviewController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Application status updated successfully',
-            'application' => $application->load('user', 'opening'),
+            'application' => $application->load('user.profile', 'opening'),
         ]);
     }
 }

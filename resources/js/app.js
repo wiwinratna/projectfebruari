@@ -1,7 +1,7 @@
 import './bootstrap';
 
 // Mobile Sidebar Toggle
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const sidebarToggle = document.getElementById('sidebar-toggle');
     const sidebarClose = document.getElementById('sidebar-close');
     const sidebar = document.getElementById('sidebar');
@@ -12,19 +12,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Toggle sidebar on hamburger click
     if (sidebarToggle && sidebar && overlay) {
-        sidebarToggle.addEventListener('click', function(e) {
+        sidebarToggle.addEventListener('click', function (e) {
             e.preventDefault();
             console.log('Hamburger clicked');
-            
-            // Show overlay first
-            overlay.classList.add('show');
-            
-            // Small delay to ensure overlay is rendered before sidebar animation
-            setTimeout(() => {
-                sidebar.classList.add('show');
-            }, 10);
-            
-            document.body.style.overflow = 'hidden';
+
+            if (sidebar.classList.contains('show')) {
+                closeSidebar();
+            } else {
+                // Show overlay first
+                overlay.classList.add('show');
+
+                // Small delay to ensure overlay is rendered before sidebar animation
+                setTimeout(() => {
+                    sidebar.classList.add('show');
+                }, 10);
+
+                document.body.style.overflow = 'hidden';
+            }
         });
     }
 
@@ -35,24 +39,24 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add closing animation class
             sidebar.classList.add('closing');
             sidebar.classList.remove('show');
-            
+
             // Remove closing class after animation completes
             setTimeout(() => {
                 sidebar.classList.remove('closing');
             }, 300);
         }
-        
+
         // Delay overlay removal to allow sidebar animation to complete
         setTimeout(() => {
             if (overlay) overlay.classList.remove('show');
         }, 300);
-        
+
         document.body.style.overflow = '';
     }
 
     // Close sidebar on close button click
     if (sidebarClose) {
-        sidebarClose.addEventListener('click', function(e) {
+        sidebarClose.addEventListener('click', function (e) {
             e.preventDefault();
             closeSidebar();
         });
@@ -64,14 +68,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Close sidebar on escape key
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape') {
             closeSidebar();
         }
     });
 
     // Handle window resize
-    window.addEventListener('resize', function() {
+    window.addEventListener('resize', function () {
         if (window.innerWidth >= 1024) {
             closeSidebar();
         }
@@ -88,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
             element.remove();
             if (flashContainer && flashContainer.childElementCount === 0) {
                 flashContainer.remove();
-            }                                                                                   
+            }
         }, 300);
     };
 

@@ -8,12 +8,20 @@
 @section('content')
 <div class="space-y-6">
 
-{{-- Search Bar & Calendar View (di bawah header) --}}
-    <div class="flex items-center justify-between mb-6">
-        <div class="relative flex items-center border border-gray-300 rounded-lg py-2 px-4 pl-10 bg-white">
-            <i class="fas fa-search absolute left-3 text-gray-400"></i>
-            <input type="text" placeholder="Search Committee..." class="focus:outline-none w-64 ml-2">
+    {{-- Header --}}
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Manage Reviews</h2>
+            <p class="text-gray-600 mt-1">Review and approve committee applications</p>
         </div>
+    </div>
+
+    {{-- Search Bar --}}
+    <div class="flex items-center justify-between mb-6">
+        <form method="GET" action="{{ route('admin.reviews.index') }}" id="search-form" class="relative flex items-center border border-gray-300 rounded-lg py-2 px-4 pl-10 bg-white">
+            <i class="fas fa-search absolute left-3 text-gray-400"></i>
+            <input type="text" name="search" id="search-input" value="{{ request('search') }}" placeholder="Search Committee..." class="focus:outline-none w-64 ml-2">
+        </form>
     </div>
 
     {{-- Stats Cards --}}
@@ -66,11 +74,18 @@
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center mr-3">
-                                    <span class="text-gray-600 font-semibold text-sm">{{ strtoupper(substr($application->user->name, 0, 2)) }}</span>
-                                </div>
+                                @if($application->user->profile && $application->user->profile->profile_photo)
+                                    <div class="w-10 h-10 rounded-full mr-3 flex-shrink-0">
+                                        <img src="{{ asset('storage/' . $application->user->profile->profile_photo) }}" alt="" 
+                                             class="w-full h-full rounded-full object-cover border border-gray-200">
+                                    </div>
+                                @else
+                                    <div class="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center mr-3 flex-shrink-0">
+                                        <span class="text-gray-500 font-bold text-sm">{{ strtoupper(substr($application->user->username, 0, 2)) }}</span>
+                                    </div>
+                                @endif
                                 <div>
-                                    <div class="text-sm font-medium text-gray-900">{{ $application->user->name }}</div>
+                                    <div class="text-sm font-bold text-gray-900">{{ $application->user->username }}</div>
                                     <div class="text-xs text-gray-500">{{ $application->user->email }}</div>
                                 </div>
                             </div>
@@ -108,15 +123,13 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">
                             <div class="flex justify-end space-x-2">
-                                <button class="text-blue-600 hover:text-blue-800 text-sm font-medium"
-                                        onclick="showApplicationDetail({{ $application->id }})">
+                                <a href="{{ route('admin.applications.show', $application->id) }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
                                     <i class="fas fa-eye mr-1"></i> View
-                                </button>
+                                </a>
                                 @if($application->status === 'pending')
-                                <button class="text-red-600 hover:text-red-800 text-sm font-medium"
-                                        onclick="showStatusUpdateModal({{ $application->id }})">
+                                <a href="{{ route('admin.applications.show', $application->id) }}" class="text-red-600 hover:text-red-800 text-sm font-medium">
                                     <i class="fas fa-edit mr-1"></i> Review
-                                </button>
+                                </a>
                                 @endif
                             </div>
                         </td>
@@ -144,195 +157,97 @@
     </div>
 </div>
 
-<!-- Application Detail Modal -->
-<div id="detailModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-    <div class="bg-white rounded-lg p-6 max-w-2xl w-full mx-4 relative max-h-[80vh] overflow-y-auto">
-        <button onclick="hideDetailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
-            ×
-        </button>
-
-        <h3 class="text-lg font-bold text-gray-900 mb-4">Application Details</h3>
-
-        <div id="applicationDetails" class="space-y-4">
-            <!-- Details will be loaded here via JavaScript -->
-        </div>
-
-        <div class="flex gap-2 justify-end mt-6">
-            <button onclick="hideDetailModal()" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
-                Close
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Status Update Modal -->
-<div id="statusModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 relative">
-        <button onclick="hideStatusModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
-            ×
-        </button>
-
-        <h3 class="text-lg font-bold text-gray-900 mb-4">Update Application Status</h3>
-
-        <form id="statusForm" onsubmit="event.preventDefault(); updateApplicationStatus();">
-            <input type="hidden" id="currentApplicationId">
-
-            <div class="space-y-4 mb-6">
-                <div>
-                    <label for="statusSelect" class="block text-sm font-medium text-gray-700 mb-1">
-                        Status
-                    </label>
-                    <select id="statusSelect" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all">
-                        <option value="approved">Approved</option>
-                        <option value="rejected">Rejected</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label for="reviewNotes" class="block text-sm font-medium text-gray-700 mb-1">
-                        Review Notes (optional)
-                    </label>
-                    <textarea id="reviewNotes" rows="3"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
-                              placeholder="Add any review notes..."></textarea>
-                </div>
-            </div>
-
-            <div class="flex gap-2 justify-end">
-                <button type="button" onclick="hideStatusModal()" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
-                    Cancel
-                </button>
-                <button type="submit" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">
-                    Update Status
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
+</script>
 <script>
-    // Store applications data for JavaScript access
-    const applications = @json($applications ?? []);
-
-    function showApplicationDetail(applicationId) {
-        const app = applications.find(a => a.id === applicationId);
-        if (!app) return;
-
-        const details = document.getElementById('applicationDetails');
-        details.innerHTML = `
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <h4 class="font-semibold text-gray-800 mb-2">Applicant Information</h4>
-                    <div class="space-y-2 text-sm">
-                        <div><strong>Name:</strong> ${app.user.name}</div>
-                        <div><strong>Email:</strong> ${app.user.email || 'N/A'}</div>
-                        <div><strong>Applied On:</strong> ${new Date(app.created_at).toLocaleString()}</div>
-                        <div><strong>Status:</strong> <span class="text-${app.status === 'approved' ? 'green' : app.status === 'rejected' ? 'red' : 'yellow'}-600 font-medium">${app.status}</span></div>
-                    </div>
-                </div>
-
-                <div>
-                    <h4 class="font-semibold text-gray-800 mb-2">Position Information</h4>
-                    <div class="space-y-2 text-sm">
-                        <div><strong>Position:</strong> ${app.opening.title}</div>
-                        <div><strong>Category:</strong> ${app.opening.job_category.name}</div>
-                        <div><strong>Event:</strong> ${app.opening.event.title}</div>
-                        <div><strong>Location:</strong> ${app.opening.event.city.name}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="mt-4">
-                <h4 class="font-semibold text-gray-800 mb-2">Motivation</h4>
-                <p class="text-gray-700 bg-gray-50 p-3 rounded">${app.motivation}</p>
-            </div>
-
-            ${app.experience ? `
-            <div class="mt-4">
-                <h4 class="font-semibold text-gray-800 mb-2">Experience</h4>
-                <p class="text-gray-700 bg-gray-50 p-3 rounded">${app.experience}</p>
-            </div>
-            ` : ''}
-
-            ${app.review_notes ? `
-            <div class="mt-4">
-                <h4 class="font-semibold text-gray-800 mb-2">Review Notes</h4>
-                <p class="text-gray-700 bg-gray-50 p-3 rounded">${app.review_notes}</p>
-            </div>
-            ` : ''}
-        `;
-
-        document.getElementById('detailModal').classList.remove('hidden');
-        document.getElementById('detailModal').classList.add('flex');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function hideDetailModal() {
-        document.getElementById('detailModal').classList.add('hidden');
-        document.getElementById('detailModal').classList.remove('flex');
-        document.body.style.overflow = '';
-    }
-
-    function showStatusUpdateModal(applicationId) {
-        document.getElementById('currentApplicationId').value = applicationId;
-        document.getElementById('statusModal').classList.remove('hidden');
-        document.getElementById('statusModal').classList.add('flex');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function hideStatusModal() {
-        document.getElementById('statusModal').classList.add('hidden');
-        document.getElementById('statusModal').classList.remove('flex');
-        document.body.style.overflow = '';
-    }
-
-    function updateApplicationStatus() {
-        const appId = document.getElementById('currentApplicationId').value;
-        const status = document.getElementById('statusSelect').value;
-        const notes = document.getElementById('reviewNotes').value;
-
-        fetch("{{ route('admin.reviews.update', ['application' => '__ID__']) }}".replace('__ID__', appId), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                status: status,
-                review_notes: notes
-            })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Application status updated successfully!');
-                location.reload();
-            } else {
-                alert('Error: ' + (data.message || 'Failed to update status'));
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('An error occurred. Please try again.');
-        });
-    }
-
-    // Close modals on escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            hideDetailModal();
-            hideStatusModal();
+    // Real-time search with debounce
+    let searchTimeout;
+    document.getElementById('search-input')?.addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        const query = e.target.value.trim();
+        const form = document.getElementById('search-form');
+        
+        // Auto-submit after 500ms pause in typing
+        if (query.length >= 2) {
+            searchTimeout = setTimeout(() => {
+                form.submit();
+            }, 500);
+        } else if (query.length === 0) {
+            // Clear search immediately when input is empty
+            searchTimeout = setTimeout(() => {
+                window.location.href = '{{ route("admin.reviews.index") }}';
+            }, 300);
         }
     });
 
-    // Close modals on outside click
-    document.getElementById('detailModal').addEventListener('click', function(e) {
-        if (e.target === this) hideDetailModal();
+    // Handle Enter key to submit immediately
+    document.getElementById('search-input')?.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            clearTimeout(searchTimeout);
+            document.getElementById('search-form').submit();
+        }
     });
 
-    document.getElementById('statusModal').addEventListener('click', function(e) {
-        if (e.target === this) hideStatusModal();
+    // Search Results Toast Functionality
+    function showSearchToast(resultsCount, query) {
+        // Remove existing search toast
+        const existingToast = document.getElementById('search-results-toast');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create new toast
+        const toast = document.createElement('div');
+        toast.id = 'search-results-toast';
+        toast.className = 'fixed top-4 right-4 z-50 max-w-sm bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 shadow-lg transform transition-all duration-300 ease-out';
+        toast.innerHTML = `
+            <div class="flex items-start gap-3">
+                <i class="fas fa-search text-blue-600 mt-0.5"></i>
+                <div class="flex-1">
+                    <p class="text-sm text-blue-800">
+                        Found <strong>${resultsCount}</strong> result${resultsCount !== 1 ? 's' : ''} for "<strong>${query}</strong>"
+                    </p>
+                </div>
+                <button type="button" onclick="clearSearch()" class="text-blue-600 hover:text-blue-800 p-1">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+        `;
+        
+        // Add to page
+        document.body.appendChild(toast);
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.remove();
+                    }
+                }, 300);
+            }
+        }, 5000);
+    }
+
+    // Helper to clear search
+    function clearSearch() {
+        document.getElementById('search-input').value = '';
+        window.location.href = '{{ route("admin.reviews.index") }}';
+    }
+
+    // Show search results toast on page load if there's a search query
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchQuery = '{{ request('search') }}';
+        const resultsCount = {{ $applications->count() }};
+        
+        if (searchQuery && searchQuery.length > 0) {
+            // Small delay to ensure page is fully loaded
+            setTimeout(() => {
+                showSearchToast(resultsCount, searchQuery);
+            }, 300);
+        }
     });
 </script>
 @endsection

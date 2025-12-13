@@ -3,172 +3,255 @@
 @section('title', $job->title . ' - NOCIS')
 
 @section('content')
-<!-- Professional Job Detail Page -->
-<div class="container mx-auto px-4 py-8">
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-        <!-- Header with Back Navigation -->
-        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <a href="{{ route('jobs.index') }}" class="text-red-600 hover:text-red-700 font-medium transition-colors">
-                ← Back to Job Listings
+<!-- Aurora Header Background -->
+<div class="relative bg-white pt-24 pb-12 overflow-hidden">
+    <div class="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-red-50 via-white to-white z-0"></div>
+    <div class="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] bg-red-100/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
+    <div class="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-50/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
+
+    <div class="container mx-auto px-4 max-w-7xl relative z-10">
+        <!-- Breadcrumb / Back -->
+        <div class="mb-8">
+            <a href="{{ route('jobs.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">
+                <i class="fas fa-arrow-left"></i> Back to Jobs
             </a>
         </div>
 
-        <div class="p-6">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Main Content -->
-                <div class="lg:col-span-2">
-                    <!-- Job Header -->
-                    <div class="mb-6">
-                        <h1 class="text-2xl font-bold text-gray-900 mb-3">{{ $job->title }}</h1>
-
-                        <!-- Company/Event Info -->
-                        <div class="mb-4">
-                            <h3 class="font-semibold text-gray-800">{{ $job->event->title }}</h3>
-                            <p class="text-sm text-gray-500">
-                                {{ $job->event->city->name }}, Indonesia
-                            </p>
-                        </div>
-
-                        <!-- Status and Deadline -->
-                        <div class="flex flex-wrap items-center gap-4 text-sm mb-4">
-                            <span class="inline-flex items-center gap-1 bg-green-100 text-green-800 px-2 py-1 rounded font-medium">
-                                {{ ucfirst($job->status) }}
-                            </span>
-                            <span class="text-gray-600">
-                                Applications close {{ $job->application_deadline->format('d M Y, H:i') }}
-                            </span>
-                        </div>
-                    </div>
-
-                    <!-- Job Overview Section -->
-                    <div class="bg-gray-50 rounded-lg p-4 mb-6">
-                        <h3 class="font-semibold text-gray-900 mb-3">Job Overview</h3>
-                        <div class="grid grid-cols-2 gap-3 text-sm">
-                            <div>
-                                <span class="text-gray-600"><strong>Category:</strong> {{ $job->jobCategory->name }}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-600"><strong>Event:</strong> {{ $job->event->title }}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-600"><strong>Location:</strong> {{ $job->event->venue }}, {{ $job->event->city->name }}</span>
-                            </div>
-                            <div>
-                                <span class="text-gray-600"><strong>Event Dates:</strong> {{ $job->event->start_at->format('d M Y') }} - {{ $job->event->end_at->format('d M Y') }}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Job Description -->
-                    <div class="mb-6">
-                        <h3 class="font-semibold text-gray-900 mb-3">Job Description</h3>
-                        <div class="text-gray-700 prose max-w-none">
-                            {!! nl2br(e($job->description)) !!}
-                        </div>
-                    </div>
-
-                    <!-- Requirements Section -->
-                    @if(!empty($job->requirements))
-                    <div class="mb-6">
-                        <h3 class="font-semibold text-gray-900 mb-3">Requirements</h3>
-                        <ul class="list-disc list-inside space-y-2 text-gray-700">
-                            @foreach($job->requirements as $requirement)
-                            <li>{{ $requirement }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
+        <!-- Header Content -->
+        <div class="flex flex-col lg:flex-row items-start justify-between gap-8">
+            <div>
+                <div class="flex flex-wrap items-center gap-3 mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-100">
+                        <i class="fas fa-tag text-[10px]"></i> {{ $job->jobCategory->name }}
+                    </span>
+                    @if($job->status === 'open')
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-100">
+                            <i class="fas fa-check-circle text-[10px]"></i> Open for Applications
+                        </span>
+                    @else
+                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                            <i class="fas fa-lock text-[10px]"></i> {{ ucfirst($job->status) }}
+                        </span>
                     @endif
-
-                    <!-- Benefits Section -->
-                    @if(!empty($job->benefits))
-                    <div class="mb-6">
-                        <h3 class="font-semibold text-gray-900 mb-3">Benefits</h3>
-                        <ul class="list-disc list-inside space-y-2 text-gray-700">
-                            @foreach(explode("\n", $job->benefits) as $benefit)
-                                @if(trim($benefit))
-                                <li>{{ trim($benefit) }}</li>
-                                @endif
-                            @endforeach
-                        </ul>
+                </div>
+                
+                <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight mb-4 leading-tight">
+                    {{ $job->title }}
+                </h1>
+                
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 text-sm text-gray-500 font-medium">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-trophy text-red-500 text-xs"></i>
+                        <span>{{ $job->event->title }}</span>
                     </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-map-marker-alt text-red-500 text-xs"></i>
+                        <span>{{ $job->event->city->name }}, Indonesia</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="far fa-calendar-alt text-red-500 text-xs"></i>
+                        <span>{{ $job->event->start_at->format('d M Y') }} - {{ $job->event->end_at->format('d M Y') }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions (Mobile Only) - Removed as per feedback -->
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="container mx-auto px-4 max-w-7xl pb-20">
+    <div class="grid lg:grid-cols-12 gap-8 lg:gap-12">
+        
+        <!-- Left Column: Details (8 cols) -->
+        <div class="lg:col-span-8 space-y-10">
+            
+            <!-- Overview Grid -->
+            <div class="grid sm:grid-cols-2 gap-4">
+                <div class="p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-xs font-medium text-gray-500 uppercase mb-1 tracking-wide">Venue</p>
+                    <p class="font-medium text-gray-800">{{ $job->event->venue }}</p>
+                </div>
+                <div class="p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-xs font-medium text-gray-500 uppercase mb-1 tracking-wide">Application Deadline</p>
+                    <p class="font-medium text-gray-800">{{ $job->application_deadline->format('d F Y, H:i') }}</p>
+                </div>
+                <div class="p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-xs font-medium text-gray-500 uppercase mb-1 tracking-wide">Slots Available</p>
+                    <p class="font-medium text-gray-800">
+                        <span class="text-green-600 font-semibold">{{ $job->slots_total - $job->slots_filled }}</span> 
+                        <span class="text-gray-400 text-xs font-normal">/ {{ $job->slots_total }} total</span>
+                    </p>
+                </div>
+                <div class="p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <p class="text-xs font-medium text-gray-500 uppercase mb-1 tracking-wide">Posted On</p>
+                    <p class="font-medium text-gray-800">{{ $job->created_at->format('d F Y') }}</p>
+                </div>
+            </div>
+
+            <!-- Description -->
+            <section>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-600">
+                        <i class="fas fa-align-left text-sm"></i>
+                    </div>
+                    <h2 class="text-lg font-semibold text-gray-800">Job Description</h2>
+                </div>
+                <div class="prose prose-gray max-w-none text-gray-600 leading-relaxed text-base">
+                    {!! nl2br(e($job->description)) !!}
+                </div>
+            </section>
+            
+            <hr class="border-gray-100">
+
+            <!-- Requirements -->
+            @if(!empty($job->requirements))
+            <section>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                        <i class="fas fa-clipboard-check text-sm"></i>
+                    </div>
+                    <h2 class="text-lg font-semibold text-gray-800">Requirements</h2>
+                </div>
+                <ul class="space-y-3">
+                    @foreach($job->requirements as $requirement)
+                    <li class="flex items-start gap-3 text-gray-600">
+                        <i class="fas fa-check-circle text-green-500 mt-1 flex-shrink-0 text-sm"></i>
+                        <span>{{ $requirement }}</span>
+                    </li>
+                    @endforeach
+                </ul>
+            </section>
+            <hr class="border-gray-100">
+            @endif
+
+            <!-- Benefits -->
+            @if(!empty($job->benefits))
+            <section>
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-lg bg-yellow-50 flex items-center justify-center text-yellow-600">
+                        <i class="fas fa-gift text-sm"></i>
+                    </div>
+                    <h2 class="text-lg font-semibold text-gray-800">Benefits</h2>
+                </div>
+                <div class="grid sm:grid-cols-2 gap-4">
+                    @foreach(explode("\n", $job->benefits) as $benefit)
+                        @if(trim($benefit))
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-gray-50 border border-gray-100">
+                            <i class="fas fa-star text-yellow-500 text-sm"></i>
+                            <span class="text-sm font-medium text-gray-700">{{ trim($benefit) }}</span>
+                        </div>
+                        @endif
+                    @endforeach
+                </div>
+            </section>
+            @endif
+
+        </div>
+
+        <!-- Right Column: Sidebar (4 cols) -->
+        <div class="lg:col-span-4">
+            <div id="action-card" class="bg-white rounded-2xl p-6 shadow-xl shadow-gray-200/50 sticky top-24 lg:-mt-32 relative z-20">
+                <h3 class="font-bold text-gray-900 mb-2">Interested?</h3>
+                <p class="text-sm text-gray-500 mb-6 leading-relaxed">Don't miss out on this opportunity to be part of the NOCIS team for {{ $job->event->title }}.</p>
+
+                @php
+                    $isCustomerAuthenticated = session('customer_authenticated');
+                    $customerId = session('customer_id');
+                    $hasApplied = false;
+                    
+                    if ($isCustomerAuthenticated && $customerId) {
+                        $hasApplied = \App\Models\Application::where('worker_opening_id', $job->id)
+                            ->where('user_id', $customerId)
+                            ->exists();
+                    }
+                @endphp
+
+                <div class="space-y-3">
+                    @if($isCustomerAuthenticated)
+                        @if($hasApplied)
+                            <button disabled class="w-full bg-gray-100 text-gray-500 py-3.5 px-4 rounded-xl font-semibold border border-gray-200 cursor-not-allowed flex items-center justify-center gap-2">
+                                <i class="fas fa-check"></i> Already Applied
+                            </button>
+                        @else
+                            <button id="applyButton" onclick="showApplyModal()" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3.5 px-4 rounded-xl font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/40 transform transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                                Apply Now <i class="fas fa-arrow-right text-xs"></i>
+                            </button>
+                        @endif
+
+                        @if($isSaved)
+                            <button id="saveBtn" onclick="toggleSaveJob({{ $job->id }})" class="w-full bg-white hover:bg-gray-50 text-red-600 py-3.5 px-4 rounded-xl font-semibold border border-red-200 transition-colors flex items-center justify-center gap-2 group">
+                                <i class="fas fa-bookmark text-red-600"></i> Saved
+                            </button>
+                        @else
+                            <button id="saveBtn" onclick="toggleSaveJob({{ $job->id }})" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-3.5 px-4 rounded-xl font-semibold border border-gray-200 transition-colors flex items-center justify-center gap-2 group">
+                                <i class="far fa-bookmark group-hover:text-red-500 transition-colors"></i> Save Job
+                            </button>
+                        @endif
+                    @else
+                        <a href="{{ route('login') }}" class="block w-full bg-red-600 hover:bg-red-700 text-white py-3.5 px-4 rounded-xl font-semibold shadow-lg shadow-red-500/30 text-center transition-all">
+                            Login to Apply
+                        </a>
+                        <button onclick="window.location.href='{{ route('login') }}'" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-3.5 px-4 rounded-xl font-semibold border border-gray-200 transition-colors flex items-center justify-center gap-2 group">
+                            <i class="far fa-bookmark group-hover:text-red-500 transition-colors"></i> Save Job
+                        </button>
                     @endif
                 </div>
 
-                <!-- Sidebar -->
-                <div class="lg:col-span-1">
-                    <div class="bg-gray-50 rounded-lg p-4 sticky top-8">
-                        <h3 class="font-semibold text-gray-900 mb-3">Job Summary</h3>
+                <!-- Support Text -->
+                <div class="mt-6 pt-6 border-t border-gray-100 text-center">
+                    <p class="text-xs text-gray-400">
+                        Need help? Contact <a href="#" class="text-red-600 hover:underline">support@nocis.id</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-                        <div class="space-y-3 mb-4">
-                            <div>
-                                <span class="text-sm text-gray-500 block">Status</span>
-                                <span class="font-medium">{{ ucfirst($job->status) }}</span>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500 block">Slots Available</span>
-                                <span class="font-medium text-green-600">{{ $job->slots_total - $job->slots_filled }} of {{ $job->slots_total }}</span>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500 block">Application Deadline</span>
-                                <span class="font-medium">
-                                    {{ $job->application_deadline->format('d M Y, H:i') }}
-                                </span>
-                            </div>
-                            <div>
-                                <span class="text-sm text-gray-500 block">Created</span>
-                                <span class="font-medium">
-                                    {{ $job->created_at->format('d M Y, H:i') }}
-                                </span>
-                            </div>
+<!-- Apply Modal (Preserved Logic, Updated Style) -->
+<div id="applyModal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <!-- Backdrop -->
+    <!-- Backdrop -->
+    <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" onclick="hideApplyModal()"></div>
+
+    <div class="fixed inset-0 z-10 overflow-y-auto">
+        <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+            <!-- Modal Panel -->
+            <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i class="fas fa-file-signature text-red-600"></i>
                         </div>
-
-                        <!-- Apply Button Section -->
-                        <div class="pt-3 border-t border-gray-200">
-                            @php
-                                $isCustomerAuthenticated = session('customer_authenticated');
-                                $customerId = session('customer_id');
-                                $hasApplied = false;
+                        <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left w-full">
+                            <h3 class="text-lg font-bold leading-6 text-gray-900" id="modal-title">Apply for {{ $job->title }}</h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500">Please answer a few questions to complete your application.</p>
                                 
-                                if ($isCustomerAuthenticated && $customerId) {
-                                    $hasApplied = \App\Models\Application::where('worker_opening_id', $job->id)
-                                        ->where('user_id', $customerId)
-                                        ->exists();
-                                }
-                            @endphp
+                                <form id="applicationForm" onsubmit="event.preventDefault(); submitApplication();" class="mt-4 space-y-4">
+                                    <div>
+                                        <label for="motivation" class="block text-sm font-semibold text-gray-700 mb-1">
+                                            Why are you interested using this position? <span class="text-red-500">*</span>
+                                        </label>
+                                        <textarea id="motivation" name="motivation" rows="3" required
+                                                  class="w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm"
+                                                  placeholder="I am passionate about sports..."></textarea>
+                                    </div>
 
-                            @if($isCustomerAuthenticated)
-                                @if($hasApplied)
-                                <!-- Already Applied Button -->
-                                <button disabled
-                                        class="w-full bg-gray-300 text-gray-600 py-2 px-4 rounded-lg font-medium transition-colors mb-2 cursor-not-allowed">
-                                    Already Applied
-                                </button>
-                                @else
-                                <!-- Apply Button for Authenticated Users -->
-                                <button id="applyButton"
-                                        class="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium transition-colors mb-2"
-                                        onclick="showApplyModal()">
-                                    Apply for this Job
-                                </button>
-                                @endif
 
-                                <!-- Save Button -->
-                                <button class="w-full bg-white hover:bg-gray-50 text-gray-800 py-2 px-4 rounded-lg font-medium transition-colors border border-gray-200"
-                                        onclick="saveJob({{ $job->id }})">
-                                    Save this Job
-                                </button>
-                            @else
-                                <!-- Login Prompt for Guests -->
-                                <a href="{{ route('login') }}"
-                                   class="block w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium transition-colors text-center mb-2">
-                                    Login to Apply
-                                </a>
-
-                                <button class="w-full bg-white hover:bg-gray-50 text-gray-800 py-2 px-4 rounded-lg font-medium transition-colors border border-gray-200"
-                                        onclick="saveJob({{ $job->id }})">
-                                    Save this Job
-                                </button>
-                            @endif
+                                    
+                                    <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-3">
+                                        <button type="submit" id="submitBtn" class="inline-flex w-full justify-center rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 sm:w-auto">
+                                            Submit Application
+                                        </button>
+                                        <button type="button" onclick="hideApplyModal()" class="mt-3 inline-flex w-full justify-center rounded-xl bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -177,116 +260,29 @@
     </div>
 </div>
 
-<!-- Apply Modal -->
-<div id="applyModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden items-center justify-center">
-    <div class="bg-white rounded-lg p-6 max-w-md w-full mx-4 relative">
-        <button onclick="hideApplyModal()" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors">
-            ×
-        </button>
-
-        <h3 class="text-lg font-bold text-gray-900 mb-3">Apply for {{ $job->title }}</h3>
-
-        <p class="text-gray-600 mb-4">
-            Please provide some information about your application.
-        </p>
-
-        <!-- Application Form -->
-        <form id="applicationForm" onsubmit="event.preventDefault(); submitApplication();">
-            <div class="space-y-4 mb-6">
-                <!-- Motivation Field -->
-                <div>
-                    <label for="motivation" class="block text-sm font-medium text-gray-700 mb-1">
-                        Why are you interested in this position?
-                    </label>
-                    <textarea id="motivation" name="motivation" rows="3"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
-                              placeholder="Briefly explain your motivation..."></textarea>
-                </div>
-
-                <!-- Experience Field -->
-                <div>
-                    <label for="experience" class="block text-sm font-medium text-gray-700 mb-1">
-                        Relevant Experience (optional)
-                    </label>
-                    <textarea id="experience" name="experience" rows="2"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all"
-                              placeholder="Describe your relevant experience..."></textarea>
-                </div>
-            </div>
-
-            <div class="flex gap-2 justify-end">
-                <button type="button" onclick="hideApplyModal()" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
-                    Cancel
-                </button>
-                <button type="submit" class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors">
-                    Submit Application
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Clean Styles -->
-<style>
-    /* Smooth animations */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    .job-detail {
-        animation: fadeIn 0.3s ease-out forwards;
-    }
-
-    /* Modal animation */
-    #applyModal {
-        transition: opacity 0.3s ease;
-    }
-
-    #applyModal > div {
-        transform: translateY(20px);
-        transition: transform 0.3s ease;
-    }
-
-    #applyModal:not(.hidden) > div {
-        transform: translateY(0);
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 1024px) {
-        .lg\:grid-cols-3 {
-            grid-template-columns: 1fr;
-        }
-
-        .lg\:col-span-2,
-        .lg\:col-span-1 {
-            grid-column: span 1;
-        }
-    }
-</style>
-
-<!-- Clean JavaScript -->
 <script>
     function showApplyModal() {
         document.getElementById('applyModal').classList.remove('hidden');
-        document.getElementById('applyModal').classList.add('flex');
-        document.body.style.overflow = 'hidden';
     }
 
     function hideApplyModal() {
         document.getElementById('applyModal').classList.add('hidden');
-        document.getElementById('applyModal').classList.remove('flex');
-        document.body.style.overflow = '';
     }
 
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') hideApplyModal();
+    });
+
     function submitApplication() {
-        const applyButton = document.getElementById('applyButton');
-        applyButton.disabled = true;
-        applyButton.textContent = 'Processing...';
+        const submitBtn = document.getElementById('submitBtn');
+        const applyButton = document.getElementById('applyButton'); // Main page button
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
         // Get form data
-        const motivation = document.getElementById('motivation')?.value || 'Interested in this opportunity';
-        const experience = document.getElementById('experience')?.value || '';
+        const motivation = document.getElementById('motivation').value;
 
         // Submit via AJAX
         fetch("{{ route('jobs.apply', $job) }}", {
@@ -297,70 +293,95 @@
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                motivation: motivation,
-                experience: experience
+                motivation: motivation
             })
         })
         .then(response => response.json())
         .then(data => {
             if (data.success) {
+                // Success State
                 alert('Application submitted successfully!');
-                // Update button to show "Already Applied"
-                applyButton.textContent = 'Already Applied';
-                applyButton.classList.remove('bg-red-600', 'hover:bg-red-700');
-                applyButton.classList.add('bg-gray-300', 'cursor-not-allowed');
-                applyButton.disabled = true;
+                
+                // Update UI without reload
+                hideApplyModal();
+                if(applyButton) {
+                    applyButton.parentElement.innerHTML = `
+                        <button disabled class="w-full bg-gray-100 text-gray-500 py-3.5 px-4 rounded-xl font-bold border border-gray-200 cursor-not-allowed flex items-center justify-center gap-2">
+                            <i class="fas fa-check"></i> Already Applied
+                        </button>
+                    `;
+                }
             } else {
                 alert('Error: ' + (data.message || 'Failed to submit application'));
-                applyButton.disabled = false;
-                applyButton.textContent = 'Apply for this Job';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Application';
             }
-            hideApplyModal();
         })
         .catch(error => {
             console.error('Error:', error);
             alert('An error occurred. Please try again.');
-            applyButton.disabled = false;
-            applyButton.textContent = 'Apply for this Job';
-            hideApplyModal();
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Submit Application';
         });
     }
 
-    // Close modal on escape
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            hideApplyModal();
-        }
-    });
+    function toggleSaveJob(jobId) {
+        const button = document.getElementById('saveBtn');
+        const icon = button.querySelector('i');
+        const isSaved = icon.classList.contains('fas'); // simple check state
+        
+        // Disable button strictly during fetch
+        button.disabled = true;
 
-    // Close modal on outside click
-    document.getElementById('applyModal').addEventListener('click', function(e) {
-        if (e.target === this) {
-            hideApplyModal();
-        }
-    });
+        const url = isSaved 
+            ? `/dashboard/jobs/${jobId}/unsave` 
+            : `/dashboard/jobs/${jobId}/save`;
+        
+        const method = isSaved ? 'DELETE' : 'POST';
 
-    // Save job functionality
-    function saveJob(jobId) {
-        fetch('/jobs/' + jobId + '/save', {
-            method: 'POST',
+        fetch(url, {
+            method: method,
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': '{{ csrf_token() }}',
                 'Accept': 'application/json'
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    window.location.href = '{{ route("login") }}';
+                    throw new Error('Unauthorized');
+                }
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
             if (data.success) {
-                alert('Job saved successfully!');
+                if (isSaved) {
+                    // Was saved, now unsaved
+                    button.innerHTML = '<i class="far fa-bookmark group-hover:text-red-500 transition-colors"></i> Save Job';
+                    button.classList.remove('text-red-600', 'border-red-200');
+                    button.classList.add('text-gray-700', 'border-gray-200');
+                } else {
+                    // Was unsaved, now saved
+                    button.innerHTML = '<i class="fas fa-bookmark text-red-600"></i> Saved';
+                    button.classList.remove('text-gray-700', 'border-gray-200');
+                    button.classList.add('text-red-600', 'border-red-200');
+                }
             } else {
-                alert(data.message || 'Failed to save job');
+                alert('Action failed: ' + data.message);
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred. Please try again.');
+            if(error.message !== 'Unauthorized') {
+               alert('An error occurred.');
+            }
+        })
+        .finally(() => {
+            button.disabled = false;
         });
     }
 </script>
