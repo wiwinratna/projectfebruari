@@ -67,20 +67,33 @@ class CustomerDashboardController extends Controller
         $user = \App\Models\User::find($customerId);
         
         // Validate and update email only if provided (e.g. from Personal Data tab)
-        if ($request->has('email')) {
-            $request->validate([
-                'email' => 'required|email|unique:users,email,'.$customerId,
-                'username' => 'required|string|max:255|unique:users,username,'.$customerId,
-            ]);
+        if ($request->has('email') || $request->has('name')) {
+            $rules = [];
+            if ($request->has('email')) {
+                $rules['email'] = 'required|email|unique:users,email,'.$customerId;
+                $rules['username'] = 'required|string|max:255|unique:users,username,'.$customerId;
+            }
+            if ($request->has('name')) {
+                $rules['name'] = 'required|string|max:255';
+            }
+            
+            $request->validate($rules);
 
-            // Update user email and username
-            $user->update([
-                'email' => $request->email,
-                'username' => $request->username
-            ]);
+            // Update user fields
+            $updateData = [];
+            if ($request->has('email')) {
+                $updateData['email'] = $request->email;
+                $updateData['username'] = $request->username;
+                // Update session username
+                session(['customer_username' => $request->username]);
+            }
+            if ($request->has('name')) {
+                $updateData['name'] = $request->name;
+                // Update session name if stored there
+                session(['customer_name' => $request->name]);
+            }
 
-            // Update session username
-            session(['customer_username' => $request->username]);
+            $user->update($updateData);
         }
 
         // Get or create user profile

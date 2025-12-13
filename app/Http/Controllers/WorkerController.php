@@ -214,6 +214,16 @@ class WorkerController extends Controller
             'benefits' => $validated['benefits'],
         ]);
 
+        // Auto-update status based on capacity (Enforce rule: Full = Closed)
+        if ($worker->slots_filled >= $worker->slots_total && $worker->status === 'open') {
+            $worker->update(['status' => 'closed']);
+        } elseif ($worker->slots_filled < $worker->slots_total && $worker->status === 'closed') {
+            // Only re-open if the deadline hasn't passed
+            if ($worker->application_deadline > now()) {
+                $worker->update(['status' => 'open']);
+            }
+        }
+
         return redirect()->route('admin.workers.index', ['flash' => 'updated', 'name' => $worker->title]);
     }
 

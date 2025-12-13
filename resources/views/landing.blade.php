@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'NOCIS - National Olympic Committee Information System')
+@section('title', 'NOCIS - National Olympic Academy of Indonesia')
 
 @section('content')
 <style>
@@ -419,7 +419,7 @@
                         The National Olympic Academy of Indonesia System (NOCIS) is a comprehensive digital platform designed to streamline and enhance the management of Olympic committee operations.
                     </p>
                     <p class="text-gray-600 mb-8">
-                        Our system integrates event management, worker coordination, job categorization, and advanced analytics to provide a unified solution for national Olympic committees.
+                        Our system integrates event management, worker coordination, job categorization, and advanced analytics to provide a unified solution for national Olympic Academy.
                     </p>
                 </div>
 

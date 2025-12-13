@@ -47,6 +47,17 @@ class ApplicationController extends Controller
             $job->decrement('slots_filled');
         }
 
+        // Auto-update job status based on capacity
+        $job->refresh(); // Get fresh slots_filled count
+        if ($job->slots_filled >= $job->slots_total && $job->status === 'open') {
+            $job->update(['status' => 'closed']);
+        } elseif ($job->slots_filled < $job->slots_total && $job->status === 'closed') {
+            // Only re-open if the deadline hasn't passed
+            if ($job->application_deadline > now()) {
+                $job->update(['status' => 'open']);
+            }
+        }
+
         return redirect()->route('admin.workers.show', $job->id)
                          ->with('status', "Application for {$application->user->name} has been {$validated['status']}.");
     }

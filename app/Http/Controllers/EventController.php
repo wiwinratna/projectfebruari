@@ -251,9 +251,8 @@ class EventController extends Controller
 
         $event->update($data);
 
-        if (isset($data['sports'])) {
-            $event->sports()->sync($sports);
-        }
+        // Always sync sports (if array is empty, it removes all sports, which is correct behavior for checkboxes)
+        $event->sports()->sync($sports);
 
         // Automatically calculate and update status based on updated dates
         EventStatusService::updateStatus($event);
@@ -326,6 +325,7 @@ class EventController extends Controller
                 'penyelenggara',
                 'instagram',
                 'email',
+                'sports',
             ])->toArray();
 
         $data['start_at'] = Carbon::parse($data['start_at']);

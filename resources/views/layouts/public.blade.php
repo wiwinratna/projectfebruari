@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>@yield('title', 'NOCIS - National Olympic Committee of Indonesia')</title>
+    <title>@yield('title', 'NOCIS - National Olympic Academy of Indonesia')</title>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -276,7 +276,7 @@
             <!-- Footer Bottom -->
             <div class="border-t border-gray-200 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
                 <div class="text-sm text-gray-500 mb-4 sm:mb-0">
-                    &copy; {{ date('Y') }} National Olympic Committee of Indonesia. All rights reserved.
+                    &copy; {{ date('Y') }}  of Indonesia. All rights reserved.
                 </div>
                 <div class="flex space-x-6 text-sm text-gray-500">
                     <a href="#" class="hover:text-red-600 transition-colors">Privacy</a>
@@ -300,35 +300,53 @@
             const mobileMenuToggle = document.getElementById('mobile-menu-btn');
             const mobileMenu = document.getElementById('mobile-menu');
 
-            if (mobileMenuToggle && mobileMenu) {
-                mobileMenuToggle.addEventListener('click', function() {
-                    mobileMenu.classList.toggle('hidden');
-                });
-            }
-
-            // Mobile filter toggle
-            const filterToggle = document.getElementById('filter-toggle');
-            const filterSidebar = document.getElementById('filter-sidebar');
-            const filterOverlay = document.getElementById('filter-overlay');
-            const closeFilterBtn = document.getElementById('close-filter');
-
-            if (filterToggle && filterSidebar && filterOverlay && closeFilterBtn) {
-                filterToggle.addEventListener('click', function() {
-                    filterSidebar.classList.add('open');
-                    filterOverlay.classList.add('active');
-                });
-
-                closeFilterBtn.addEventListener('click', function() {
-                    filterSidebar.classList.remove('open');
-                    filterOverlay.classList.remove('active');
-                });
-
-                filterOverlay.addEventListener('click', function() {
-                    filterSidebar.classList.remove('open');
-                    filterOverlay.classList.remove('active');
-                });
             }
         });
+
+        // --- Public Flash Message System ---
+        function showPublicFlash(message, type = 'success') {
+            let container = document.getElementById('public-flash-container');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'public-flash-container';
+                container.className = 'fixed top-24 right-4 z-[9999] space-y-3';
+                document.body.appendChild(container);
+            }
+
+            const isSuccess = type === 'success';
+            const bgColor = isSuccess ? 'bg-green-50/90 border-green-200 text-green-800' : 'bg-red-50/90 border-red-200 text-red-800';
+            const icon = isSuccess ? 'fa-check-circle text-green-500' : 'fa-exclamation-circle text-red-500';
+
+            const toast = document.createElement('div');
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border shadow-lg backdrop-blur-md transition-all duration-300 transform translate-x-full opacity-0 ${bgColor}`;
+            toast.style.maxWidth = '350px';
+            toast.innerHTML = `
+                <i class="fas ${icon} text-lg"></i>
+                <div class="flex-1 text-sm font-semibold">${message}</div>
+                <button onclick="this.parentElement.remove()" class="opacity-60 hover:opacity-100 transition"><i class="fas fa-times"></i></button>
+            `;
+
+            container.appendChild(toast);
+
+            // Animate In
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            });
+
+            // Auto Dismiss
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        }
+
+        // Check for server-side flashes
+        @if(session('success'))
+            document.addEventListener('DOMContentLoaded', () => showPublicFlash("{{ session('success') }}", 'success'));
+        @endif
+        @if(session('error'))
+            document.addEventListener('DOMContentLoaded', () => showPublicFlash("{{ session('error') }}", 'error'));
+        @endif
     </script>
 </body>
 </html>

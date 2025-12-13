@@ -291,16 +291,82 @@
         window.location.href = '{{ route("admin.workers.index") }}';
     }
 
-    // Show search results toast on page load if there's a search query
+    // --- Flash Message Logic ---
+    function showFlashMessage(message, type = 'status') {
+        const flashContainer = document.getElementById('flash-container') || createFlashContainer();
+        
+        const iconMap = {
+            'status': 'fas fa-check-circle',
+            'error': 'fas fa-exclamation-circle'
+        };
+        const classMap = {
+            'status': 'bg-green-500 text-white',
+            'error': 'bg-red-500 text-white'
+        };
+        
+        const flashMessage = document.createElement('div');
+        flashMessage.className = `flash-message ${classMap[type]} shadow-lg rounded-lg px-4 py-3 text-sm flex items-start gap-3 transition duration-300 ease-out`;
+        flashMessage.innerHTML = `
+            <i class="${iconMap[type]} mt-0.5"></i>
+            <div class="flex-1">${message}</div>
+            <button type="button" class="text-white/70 hover:text-white transition" onclick="this.parentElement.remove()">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        
+        flashMessage.style.opacity = '0';
+        flashMessage.style.transform = 'translateX(100%)';
+        flashContainer.appendChild(flashMessage);
+        
+        requestAnimationFrame(() => {
+            flashMessage.style.opacity = '1';
+            flashMessage.style.transform = 'translateX(0)';
+        });
+
+        setTimeout(() => {
+            if (flashMessage.parentNode) {
+                flashMessage.style.opacity = '0';
+                flashMessage.style.transform = 'translateX(100%)';
+                setTimeout(() => flashMessage.remove(), 300);
+            }
+        }, 4500);
+    }
+
+    function createFlashContainer() {
+        let container = document.getElementById('flash-container');
+        if (container) return container;
+        container = document.createElement('div');
+        container.id = 'flash-container';
+        container.className = 'fixed top-4 right-4 z-50 space-y-2';
+        document.body.appendChild(container);
+        return container;
+    }
+
+    // --- On Load Logic ---
     document.addEventListener('DOMContentLoaded', function() {
+        // 1. Search Toast
         const searchQuery = '{{ request('search') }}';
         const resultsCount = {{ $openings->count() }};
         
         if (searchQuery && searchQuery.length > 0) {
-            // Small delay to ensure page is fully loaded
             setTimeout(() => {
-                showSearchToast(resultsCount, searchQuery);
+                if (typeof showSearchToast === 'function') {
+                    showSearchToast(resultsCount, searchQuery);
+                }
             }, 300);
+        }
+
+        // 2. Flash Messages from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const flash = urlParams.get('flash');
+        const name = urlParams.get('name');
+        
+        if (flash && name) {
+            const action = flash === 'created' ? 'created' : 'updated';
+            showFlashMessage(`Job Opening "${name}" ${action} successfully!`, 'status');
+            // Clean URL
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
         }
     });
 </script>

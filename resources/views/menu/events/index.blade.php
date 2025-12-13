@@ -234,7 +234,7 @@
                     </div>
 
                     <div class="mb-4">
-                        <p class="text-sm text-gray-500 mb-2">Sports yang tersedia:</p>
+                        <p class="text-sm text-gray-500 mb-2">Sports Available:</p>
                         <div class="flex flex-wrap gap-2">
                             @forelse ($event->sports as $sport)
                                 <span class="bg-red-100 text-red-700 text-xs px-3 py-1 rounded-full">{{ $sport->name }}</span>
