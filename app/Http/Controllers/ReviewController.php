@@ -8,6 +8,7 @@ use App\Models\Event;
 use Illuminate\Http\Request;
 use App\Exports\ApplicationsExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Str;
 
 class ReviewController extends Controller
 {
@@ -76,8 +77,15 @@ class ReviewController extends Controller
 
         $eventId = request('event_id');
         $search = request('search');
+        $eventName = null;
 
-        $filename = 'applications_' . date('Y-m-d_His') . '.xlsx';
+        if ($eventId) {
+            $event = Event::find($eventId);
+            $eventName = $event ? $event->title : null;
+        }
+
+        $baseName = $eventName ? Str::slug($eventName, '_') : 'all_events';
+        $filename = $baseName . '_' . date('Y-m-d_His') . '.xlsx';
 
         return Excel::download(new ApplicationsExport($eventId, $search), $filename);
     }
