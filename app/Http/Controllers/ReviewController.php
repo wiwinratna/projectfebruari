@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Application;
 use App\Models\WorkerOpening;
+use App\Models\Event;
 use Illuminate\Http\Request;
+use App\Exports\ApplicationsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReviewController extends Controller
 {
@@ -22,9 +25,19 @@ class ReviewController extends Controller
             'rejected_members' => Application::where('status', 'rejected')->count(),
         ];
 
+        // Get all events for filter dropdown
+        $events = Event::orderBy('title')->get();
+
         // Get query builder
-        $query = Application::with(['user.profile', 'opening.jobCategory', 'opening.event'])
+        $query = Application::with(['user.profile', 'opening.jobCategory', 'opening.event.city'])
             ->orderBy('created_at', 'desc');
+
+        // Apply event filter if present
+        if (request('event_id')) {
+            $query->whereHas('opening', function($q) {
+                $q->where('event_id', request('event_id'));
+            });
+        }
 
         // Apply search if present
         if (request('search')) {
@@ -51,7 +64,22 @@ class ReviewController extends Controller
         return view('menu.reviews.index', [
             'applications' => $applications,
             'stats' => $stats,
+            'events' => $events,
         ]);
+    }
+
+    public function export()
+    {
+        if (!session('admin_authenticated')) {
+            return redirect('/admin/login');
+        }
+
+        $eventId = request('event_id');
+        $search = request('search');
+
+        $filename = 'applications_' . date('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(new ApplicationsExport($eventId, $search), $filename);
     }
 
     public function updateStatus(Request $request, Application $application)

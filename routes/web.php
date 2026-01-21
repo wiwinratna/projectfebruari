@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     $jobController = new \App\Http\Controllers\JobController();
     $recentJobs = $jobController->getRecentJobs();
-    
+
     return view('landing', compact('recentJobs'));
 })->name('landing');
 
@@ -52,7 +52,7 @@ Route::post('/login', function () {
         // Redirect back to jobs page or to intended URL
         $redirectTo = session('intended_url', '/jobs');
         session()->forget('intended_url');
-        
+
         return redirect($redirectTo);
     }
 
@@ -128,7 +128,7 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
     Route::post('/settings/photo', [CustomerDashboardController::class, 'updateProfilePhoto'])->name('settings.photo');
     Route::delete('/settings/photo', [CustomerDashboardController::class, 'removeProfilePhoto'])->name('settings.photo.remove');
     Route::get('/applications', [CustomerDashboardController::class, 'applications'])->name('applications');
-    
+
     // Saved jobs routes
     Route::post('/jobs/{job}/save', [CustomerDashboardController::class, 'saveJob'])->name('jobs.save');
     Route::delete('/jobs/{job}/unsave', [CustomerDashboardController::class, 'unsaveJob'])->name('jobs.unsave');
@@ -180,7 +180,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 Route::post('/flash-message', function () {
     $data = request()->only(['message', 'type']);
     $type = in_array($data['type'], ['status', 'error', 'warning']) ? $data['type'] : 'status';
-    
+
     return back()->with($type, $data['message']);
 })->name('flash.message');
 
@@ -206,6 +206,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
 
     // Reviews Management - Protected
     Route::get('/reviews', [\App\Http\Controllers\ReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/reviews/export', [\App\Http\Controllers\ReviewController::class, 'export'])->name('reviews.export');
     Route::post('/reviews/{application}', [\App\Http\Controllers\ReviewController::class, 'updateStatus'])->name('reviews.update');
 
     // Dedicated Application Review (Full Page)

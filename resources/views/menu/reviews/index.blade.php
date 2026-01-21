@@ -16,12 +16,42 @@
         </div>
     </div>
 
-    {{-- Search Bar --}}
-    <div class="flex items-center justify-between mb-6">
-        <form method="GET" action="{{ route('admin.reviews.index') }}" id="search-form" class="relative flex items-center border border-gray-300 rounded-lg py-2 px-4 pl-10 bg-white">
-            <i class="fas fa-search absolute left-3 text-gray-400"></i>
-            <input type="text" name="search" id="search-input" value="{{ request('search') }}" placeholder="Search Committee..." class="focus:outline-none w-64 ml-2">
+    {{-- Search Bar and Filters --}}
+    <div class="flex items-center justify-between mb-6 gap-4">
+        <form method="GET" action="{{ route('admin.reviews.index') }}" id="filter-form" class="flex items-center gap-4">
+            {{-- Search Input --}}
+            <div class="relative flex items-center border border-gray-300 rounded-lg py-2 px-4 pl-10 bg-white">
+                <i class="fas fa-search absolute left-3 text-gray-400"></i>
+                <input type="text" name="search" id="search-input" value="{{ request('search') }}" placeholder="Search Committee..." class="focus:outline-none w-64 ml-2">
+            </div>
+
+            {{-- Event Filter --}}
+            <div class="relative">
+                <select name="event_id" id="event-filter" class="border border-gray-300 rounded-lg py-2 px-4 pr-10 bg-white focus:outline-none focus:ring-2 focus:ring-red-500 appearance-none w-64">
+                    <option value="">All Events</option>
+                    @foreach($events as $event)
+                        <option value="{{ $event->id }}" {{ request('event_id') == $event->id ? 'selected' : '' }}>
+                            {{ $event->title }}
+                        </option>
+                    @endforeach
+                </select>
+                <i class="fas fa-chevron-down absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none"></i>
+            </div>
+
+            {{-- Clear Filters Button --}}
+            @if(request('search') || request('event_id'))
+                <a href="{{ route('admin.reviews.index') }}" class="text-gray-600 hover:text-gray-800 px-4 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition">
+                    <i class="fas fa-times mr-1"></i> Clear
+                </a>
+            @endif
         </form>
+
+        {{-- Export to Excel Button --}}
+        <a href="{{ route('admin.reviews.export', ['event_id' => request('event_id'), 'search' => request('search')]) }}"
+           class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition">
+            <i class="fas fa-file-excel"></i>
+            <span>Export Excel</span>
+        </a>
     </div>
 
     {{-- Stats Cards --}}
@@ -76,7 +106,7 @@
                             <div class="flex items-center">
                                 @if($application->user->profile && $application->user->profile->profile_photo)
                                     <div class="w-10 h-10 rounded-full mr-3 flex-shrink-0">
-                                        <img src="{{ asset('storage/' . $application->user->profile->profile_photo) }}" alt="" 
+                                        <img src="{{ asset('storage/' . $application->user->profile->profile_photo) }}" alt=""
                                              class="w-full h-full rounded-full object-cover border border-gray-200">
                                     </div>
                                 @else
@@ -164,8 +194,8 @@
     document.getElementById('search-input')?.addEventListener('input', function(e) {
         clearTimeout(searchTimeout);
         const query = e.target.value.trim();
-        const form = document.getElementById('search-form');
-        
+        const form = document.getElementById('filter-form');
+
         // Auto-submit after 500ms pause in typing
         if (query.length >= 2) {
             searchTimeout = setTimeout(() => {
@@ -174,7 +204,7 @@
         } else if (query.length === 0) {
             // Clear search immediately when input is empty
             searchTimeout = setTimeout(() => {
-                window.location.href = '{{ route("admin.reviews.index") }}';
+                form.submit();
             }, 300);
         }
     });
@@ -184,8 +214,13 @@
         if (e.key === 'Enter') {
             e.preventDefault();
             clearTimeout(searchTimeout);
-            document.getElementById('search-form').submit();
+            document.getElementById('filter-form').submit();
         }
+    });
+
+    // Auto-submit when event filter changes
+    document.getElementById('event-filter')?.addEventListener('change', function() {
+        document.getElementById('filter-form').submit();
     });
 
     // Search Results Toast Functionality
@@ -213,10 +248,10 @@
                 </button>
             </div>
         `;
-        
+
         // Add to page
         document.body.appendChild(toast);
-        
+
         // Auto-remove after 5 seconds
         setTimeout(() => {
             if (toast.parentNode) {
@@ -241,7 +276,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const searchQuery = '{{ request('search') }}';
         const resultsCount = {{ $applications->count() }};
-        
+
         if (searchQuery && searchQuery.length > 0) {
             // Small delay to ensure page is fully loaded
             setTimeout(() => {
