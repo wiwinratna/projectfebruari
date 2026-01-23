@@ -231,6 +231,24 @@ Route::middleware(['web'])->group(function () {
     })->where('any', '.*');
 });
 
+// Storage file serving route (workaround for symlink permission issues)
+Route::get('/storage/{path}', function ($path) {
+    $file = storage_path('app/public/' . $path);
+    
+    if (!file_exists($file)) {
+        abort(404);
+    }
+    
+    // Get file mime type
+    $mimeType = mime_content_type($file);
+    
+    // Return file with proper headers
+    return response()->file($file, [
+        'Content-Type' => $mimeType,
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*')->name('storage.serve');
+
 // Store intended URL before redirecting to login (for apply functionality)
 Route::middleware(['web'])->group(function () {
     Route::get('/store-intended-url', function () {
