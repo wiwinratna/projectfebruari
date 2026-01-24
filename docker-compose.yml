@@ -1,0 +1,18 @@
+services:
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: projectfebruari
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      # host:container
+      - '3030:3306'
+    volumes:
+      - project:/var/lib/mysql
+
+
+volumes:
+  project:
