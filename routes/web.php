@@ -233,7 +233,7 @@ Route::middleware(['web'])->group(function () {
 
 // Storage file serving route (workaround for symlink permission issues)
 Route::get('/storage/{path}', function ($path) {
-    $file = storage_path('app/public/' . $path);
+    $file = storage_path('app/public/storage/profile_photos' . $path);
     
     if (!file_exists($file)) {
         abort(404);
