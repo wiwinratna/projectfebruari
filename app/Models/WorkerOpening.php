@@ -53,4 +53,13 @@ public function getSlotsRemainingAttribute(): int
 {
     return max(0, (int) $this->slots_total - (int) $this->slots_filled);
 }
+public function accessCodes()
+{
+    return $this->belongsToMany(
+        \App\Models\EventAccessCode::class,
+        'worker_opening_access_codes',
+        'worker_opening_id',
+        'event_access_code_id'
+    );
+}
 }

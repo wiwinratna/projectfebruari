@@ -6,6 +6,8 @@ use App\Models\Application;
 use App\Models\WorkerOpening;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\UserCertificate;
+
 
 class CustomerDashboardController extends Controller
 {
@@ -48,7 +50,7 @@ class CustomerDashboardController extends Controller
     public function profile()
     {
         $customerId = session('customer_id');
-        $user = \App\Models\User::with('profile')->find($customerId);
+        $user = \App\Models\User::with(['profile','certificates'])->findOrFail($customerId);
 
         return view('menu.customer.profile', compact('user'));
     }
@@ -475,5 +477,65 @@ $customerId = session('customer_id');
         ->paginate(10);
 
 return view('menu.customer.saved-jobs', compact('savedJobs'));
+}
+public function uploadCertificates(Request $request)
+{
+    $customerId = session('customer_id');
+
+    $request->validate([
+        'certificates' => 'required|array|min:1',
+        'certificates.*.title' => 'required|string|max:150',
+        'certificates.*.event_date' => 'required|date',
+        'certificates.*.stage' => 'required|in:province,national,asean_sea,asia,world',
+        'certificates.*.file' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+        'certificates.*.title' => 'required|string|max:150',
+        'certificates.*.event_date' => 'required|date',
+    ]);
+
+    foreach ($request->certificates as $item) {
+        $file = $item['file'];
+        $path = $file->store('certificates', 'public');
+
+        \App\Models\UserCertificate::create([
+            'user_id' => $customerId,
+            'file_path' => $path,
+            'original_name' => $file->getClientOriginalName(),
+            'title' => $item['title'],
+            'event_date' => $item['event_date'],
+            'stage' => $item['stage'],
+            'title' => $item['title'],
+            'event_date' => $item['event_date'],
+        ]);
+    }
+
+    return response()->json(['success' => true]);
+}
+public function certificateDetail(\App\Models\UserCertificate $certificate)
+{
+    if ($certificate->user_id !== session('customer_id')) {
+        abort(403);
+    }
+
+    return response()->json([
+        'title' => $certificate->title,
+        'event_date' => $certificate->event_date,
+        'stage' => strtoupper(str_replace('_',' ', $certificate->stage)),
+        'file_url' => asset('storage/'.$certificate->file_path),
+        'file_name' => $certificate->original_name,
+    ]);
+}
+public function certificateDelete(\App\Models\UserCertificate $certificate)
+{
+    if ($certificate->user_id !== session('customer_id')) {
+        abort(403);
+    }
+
+    if (\Storage::disk('public')->exists($certificate->file_path)) {
+        \Storage::disk('public')->delete($certificate->file_path);
+    }
+
+    $certificate->delete();
+
+    return response()->json(['success' => true]);
 }
 }

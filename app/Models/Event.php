@@ -136,4 +136,9 @@ class Event extends Model
     {
         return $query->where('status', '!=', 'completed')->orderBy('start_at');
     }
+    public function accessCodes()
+    {
+        return $this->hasMany(\App\Models\EventAccessCode::class);
+    }
+
 }

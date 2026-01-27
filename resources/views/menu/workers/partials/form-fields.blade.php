@@ -26,6 +26,80 @@
     @enderror
 </div>
 
+@php
+  $selectedCodes = old(
+    'access_code_ids',
+    isset($opening) ? ($opening->accessCodes->pluck('id')->toArray() ?? []) : []
+  );
+
+  $selectedEventId = old('event_id', $opening->event_id ?? null);
+@endphp
+
+@php
+  $selectedCodes = old(
+    'access_code_ids',
+    isset($opening) ? ($opening->accessCodes->pluck('id')->toArray() ?? []) : []
+  );
+
+  $selectedEventId = old('event_id', $opening->event_id ?? null);
+@endphp
+
+<div class="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+  <div class="flex items-start justify-between gap-4 mb-3">
+    <div>
+      <h3 class="font-semibold text-gray-800">Akses untuk Posisi Ini</h3>
+      <p class="text-xs text-gray-500 mt-0.5">
+        Centang kode akses yang boleh dipakai oleh posisi/lowongan ini.
+      </p>
+    </div>
+  </div>
+
+  {{-- toolbar: search + select all --}}
+  <div class="flex flex-col sm:flex-row sm:items-center gap-2 mb-3">
+    <div class="flex-1">
+      <input
+        type="text"
+        id="accessCodesSearch"
+        placeholder="Cari kode / deskripsi..."
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-500">
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button type="button" id="accessCodesSelectAll"
+        class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm hover:bg-gray-50">
+        Select All
+      </button>
+      <button type="button" id="accessCodesClearAll"
+        class="px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm hover:bg-gray-50">
+        Clear
+      </button>
+
+      <span id="accessCodesCount" class="text-xs text-gray-500 px-2">
+        0 selected
+      </span>
+    </div>
+  </div>
+
+  {{-- list scroll --}}
+  <div id="accessCodesList"
+       class="space-y-2 max-h-64 overflow-y-auto pr-1 bg-white border border-gray-200 rounded-lg p-2">
+    <p class="text-sm text-gray-500">Pilih event dulu untuk menampilkan daftar kode akses.</p>
+  </div>
+
+  {{-- seed --}}
+  <input type="hidden" id="accessCodesSelectedSeed" value='@json($selectedCodes)'>
+  <input type="hidden" id="accessCodesEventSeed" value="{{ $selectedEventId ?? '' }}">
+
+  @error('access_code_ids')
+    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+  @enderror
+  @error('access_code_ids.*')
+    <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
+  @enderror
+</div>
+
+
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Job Title</label>

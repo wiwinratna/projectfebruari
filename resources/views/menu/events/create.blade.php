@@ -130,5 +130,70 @@
     // Check URL flash messages on page load
     document.addEventListener('DOMContentLoaded', checkUrlFlashMessages);
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const wrap = document.getElementById('accessRows');
+  const addBtn = document.getElementById('addAccessRow');
+
+  if (!wrap || !addBtn) return;
+
+  function reindex() {
+    const rows = wrap.querySelectorAll('.access-row');
+    rows.forEach((row, idx) => {
+      row.querySelectorAll('input').forEach((inp) => {
+        inp.name = inp.name.replace(/access_codes\[\d+\]/g, `access_codes[${idx}]`);
+      });
+    });
+  }
+
+  function rowTemplate(idx) {
+    return `
+      <div class="flex items-center gap-2 access-row">
+        <div class="w-56 shrink-0">
+          <input
+            name="access_codes[${idx}][code]"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+            placeholder="VIP / GATE-A / ROOM-1">
+        </div>
+
+        <div class="flex-1 min-w-0">
+          <input
+            name="access_codes[${idx}][label]"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
+            placeholder="Arti / Deskripsi kode">
+        </div>
+
+        <div class="w-10 shrink-0 flex justify-center">
+          <input
+            type="color"
+            name="access_codes[${idx}][color_hex]"
+            value="#EF4444"
+            class="w-9 h-9 p-0 border border-gray-300 rounded-md cursor-pointer bg-white">
+        </div>
+
+        <div class="w-10 shrink-0 flex justify-center">
+          <button type="button"
+            class="removeAccessRow text-gray-400 hover:text-red-500 px-2 py-2"
+            title="Hapus baris">✕</button>
+        </div>
+      </div>
+    `;
+  }
+
+  addBtn.addEventListener('click', () => {
+    const idx = wrap.querySelectorAll('.access-row').length;
+    wrap.insertAdjacentHTML('beforeend', rowTemplate(idx));
+  });
+
+  wrap.addEventListener('click', (e) => {
+    const btn = e.target.closest('.removeAccessRow');
+    if (!btn) return;
+
+    btn.closest('.access-row')?.remove();
+    reindex();
+  });
+});
+</script>
+
 @endsection
 

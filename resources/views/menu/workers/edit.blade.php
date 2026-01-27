@@ -133,4 +133,223 @@
     // Check URL flash messages on page load
     document.addEventListener('DOMContentLoaded', checkUrlFlashMessages);
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const eventSelect = document.querySelector('select[name="event_id"]');
+  const listEl = document.getElementById('accessCodesList');
+
+  const searchEl = document.getElementById('accessCodesSearch');
+  const btnAll = document.getElementById('accessCodesSelectAll');
+  const btnClear = document.getElementById('accessCodesClearAll');
+  const countEl = document.getElementById('accessCodesCount');
+
+  const seedSelectedEl = document.getElementById('accessCodesSelectedSeed');
+  const seedEventEl = document.getElementById('accessCodesEventSeed');
+
+  let allCodes = [];        // hasil fetch event
+  let currentEventId = '';  // event yang sedang aktif
+
+  const seededSelected = (() => {
+    try { return JSON.parse(seedSelectedEl?.value || '[]'); }
+    catch { return []; }
+  })();
+
+  function escapeHtml(str) {
+    return String(str ?? '').replace(/[&<>"']/g, (m) => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+    }[m]));
+  }
+
+  function getCheckedIds() {
+    return Array.from(listEl.querySelectorAll('input[name="access_code_ids[]"]:checked'))
+      .map(i => Number(i.value))
+      .filter(Boolean);
+  }
+
+  function setCount() {
+    const n = getCheckedIds().length;
+    if (countEl) countEl.textContent = `${n} selected`;
+  }
+
+  function renderEmpty(msg) {
+    listEl.innerHTML = `<p class="text-sm text-gray-500 p-2">${msg}</p>`;
+    setCount();
+  }
+
+  function filterCodes(q) {
+    const s = (q || '').trim().toLowerCase();
+    if (!s) return allCodes;
+    return allCodes.filter(c => {
+      const code = (c.code ?? '').toLowerCase();
+      const label = (c.label ?? '').toLowerCase();
+      return code.includes(s) || label.includes(s);
+    });
+  }
+
+  function renderList() {
+    const q = searchEl?.value || '';
+    const data = filterCodes(q);
+    const checkedSet = new Set(getCheckedIds());
+
+    if (!currentEventId) {
+      renderEmpty('Pilih event dulu untuk menampilkan daftar kode akses.');
+      return;
+    }
+    if (!allCodes.length) {
+      renderEmpty('Event ini belum memiliki kode akses.');
+      return;
+    }
+    if (!data.length) {
+      renderEmpty('Tidak ada hasil untuk pencarian ini.');
+      return;
+    }
+
+    listEl.innerHTML = data.map(c => {
+      const checked = checkedSet.has(c.id) ? 'checked' : '';
+      return `
+        <label class="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer">
+          <input
+            type="checkbox"
+            name="access_code_ids[]"
+            value="${c.id}"
+            ${checked}
+            class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+          <span class="px-2 py-0.5 rounded text-xs font-semibold text-white"
+                style="background-color:${c.color_hex || '#EF4444'}">
+            ${escapeHtml(c.code)}
+          </span>
+          <span class="text-sm text-gray-700">${escapeHtml(c.label)}</span>
+        </label>
+      `;
+    }).join('');
+
+    // bind checkbox change to update count
+    listEl.querySelectorAll('input[name="access_code_ids[]"]').forEach(cb => {
+      cb.addEventListener('change', setCount);
+    });
+
+    setCount();
+  }
+
+  function applySeededChecked() {
+    // seed centang hanya yang ada di event ini
+    const ids = new Set(allCodes.map(c => c.id));
+    const wanted = seededSelected.filter(id => ids.has(id));
+
+    // render dulu semua (tanpa search)
+    if (searchEl) searchEl.value = '';
+    listEl.innerHTML = allCodes.map(c => {
+      const checked = wanted.includes(c.id) ? 'checked' : '';
+      return `
+        <label class="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer">
+          <input
+            type="checkbox"
+            name="access_code_ids[]"
+            value="${c.id}"
+            ${checked}
+            class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+          <span class="px-2 py-0.5 rounded text-xs font-semibold text-white"
+                style="background-color:${c.color_hex || '#EF4444'}">
+            ${escapeHtml(c.code)}
+          </span>
+          <span class="text-sm text-gray-700">${escapeHtml(c.label)}</span>
+        </label>
+      `;
+    }).join('');
+
+    listEl.querySelectorAll('input[name="access_code_ids[]"]').forEach(cb => {
+      cb.addEventListener('change', setCount);
+    });
+
+    setCount();
+  }
+
+  async function loadAccessCodes(eventId, preserveChecked = true) {
+    currentEventId = String(eventId || '');
+    if (!currentEventId) {
+      allCodes = [];
+      renderEmpty('Pilih event dulu untuk menampilkan daftar kode akses.');
+      return;
+    }
+
+    const preserved = preserveChecked ? getCheckedIds() : [];
+
+    renderEmpty('Memuat kode akses...');
+
+    try {
+      const url = `/admin/events/${currentEventId}/access-codes`;
+      const res = await fetch(url, { headers: { 'Accept': 'application/json' } });
+      if (!res.ok) throw new Error('Failed');
+      allCodes = await res.json();
+
+      // kalau preserve, centang yang sebelumnya dicentang tapi hanya yg available
+      if (preserved.length) {
+        const avail = new Set(allCodes.map(c => c.id));
+        const keep = new Set(preserved.filter(id => avail.has(id)));
+
+        if (searchEl) searchEl.value = '';
+        listEl.innerHTML = allCodes.map(c => {
+          const checked = keep.has(c.id) ? 'checked' : '';
+          return `
+            <label class="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer">
+              <input type="checkbox" name="access_code_ids[]" value="${c.id}" ${checked}
+                class="rounded border-gray-300 text-red-600 focus:ring-red-500">
+              <span class="px-2 py-0.5 rounded text-xs font-semibold text-white"
+                style="background-color:${c.color_hex || '#EF4444'}">
+                ${escapeHtml(c.code)}
+              </span>
+              <span class="text-sm text-gray-700">${escapeHtml(c.label)}</span>
+            </label>
+          `;
+        }).join('');
+
+        listEl.querySelectorAll('input[name="access_code_ids[]"]').forEach(cb => {
+          cb.addEventListener('change', setCount);
+        });
+
+        setCount();
+      } else {
+        // first load (edit) pakai seed
+        applySeededChecked();
+      }
+    } catch (e) {
+      allCodes = [];
+      renderEmpty('Gagal memuat kode akses. Coba refresh halaman.');
+    }
+  }
+
+  // search realtime
+  searchEl?.addEventListener('input', () => renderList());
+
+  // select all (yang lagi tampil sesuai search)
+  btnAll?.addEventListener('click', () => {
+    const q = searchEl?.value || '';
+    const visible = filterCodes(q);
+    const visibleIds = new Set(visible.map(c => c.id));
+    listEl.querySelectorAll('input[name="access_code_ids[]"]').forEach(cb => {
+      if (visibleIds.has(Number(cb.value))) cb.checked = true;
+    });
+    setCount();
+  });
+
+  // clear all
+  btnClear?.addEventListener('click', () => {
+    listEl.querySelectorAll('input[name="access_code_ids[]"]').forEach(cb => cb.checked = false);
+    setCount();
+  });
+
+  // initial load (edit)
+  const initialEventId = (seedEventEl?.value || eventSelect?.value || '').toString();
+  if (initialEventId) loadAccessCodes(initialEventId, false);
+
+  // change event realtime
+  eventSelect?.addEventListener('change', (e) => {
+    // saran: kalau ganti event, akses lama harus dibuang biar ga nyangkut
+    // jadi preserveChecked = false
+    loadAccessCodes(e.target.value, false);
+  });
+});
+</script>
+
+
 @endsection

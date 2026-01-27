@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\JobCategory;
 use App\Models\WorkerOpening;
 use Illuminate\Http\Request;
+use App\Models\AccessCard;
 
 class WorkerController extends Controller
 {
@@ -137,6 +138,8 @@ class WorkerController extends Controller
             'status' => 'required|in:planned,open,closed',
             'requirements_text' => 'nullable|string',
             'benefits' => 'nullable|string',
+            'access_code_ids' => ['nullable','array'],
+            'access_code_ids.*' => ['exists:event_access_codes,id'],
         ]);
 
         $requirements = [];
@@ -157,6 +160,8 @@ class WorkerController extends Controller
             'benefits' => $validated['benefits'],
         ]);
 
+        $opening->accessCodes()->sync($request->input('access_code_ids', []));
+
         return redirect()->route('admin.workers.index', ['flash' => 'created', 'name' => $opening->title]);
     }
 
@@ -166,8 +171,9 @@ class WorkerController extends Controller
             return redirect('/admin/login');
         }
 
+        $worker->load(['accessCodes', 'event.accessCodes']);
+
         $categories = JobCategory::orderBy('name')->get();
-        // For editing, show all events (including closed) in case user needs to see current assignment
         $events = Event::orderBy('start_at')->get(['id', 'title', 'venue', 'status']);
 
         return view('menu.workers.edit', [
@@ -176,6 +182,7 @@ class WorkerController extends Controller
             'events' => $events,
         ]);
     }
+
 
     public function update(Request $request, WorkerOpening $worker)
     {
@@ -194,6 +201,8 @@ class WorkerController extends Controller
             'status' => 'required|in:planned,open,closed',
             'requirements_text' => 'nullable|string',
             'benefits' => 'nullable|string',
+            'access_code_ids' => ['nullable','array'],
+            'access_code_ids.*' => ['exists:event_access_codes,id'],
         ]);
 
         $requirements = [];
@@ -213,6 +222,16 @@ class WorkerController extends Controller
             'requirements' => $requirements,
             'benefits' => $validated['benefits'],
         ]);
+        $worker->accessCodes()->sync($request->input('access_code_ids', []));
+        // 🔥 AUTO-SYNC AKSES KARTU (kartu yang sudah dibuat dari opening ini)
+        $newAccessIds = $worker->accessCodes()->pluck('event_access_codes.id')->all();
+
+        AccessCard::where('worker_opening_id', $worker->id)
+            ->get()
+            ->each(function ($card) use ($newAccessIds) {
+                $card->accessCodes()->sync($newAccessIds);
+            });
+
 
         // Auto-update status based on capacity (Enforce rule: Full = Closed)
         if ($worker->slots_filled >= $worker->slots_total && $worker->status === 'open') {

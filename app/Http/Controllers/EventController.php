@@ -182,6 +182,19 @@ class EventController extends Controller
         unset($data['sports']);
 
         $event = Event::create($data);
+        $codes = collect($request->input('access_codes', []))
+            ->filter(fn($r) => !empty(trim($r['code'] ?? '')))
+            ->map(fn($r) => [
+                'code' => strtoupper(trim($r['code'])),
+                'label' => trim($r['label'] ?? ''),
+                'color_hex' => $r['color_hex'] ?? '#EF4444',
+            ])
+            ->values()
+            ->all();
+
+        $event->accessCodes()->delete(); // aman biar bersih dulu
+        $event->accessCodes()->createMany($codes);
+
         
         // Automatically calculate and update status based on dates
         EventStatusService::updateStatus($event);
@@ -224,6 +237,8 @@ class EventController extends Controller
      */
     public function edit(Event $event)
     {
+        $event->load('accessCodes');
+
         if (!session('admin_authenticated')) {
             return redirect('/admin/login');
         }
@@ -250,6 +265,19 @@ class EventController extends Controller
         unset($data['sports']);
 
         $event->update($data);
+        $codes = collect($request->input('access_codes', []))
+            ->filter(fn($r) => !empty(trim($r['code'] ?? '')))
+            ->map(fn($r) => [
+                'code' => strtoupper(trim($r['code'])),
+                'label' => trim($r['label'] ?? ''),
+                'color_hex' => $r['color_hex'] ?? '#EF4444',
+            ])
+            ->values()
+            ->all();
+
+        $event->accessCodes()->delete();
+        $event->accessCodes()->createMany($codes);
+
 
         // Always sync sports (if array is empty, it removes all sports, which is correct behavior for checkboxes)
         $event->sports()->sync($sports);
@@ -310,6 +338,10 @@ class EventController extends Controller
             'email' => ['nullable', 'email', 'max:255'],
             'sports' => ['nullable', 'array'],
             'sports.*' => ['exists:sports,id'],
+            'access_codes' => ['nullable','array'],
+            'access_codes.*.code' => ['nullable','string','max:50'],
+            'access_codes.*.label' => ['nullable','string','max:255'],
+            'access_codes.*.color_hex' => ['nullable','string','max:20'],
         ]);
 
         $data = collect($validated)

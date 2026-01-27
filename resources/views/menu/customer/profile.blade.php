@@ -185,7 +185,111 @@
                     </button>
                 </div>
             @endif
+
         </section>
+                    {{-- =========================
+            Certificates Section
+            ========================= --}}
+            <section class="mb-12 border-t border-gray-200 pt-12">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">Certificates</h2>
+                </div>
+
+                {{-- Form Upload Multi Sertifikat --}}
+                <form id="certificateForm" class="space-y-4">
+                    <div id="certificateRows" class="space-y-4"></div>
+
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="submitCertificates()"
+                            class="px-6 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all">
+                            Save Certificates
+                        </button>
+
+                        <p class="text-xs text-gray-500">
+                            Allowed: PDF/JPG/PNG (max 2MB). You can upload more than one certificate.
+                        </p>
+                    </div>
+                </form>
+
+                {{-- List Sertifikat yang sudah diupload --}}
+                <div class="mt-8">
+                    <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wide mb-3 flex items-center gap-2">
+                        <i class="fas fa-certificate text-red-500"></i> Uploaded Certificates
+                    </h3>
+
+                    @if($user->certificates && $user->certificates->count())
+                    <div class="overflow-x-auto bg-white border border-gray-200 rounded-xl">
+                        <table class="min-w-full text-sm">
+                        <thead class="bg-gray-50 text-gray-600">
+                            <tr>
+                            <th class="text-left p-3 font-bold">Title</th>
+                            <th class="text-left p-3 font-bold">Date</th>
+                            <th class="text-left p-3 font-bold">Stage</th>
+                            <th class="text-left p-3 font-bold">File</th>
+                            <th class="text-right p-3 font-bold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @foreach($user->certificates as $cert)
+                            <tr class="hover:bg-gray-50">
+                                <td class="p-3 font-semibold text-gray-900">
+                                {{ $cert->title ?? '-' }}
+                                </td>
+
+                                <td class="p-3 text-gray-700">
+                                {{ $cert->event_date ? \Carbon\Carbon::parse($cert->event_date)->format('d M Y') : '-' }}
+                                </td>
+
+                                <td class="p-3">
+                                <span class="inline-flex text-[10px] font-bold px-2 py-1 rounded bg-gray-100 text-gray-700 uppercase">
+                                    {{ strtoupper(str_replace('_',' ', $cert->stage)) }}
+                                </span>
+                                </td>
+
+                                <td class="p-3">
+                                <a href="{{ asset('storage/' . $cert->file_path) }}" target="_blank"
+                                    class="text-red-600 font-bold hover:underline">
+                                   @php
+                                    $ext = pathinfo($cert->original_name ?? $cert->file_path, PATHINFO_EXTENSION);
+                                    $displayName = ($cert->title ? \Illuminate\Support\Str::slug($cert->title, '-') : 'certificate') . ($ext ? '.'.$ext : '');
+                                    @endphp
+
+                                    <span class="font-semibold text-gray-900">{{ $displayName }}</span>
+                                </a>
+                                </td>
+
+                                <td class="p-3">
+                                <div class="flex justify-end gap-2">
+                                    {{-- Download --}}
+                                    <a href="{{ asset('storage/' . $cert->file_path) }}" download
+                                    class="w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center"
+                                    title="Download">
+                                    <i class="fas fa-download"></i>
+                                    </a>
+
+                                    {{-- Delete --}}
+                                    <button type="button"
+                                            onclick="deleteCertificate({{ $cert->id }})"
+                                            class="w-9 h-9 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center"
+                                            title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                        </table>
+                    </div>
+                    @else
+                    <div class="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-8 text-center">
+                        <p class="text-gray-500 font-medium">No certificates uploaded yet.</p>
+                    </div>
+                    @endif
+
+                </div>
+            </section>
+
 
         <!-- Hidden File Input -->
         <input type="file" id="cvFileInput" class="hidden" accept=".pdf,.doc,.docx" onchange="handleCvUpload(this)">
@@ -241,8 +345,6 @@
                 }
             }
         </script>
-
-
 
         <!-- Social Media Section -->
         <section class="border-t border-gray-200 pt-12">
@@ -399,4 +501,188 @@
         });
     }
 </script>
+<script>
+let certIndex = 0;
+
+function addCertificateRow() {
+  const container = document.getElementById('certificateRows');
+
+  container.insertAdjacentHTML('beforeend', `
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center border border-gray-200 p-4 rounded-xl bg-white">
+      
+      <div class="md:col-span-4">
+        <label class="block text-xs font-bold text-gray-500 mb-1">Title (Nama Lomba/Sertifikat)</label>
+        <input type="text"
+          name="certificates[${certIndex}][title]"
+          class="w-full border border-gray-300 rounded-lg p-2 text-sm"
+          placeholder="Contoh: Lomba UI/UX Nasional"
+          required>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-xs font-bold text-gray-500 mb-1">Date</label>
+        <input type="date"
+          name="certificates[${certIndex}][event_date]"
+          class="w-full border border-gray-300 rounded-lg p-2 text-sm"
+          required>
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-xs font-bold text-gray-500 mb-1">Stage</label>
+        <select name="certificates[${certIndex}][stage]"
+          class="w-full border border-gray-300 rounded-lg p-2 text-sm"
+          required>
+          <option value="">Select stage</option>
+          <option value="province">Province</option>
+          <option value="national">National</option>
+          <option value="asean_sea">ASEAN / South East Asia</option>
+          <option value="asia">Asia</option>
+          <option value="world">World</option>
+        </select>
+      </div>
+
+      <div class="md:col-span-3">
+        <label class="block text-xs font-bold text-gray-500 mb-1">Certificate File</label>
+        <input type="file"
+          name="certificates[${certIndex}][file]"
+          accept=".pdf,.jpg,.jpeg,.png"
+          class="w-full border border-gray-300 rounded-lg p-2 text-sm"
+          required>
+      </div>
+
+      <div class="md:col-span-1 flex md:justify-end">
+      </div>
+    </div>
+  `);
+
+  certIndex++;
+}
+
+document.addEventListener('DOMContentLoaded', () => addCertificateRow());
+</script>
+<script>
+function openCertDetail(id){
+  fetch(`{{ url('/dashboard/profile/certificates') }}/${id}`, {
+    headers: { 'Accept': 'application/json' }
+  })
+  .then(r => r.json())
+  .then(d => {
+    alert(
+      `Title: ${d.title}\nDate: ${d.event_date}\nStage: ${String(d.stage).toUpperCase()}\nFile: ${d.file_name}`
+    );
+  });
+}
+
+function deleteCertificate(id){
+  if(!confirm('Delete this certificate?')) return;
+
+  fetch(`{{ url('/dashboard/profile/certificates') }}/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'X-CSRF-TOKEN': '{{ csrf_token() }}',
+      'Accept': 'application/json'
+    }
+  })
+  .then(r => r.json().catch(()=>({})))
+  .then(d => {
+    if(d.success) location.reload();
+    else alert(d.message || 'Delete failed');
+  });
+}
+</script>
+<script>
+window.submitCertificates = function () {
+  const form = document.getElementById('certificateForm');
+  if (!form) return alert('certificateForm not found');
+
+  const fileInputs = form.querySelectorAll('input[type="file"]');
+  if (!fileInputs.length) return alert('Add at least one certificate first.');
+
+  const formData = new FormData(form);
+  formData.append('_token', '{{ csrf_token() }}');
+
+  // DEBUG (biar keliatan kirim apa)
+  console.log('Submitting certificates...');
+  for (const [k, v] of formData.entries()) {
+    console.log(k, v instanceof File ? v.name : v);
+  }
+
+  fetch('{{ route("customer.profile.upload-certificates") }}', {
+    method: 'POST',
+    body: formData,
+    headers: { 'Accept': 'application/json' }
+  })
+  .then(async (res) => {
+    const text = await res.text();
+    console.log('STATUS', res.status);
+    console.log('RAW', text);
+
+    let data = {};
+    try { data = JSON.parse(text); } catch(e) {}
+
+    if (!res.ok) {
+      if (data?.errors) {
+        const firstKey = Object.keys(data.errors)[0];
+        return alert(data.errors[firstKey][0]);
+      }
+      return alert(data.message || 'Upload failed');
+    }
+
+    if (data.success) window.location.reload();
+    else alert(data.message || 'Upload failed');
+  })
+  .catch(err => {
+    console.error(err);
+    alert('An error occurred during upload.');
+  });
+}
+</script>
+<script>
+window.submitCertificates = function () {
+  const form = document.getElementById('certificateForm');
+  if (!form) return alert('certificateForm not found');
+
+  const fileInputs = form.querySelectorAll('input[type="file"]');
+  if (!fileInputs.length) return alert('Add at least one certificate first.');
+
+  const formData = new FormData(form);
+  formData.append('_token', '{{ csrf_token() }}');
+
+  // DEBUG (biar keliatan kirim apa)
+  console.log('Submitting certificates...');
+  for (const [k, v] of formData.entries()) {
+    console.log(k, v instanceof File ? v.name : v);
+  }
+
+  fetch('{{ route("customer.profile.upload-certificates") }}', {
+    method: 'POST',
+    body: formData,
+    headers: { 'Accept': 'application/json' }
+  })
+  .then(async (res) => {
+    const text = await res.text();
+    console.log('STATUS', res.status);
+    console.log('RAW', text);
+
+    let data = {};
+    try { data = JSON.parse(text); } catch(e) {}
+
+    if (!res.ok) {
+      if (data?.errors) {
+        const firstKey = Object.keys(data.errors)[0];
+        return alert(data.errors[firstKey][0]);
+      }
+      return alert(data.message || 'Upload failed');
+    }
+
+    if (data.success) window.location.reload();
+    else alert(data.message || 'Upload failed');
+  })
+  .catch(err => {
+    console.error(err);
+    alert('An error occurred during upload.');
+  });
+}
+</script>
+
 @endsection

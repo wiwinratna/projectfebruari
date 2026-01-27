@@ -9,6 +9,9 @@ use App\Http\Controllers\AnalyticsDashboardController;
 use App\Http\Controllers\JobController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Models\Event;
+use App\Http\Controllers\AccessCardController;
+use App\Http\Controllers\AccessCardVerifyController;
 
 // Landing page route
 Route::get('/', function () {
@@ -133,6 +136,19 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
     Route::post('/jobs/{job}/save', [CustomerDashboardController::class, 'saveJob'])->name('jobs.save');
     Route::delete('/jobs/{job}/unsave', [CustomerDashboardController::class, 'unsaveJob'])->name('jobs.unsave');
     Route::get('/saved-jobs', [CustomerDashboardController::class, 'savedJobs'])->name('saved-jobs');
+
+    Route::get('/applications/{application}/card', [AccessCardController::class, 'customerPrint'])
+    ->name('applications.card');
+
+    Route::post('/profile/upload-certificates', [CustomerDashboardController::class, 'uploadCertificates'])
+        ->name('profile.upload-certificates');
+
+    Route::get('/profile/certificates/{certificate}', [CustomerDashboardController::class, 'certificateDetail'])
+        ->name('profile.certificate.detail');
+
+    Route::delete('/profile/certificates/{certificate}', [CustomerDashboardController::class, 'certificateDelete'])
+        ->name('profile.certificate.delete');
+
 });
 
 // Admin Authentication Routes
@@ -207,7 +223,8 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     // Reviews Management - Protected
     Route::get('/reviews', [\App\Http\Controllers\ReviewController::class, 'index'])->name('reviews.index');
     Route::get('/reviews/export', [\App\Http\Controllers\ReviewController::class, 'export'])->name('reviews.export');
-    Route::post('/reviews/{application}', [\App\Http\Controllers\ReviewController::class, 'updateStatus'])->name('reviews.update');
+    Route::post('/reviews/{application}', [\App\Http\Controllers\ReviewController::class, 'update'])->name('reviews.update');
+
 
     // Dedicated Application Review (Full Page)
     Route::prefix('applications')->name('applications.')->group(function () {
@@ -219,6 +236,19 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     Route::get('/profile', [\App\Http\Controllers\AdminProfileController::class, 'index'])->name('profile');
     Route::post('/profile', [\App\Http\Controllers\AdminProfileController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/password', [\App\Http\Controllers\AdminProfileController::class, 'updatePassword'])->name('profile.password');
+
+    Route::get('/events/{event}/access-codes', function (Event $event) {
+    return response()->json(
+        $event->accessCodes()
+            ->select('id','code','label','color_hex')
+            ->orderBy('code')
+            ->get()
+    );
+})->name('events.access-codes');
+
+    Route::get('/access-cards/{accessCard}/print', [AccessCardController::class, 'adminPrint'])
+        ->name('access-cards.print');
+
 });
 
 // Prevent customer users from accessing admin routes directly
@@ -233,7 +263,7 @@ Route::middleware(['web'])->group(function () {
 
 // Storage file serving route (workaround for symlink permission issues)
 Route::get('/storage/{path}', function ($path) {
-    $file = storage_path('app/public/storage/profile_photos' . $path);
+    $file = storage_path('app/public/' . $path);
     
     if (!file_exists($file)) {
         abort(404);
@@ -256,3 +286,7 @@ Route::middleware(['web'])->group(function () {
         return response()->json(['success' => true]);
     })->name('store.intended.url');
 });
+
+Route::get('/verify/{token}', [AccessCardVerifyController::class, 'show'])
+    ->name('access-cards.verify');
+

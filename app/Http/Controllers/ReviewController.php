@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use App\Exports\ApplicationsExport;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Str;
+use App\Models\AccessCard;
+use Illuminate\Support\Facades\DB;
 
 class ReviewController extends Controller
 {
@@ -90,16 +92,23 @@ class ReviewController extends Controller
         return Excel::download(new ApplicationsExport($eventId, $search), $filename);
     }
 
-    public function updateStatus(Request $request, Application $application)
-    {
-        if (!session('admin_authenticated')) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
+public function update(Request $request, Application $application)
+{
+    \Log::info('REVIEWS UPDATE HIT', [
+        'app_id' => $application->id,
+        'incoming' => $request->all(),
+    ]);
 
-        $validated = $request->validate([
-            'status' => 'required|in:pending,approved,rejected',
-            'review_notes' => 'nullable|string|max:1000',
-        ]);
+    if (!session('admin_authenticated')) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    $validated = $request->validate([
+        'status' => 'required|in:pending,approved,rejected',
+        'review_notes' => 'nullable|string|max:1000',
+    ]);
+
+    DB::transaction(function () use ($validated, $application) {
 
         $application->update([
             'status' => $validated['status'],
@@ -108,10 +117,41 @@ class ReviewController extends Controller
             'reviewed_at' => now(),
         ]);
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Application status updated successfully',
-            'application' => $application->load('user.profile', 'opening'),
-        ]);
-    }
+        // kalau bukan approved → hapus kartu (opsi A)
+        if ($validated['status'] !== 'approved') {
+            $card = AccessCard::where('application_id', $application->id)->first();
+            if ($card) {
+                $card->accessCodes()->detach();
+                $card->delete();
+            }
+            return;
+        }
+
+        // approved → buat/update kartu + sync akses
+        $application->load('opening.accessCodes');
+
+        $existingCode = AccessCard::where('application_id', $application->id)->value('registration_code');
+
+        $card = AccessCard::updateOrCreate(
+            ['application_id' => $application->id],
+            [
+                'user_id' => $application->user_id,
+                'event_id' => $application->opening->event_id,
+                'worker_opening_id' => $application->worker_opening_id,
+                'registration_code' => $existingCode ?: strtoupper(Str::random(10)),
+                'qr_token'       => Str::uuid(), // ⬅️ INI PENTING
+                'issued_at' => now(),
+            ]
+        );
+
+        $card->accessCodes()->sync(
+            $application->opening->accessCodes->pluck('id')->all()
+        );
+    });
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Application status updated successfully',
+    ]);
+}
 }

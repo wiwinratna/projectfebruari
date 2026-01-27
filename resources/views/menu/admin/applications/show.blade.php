@@ -150,8 +150,106 @@
                 @else
                     <p class="text-gray-500 italic">No CV uploaded.</p>
                 @endif
+
+            {{-- ✅ Certificates --}}
+            <div class="mt-6">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <i class="fas fa-certificate text-red-500"></i> Certificates
+                <span class="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-full font-bold">
+                {{ $application->user->certificates?->count() ?? 0 }}
+                </span>
+            </h3>
+
+            @if($application->user->certificates && $application->user->certificates->count())
+
+                <div class="overflow-x-auto bg-white border border-gray-200 rounded-2xl">
+                <table class="min-w-full text-sm">
+                    <thead class="bg-gray-50 text-gray-600">
+                    <tr>
+                        <th class="text-left px-4 py-3 font-bold">Title</th>
+                        <th class="text-left px-4 py-3 font-bold whitespace-nowrap">Date</th>
+                        <th class="text-left px-4 py-3 font-bold">Stage</th>
+                        <th class="text-left px-4 py-3 font-bold">File</th>
+                        <th class="text-right px-4 py-3 font-bold whitespace-nowrap">Actions</th>
+                    </tr>
+                    </thead>
+
+                    <tbody class="divide-y divide-gray-100">
+                    @foreach($application->user->certificates as $cert)
+                        @php
+                        $displayName = trim(
+                            $cert->original_name
+                            ?: ($cert->title
+                                    ? ($cert->title . '.' . pathinfo($cert->file_path, PATHINFO_EXTENSION))
+                                    : basename($cert->file_path))
+                        );
+
+                        $ext = strtolower(pathinfo($displayName, PATHINFO_EXTENSION));
+                        $icon = match($ext) {
+                            'pdf' => 'fa-file-pdf text-red-500',
+                            'jpg','jpeg','png' => 'fa-file-image text-blue-500',
+                            default => 'fa-file-lines text-gray-400'
+                        };
+                        @endphp
+
+                        <tr class="hover:bg-gray-50/70">
+                        <td class="px-4 py-3">
+                            <div class="font-semibold text-gray-900 leading-tight line-clamp-2">
+                            {{ $cert->title ?? '-' }}
+                            </div>
+                        </td>
+
+                        <td class="px-4 py-3 text-gray-700 whitespace-nowrap">
+                            {{ $cert->event_date ? \Carbon\Carbon::parse($cert->event_date)->format('d M Y') : '-' }}
+                        </td>
+
+                        <td class="px-4 py-3">
+                            <span class="inline-flex items-center text-[10px] font-extrabold px-2.5 py-1 rounded-full
+                                        bg-gray-100 text-gray-700 uppercase tracking-wide">
+                            {{ strtoupper(str_replace('_',' ', $cert->stage)) }}
+                            </span>
+                        </td>
+
+                        <td class="px-4 py-3">
+                            <div class="flex items-center gap-2 min-w-0">
+                            <i class="fas {{ $icon }} flex-shrink-0"></i>
+                            <a href="{{ asset('storage/' . $cert->file_path) }}"
+                                target="_blank"
+                                class="text-red-600 font-bold hover:underline truncate max-w-[360px] md:max-w-[520px]"
+                                title="{{ $displayName }}">
+                                {{ $displayName }}
+                            </a>
+                            </div>
+                            <div class="text-[11px] text-gray-400 mt-0.5">{{ strtoupper($ext) }}</div>
+                        </td>
+
+                        <td class="px-4 py-3">
+                            <div class="flex justify-end gap-2">
+                            <a href="{{ asset('storage/' . $cert->file_path) }}" target="_blank"
+                                class="w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center"
+                                title="Open">
+                                <i class="fas fa-arrow-up-right-from-square"></i>
+                            </a>
+
+                            <a href="{{ asset('storage/' . $cert->file_path) }}" download
+                                class="w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center"
+                                title="Download">
+                                <i class="fas fa-download"></i>
+                            </a>
+                            </div>
+                        </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+                </div>
+
+            @else
+                <div class="bg-gray-50 border border-dashed border-gray-300 rounded-xl p-8 text-center">
+                <p class="text-gray-500 font-medium">No certificates uploaded.</p>
+                </div>
+            @endif
             </div>
-        </div>
 
         <!-- Review Action -->
         <form action="{{ route('admin.applications.update', $application->id) }}" method="POST">

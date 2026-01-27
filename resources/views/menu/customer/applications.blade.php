@@ -74,39 +74,55 @@
                                                 </span>
                                                 <span class="text-sm font-bold">Pending Review</span>
                                             </div>
-                                        @elseif($application->status === 'approved')
-                                            <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 text-green-700 border border-green-100 shadow-sm">
-                                                <i class="fas fa-check-circle text-green-500"></i>
-                                                <span class="text-sm font-bold">Approved</span>
-                                            </div>
-                                        @else
-                                            <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-700 border border-red-100 shadow-sm">
-                                                <i class="fas fa-times-circle text-red-500"></i>
-                                                <span class="text-sm font-bold">Not Selected</span>
-                                            </div>
-                                        @endif
+                                            @elseif($application->status === 'approved')
+                                                <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 text-green-700 border border-green-100 shadow-sm">
+                                                    <i class="fas fa-check-circle text-green-500"></i>
+                                                    <span class="text-sm font-bold">Approved</span>
+                                                </div>
+                                            @else
+                                                <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-700 border border-red-100 shadow-sm">
+                                                    <i class="fas fa-times-circle text-red-500"></i>
+                                                    <span class="text-sm font-bold">Not Selected</span>
+                                                </div>
+                                            @endif
+                                        </div>
                                     </div>
-                                </div>
 
-                                <!-- Grid Details -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/50 rounded-xl p-4 border border-gray-100/50">
-                                    <div>
-                                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Applied Date</p>
-                                        <p class="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                            <i class="fas fa-calendar-alt text-gray-400"></i> {{ $application->created_at->format('d M Y, H:i') }}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Motivation</p>
-                                        <p class="text-sm font-medium text-gray-700 truncate" title="{{ $application->motivation }}">
-                                            "{{ Str::limit($application->motivation, 60) }}"
-                                        </p>
+                                    <!-- Grid Details -->
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50/50 rounded-xl p-4 border border-gray-100/50">
+                                        <div>
+                                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Applied Date</p>
+                                            <p class="text-sm font-medium text-gray-700 flex items-center gap-2">
+                                                <i class="fas fa-calendar-alt text-gray-400"></i> {{ $application->created_at->format('d M Y, H:i') }}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-1">Motivation</p>
+                                            <p class="text-sm font-medium text-gray-700 truncate" title="{{ $application->motivation }}">
+                                                "{{ Str::limit($application->motivation, 60) }}"
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-     
-                            <!-- Right: Actions -->
+        
+                                <!-- Right: Actions -->
+
                             <div class="flex lg:flex-col justify-end gap-2 border-t lg:border-t-0 lg:border-l border-gray-100 pt-4 lg:pt-0 lg:pl-6 min-w-[140px]">
+                                 @if($application->status === 'approved')
+                                <a
+                                    href="{{ route('customer.applications.card', $application) }}"
+                                    target="_blank"
+                                    class="w-full text-center px-4 py-2 rounded-xl
+                                        bg-gradient-to-r from-red-600 to-rose-600
+                                        text-white font-extrabold text-sm
+                                        shadow-md shadow-red-500/20
+                                        hover:shadow-lg hover:shadow-red-500/30
+                                        hover:from-red-700 hover:to-rose-700
+                                        hover:-translate-y-0.5 transition-all duration-300"
+                                >
+                                    <i class="fas fa-id-card mr-2"></i> View Card
+                                </a>
+                                @endif
                                 <a href="{{ route('jobs.show', $application->opening) }}" class="w-full text-center px-4 py-2 rounded-xl bg-gray-50 hover:bg-white text-gray-600 hover:text-red-600 font-bold text-sm border border-gray-200 hover:border-red-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                                     View Job
                                 </a>

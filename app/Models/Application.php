@@ -30,8 +30,12 @@ class Application extends Model
 
     public function opening()
     {
-        return $this->belongsTo(WorkerOpening::class, 'worker_opening_id');
+        return $this->belongsTo(
+            \App\Models\WorkerOpening::class,
+            'worker_opening_id'
+        );
     }
+
 
     public function user()
     {
@@ -42,4 +46,14 @@ class Application extends Model
     {
         return $this->belongsTo(User::class, 'reviewed_by');
     }
+    public function accessCard()
+    {
+        return $this->hasOne(\App\Models\AccessCard::class);
+    }
+
+    public function workerOpening()
+    {
+        return $this->belongsTo(\App\Models\WorkerOpening::class, 'worker_opening_id');
+    }
+
 }

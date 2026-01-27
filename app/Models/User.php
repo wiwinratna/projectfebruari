@@ -99,5 +99,9 @@ public function profile()
 {
     return $this->hasOne(UserProfile::class);
 }
+public function certificates()
+{
+    return $this->hasMany(\App\Models\UserCertificate::class);
+}
 }
 
