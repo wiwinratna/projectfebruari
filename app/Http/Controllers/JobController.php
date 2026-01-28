@@ -193,14 +193,13 @@ class JobController extends Controller
      */
     public function getRecentJobs()
     {
-        $recentJobs = WorkerOpening::with(['event.city', 'jobCategory'])
+        return WorkerOpening::with(['event.city', 'jobCategory'])
             ->where('status', 'open')
             ->where('application_deadline', '>', now())
             ->whereColumn('slots_filled', '<', 'slots_total')
-            ->orderBy('created_at', 'desc')
-            ->limit(6)
+            ->orderByDesc('created_at')
+            ->take(3)
             ->get();
-
-        return $recentJobs;
     }
+
 }

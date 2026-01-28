@@ -1,0 +1,190 @@
+/* =======================================================
+   LANDING THEME (STABIL & HALUS)
+======================================================= */
+.landing-scope{
+  /* Olympic rings */
+  --blue:   #0085C7;
+  --yellow: #F4C300;
+  --black:  #000000;
+  --green:  #009F3D;
+  --red:    #DF0024;
+
+  /* UI neutrals */
+  --bg: #070B12;
+  --card: rgba(255,255,255,.06);
+  --stroke: rgba(255,255,255,.12);
+  --muted: rgba(255,255,255,.72);
+  --text: rgba(255,255,255,.92);
+
+  --accent: linear-gradient(90deg, var(--blue), var(--green), var(--red));
+
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* text */
+.landing-scope p { color: var(--muted); }
+.landing-scope h1,
+.landing-scope h2,
+.landing-scope h3 { color: var(--text); }
+
+/* selection */
+.landing-scope ::selection{
+  background: rgba(255,255,255,.15);
+}
+
+/* =======================================================
+   CARDS & BUTTONS
+======================================================= */
+.landing-scope .card-surface{
+  background: var(--card);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: transform .25s ease, background .25s ease, border-color .25s ease;
+}
+
+.landing-scope .card-surface.group:hover{
+  transform: translateY(-4px);
+  background: rgba(255,255,255,.08);
+  border-color: rgba(255,255,255,.18);
+}
+
+.landing-scope .btn-primary{
+  background: var(--blue); /* BUKAN gradient */
+  color: white;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 28px rgba(0,0,0,.35);
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease;
+}
+.landing-scope .btn-primary:hover{
+  transform: translateY(-1px);
+  background: #0093db; /* sedikit lebih terang */
+  box-shadow: 0 14px 36px rgba(0,0,0,.45);
+}
+
+.landing-scope .btn-ghost{
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid rgba(255,255,255,.18);
+  transition: transform .2s ease, color .2s ease, border-color .2s ease;
+}
+
+.landing-scope .btn-ghost:hover{
+  transform: translateY(-1px);
+  color: white;
+  border-color: rgba(255,255,255,.35);
+}
+/* =======================================================
+   NAV
+======================================================= */
+.landing-scope .nav-link{
+  color: var(--muted);
+}
+.landing-scope .nav-link:hover{
+  color: #fff;
+}
+
+.landing-scope .js-nav-surface{
+  position: relative;
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transition: transform .25s ease, background .25s ease;
+}
+
+.landing-scope .nav-indicator{
+  position: absolute;
+  bottom: 10px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--blue), var(--green), var(--red));
+  width: 24px;
+  left: 0;
+  opacity: .9;
+  pointer-events: none;
+  transition: width .25s ease, transform .25s ease;
+}
+
+/* =======================================================
+   GSAP INITIAL STATES (PENTING!)
+======================================================= */
+.landing-scope .js-hero,
+.landing-scope .js-reveal{
+  opacity: 0;
+  transform: translateY(18px);
+}
+
+.landing-scope .js-scale{
+  opacity: 0;
+  transform: scale(.96);
+}
+
+.landing-scope .js-fade{
+  opacity: 0;
+}
+
+/* slide dari kiri / kanan */
+.landing-scope .js-from-left{
+  opacity: 0;
+  transform: translate3d(-60px,0,0);
+  will-change: transform, opacity;
+}
+.landing-scope .js-from-right{
+  opacity: 0;
+  transform: translate3d(60px,0,0);
+  will-change: transform, opacity;
+}
+
+/* =======================================================
+   GAMBAR ATLET (GEDE TAPI AMAN)
+======================================================= */
+.landing-scope .athlete-img{
+  max-width: 520px;          /* gede tapi wajar */
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 16px 26px rgba(0,0,0,.22));
+}
+
+/* =======================================================
+   BW BACKGROUND SECTION
+======================================================= */
+.landing-scope .section-bw{
+  position: relative;
+}
+.landing-scope .section-bw::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  filter: grayscale(1) contrast(1.05);
+  opacity: .18;
+  z-index: -1;
+}
+
+/* =======================================================
+   TYPEWRITER CURSOR
+======================================================= */
+@keyframes nocis-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+.landing-scope .js-left{
+  opacity: 0;
+  transform: translate3d(-80px, 18px, 0) rotate(-6deg) scale(.96);
+  will-change: transform, opacity;
+}
+.landing-scope .js-right{
+  opacity: 0;
+  transform: translate3d(80px, 12px, 0) rotate(6deg) scale(.96);
+  will-change: transform, opacity;
+}
+.landing-scope .flow-step:hover{
+  transform: translateY(-6px);
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.18);
+}
+
