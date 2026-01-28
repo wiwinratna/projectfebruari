@@ -12,11 +12,23 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <!-- Tailwind CSS -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Tailwind + App -->
+   @vite(['resources/css/app.css'])
+
+    @if(request()->routeIs('landing'))
+        @vite(['resources/js/landing.js'])
+    @else
+        @vite(['resources/js/app.js'])
+    @endif
+
 
     <!-- Custom CSS -->
-    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
+    @if(request()->routeIs('landing'))
+    <link href="{{ asset('css/landing.css') }}" rel="stylesheet">
+    @else
+        <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
+    @endif
+
 
     <!-- Meta Tags -->
     <meta name="description" content="NOCIS Job Opportunities - Find exciting career opportunities at major sporting events">
@@ -31,8 +43,15 @@
     <meta property="og:description" content="Find exciting career opportunities at major sporting events">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
+
+    {{-- ✅ allow landing page (and others) to inject styles --}}
+    @stack('styles')
 </head>
-<body class="bg-gray-50 font-sans">
+
+<body class="{{ request()->routeIs('landing') ? 'landing-scope font-sans' : 'bg-gray-50 font-sans' }}">
+
+    {{-- ✅ HEADER (skip on landing because landing has its own nav partial) --}}
+    @if(!request()->routeIs('landing'))
     <!-- Modern Web3 Floating Header -->
     <header class="fixed top-4 left-0 right-0 z-50 transition-all duration-300">
         <div class="container mx-auto px-4 lg:px-6">
@@ -48,7 +67,7 @@
                         @php
                             // Robust Profile Photo Logic
                             $headerProfilePhoto = session('customer_profile_photo');
-                            
+
                             // Fallback: Check DB if session is empty but user is logged in
                             if (empty($headerProfilePhoto) && session('customer_id')) {
                                 $headerUser = \App\Models\User::with('profile')->find(session('customer_id'));
@@ -60,13 +79,14 @@
                             }
                         @endphp
 
-                        <a href="{{ route('jobs.index') }}" 
+                        <a href="{{ route('jobs.index') }}"
                            class="text-sm font-semibold {{ request()->routeIs('jobs.*') ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 relative py-2 group transition-colors">
                             Jobs
                             <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('jobs.*') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                         </a>
+
                         @if(session('customer_authenticated'))
-                            <a href="{{ route('customer.dashboard') }}" 
+                            <a href="{{ route('customer.dashboard') }}"
                                class="text-sm font-semibold {{ request()->routeIs('customer.dashboard') ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 relative py-2 group transition-colors">
                                 Dashboard
                                 <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('customer.dashboard') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
@@ -77,7 +97,7 @@
                     <!-- Desktop Actions -->
                     <div class="hidden lg:flex items-center gap-3">
                         @if(session('customer_authenticated'))
-                                <!-- Profile Dropdown -->
+                            <!-- Profile Dropdown -->
                             <div class="relative group" x-data="{ open: false }">
                                 <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full border border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all">
                                     <div class="w-8 h-8 rounded-full bg-gray-100 ring-2 ring-white shadow-md overflow-hidden flex items-center justify-center">
@@ -91,7 +111,7 @@
                                     </div>
                                     <i class="fas fa-chevron-down text-xs text-gray-400 mr-2 group-hover:text-red-400"></i>
                                 </button>
-                                
+
                                 <!-- Dropdown Menu -->
                                 <div class="absolute right-0 mt-3 w-56 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 ring-1 ring-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right">
                                     <div class="p-4 border-b border-gray-100/50">
@@ -193,14 +213,15 @@
             </div>
         </div>
     </header>
+    @endif
 
     <!-- Main Content -->
     <main class="min-h-screen">
         @yield('content')
     </main>
 
-    <!-- Footer -->
-    @unless(request()->routeIs('customer.profile', 'customer.settings'))
+    {{-- ✅ FOOTER (skip on landing because landing has its own footer partial) --}}
+    @unless(request()->routeIs('customer.profile', 'customer.settings', 'landing'))
     <footer class="bg-white border-t border-gray-200 py-12 relative z-50">
         <div class="container mx-auto px-4 max-w-7xl">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
@@ -209,8 +230,8 @@
                     <div class="flex items-center gap-4 mb-6">
                         <!-- Logo Container -->
                         <div class="flex-shrink-0">
-                            <img src="{{ asset('images/nocis logo.png') }}" 
-                                 alt="NOC Indonesia Logo" 
+                            <img src="{{ asset('images/nocis logo.png') }}"
+                                 alt="NOC Indonesia Logo"
                                  class="w-96 h-auto object-contain">
                         </div>
                     </div>
@@ -276,7 +297,7 @@
             <!-- Footer Bottom -->
             <div class="border-t border-gray-200 mt-12 pt-8 flex flex-col sm:flex-row justify-between items-center">
                 <div class="text-sm text-gray-500 mb-4 sm:mb-0">
-                    &copy; {{ date('Y') }}  of Indonesia. All rights reserved.
+                    &copy; {{ date('Y') }} of Indonesia. All rights reserved.
                 </div>
                 <div class="flex space-x-6 text-sm text-gray-500">
                     <a href="#" class="hover:text-red-600 transition-colors">Privacy</a>
@@ -289,11 +310,17 @@
     @endunless
 
     <!-- Flash Messages -->
+    @if(!request()->routeIs('landing'))
     @include('components.flash')
+    @endif
+
 
     <!-- Scripts -->
-    <!-- Scripts -->
+    @if(request()->routeIs('jobs.*'))
     @vite('resources/js/jobs.js')
+    @endif
+
+    @if(!request()->routeIs('landing'))
     <script>
         // Initialize all functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -302,9 +329,9 @@
             const mobileMenu = document.getElementById('mobile-menu');
 
             if (mobileMenuToggle && mobileMenu) {
-                 mobileMenuToggle.addEventListener('click', function() {
+                mobileMenuToggle.addEventListener('click', function() {
                     mobileMenu.classList.toggle('hidden');
-                 });
+                });
             }
         });
 
@@ -353,5 +380,10 @@
             document.addEventListener('DOMContentLoaded', () => showPublicFlash("{{ session('error') }}", 'error'));
         @endif
     </script>
+    @endif
+
+    {{-- ✅ allow landing page (and others) to inject scripts --}}
+    @stack('scripts')
+
 </body>
 </html>

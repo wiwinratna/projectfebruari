@@ -12,13 +12,41 @@ use Illuminate\Support\Facades\Route;
 use App\Models\Event;
 use App\Http\Controllers\AccessCardController;
 use App\Http\Controllers\AccessCardVerifyController;
+use App\Http\Controllers\NewsPostController;
+use App\Models\NewsPost;
+use App\Services\SportsNewsService;
+use Illuminate\Support\Facades\Cache;
 
 // Landing page route
 Route::get('/', function () {
     $jobController = new \App\Http\Controllers\JobController();
     $recentJobs = $jobController->getRecentJobs();
 
-    return view('landing', compact('recentJobs'));
+    // 🔹 INTERNAL NEWS (ADMIN)
+    $internalNews = NewsPost::where('is_published', true)
+        ->orderByDesc('published_at')
+        ->limit(2)
+        ->get()
+        ->map(fn ($n) => [
+            'title' => $n->title,
+            'excerpt' => $n->excerpt,
+            'image' => $n->cover_image ? asset('storage/'.$n->cover_image) : null,
+            'url' => $n->source_url ?? '#',
+            'source' => $n->source_name ?? 'NOCIS',
+            'published_at' => optional($n->published_at)->toISOString(),
+            'type' => 'internal',
+        ])
+        ->toArray();
+
+    // 🔹 API SPORTS NEWS (CACHE 10 MENIT)
+    $apiNews = Cache::remember('landing:sports-news', 600, function () {
+        return app(SportsNewsService::class)->latest(4);
+    });
+
+    // 🔹 GABUNG
+    $newsItems = array_merge($internalNews, $apiNews);
+
+    return view('landing', compact('recentJobs', 'newsItems'));
 })->name('landing');
 
 // Public Job Routes (accessible without login)
@@ -244,10 +272,14 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
             ->orderBy('code')
             ->get()
     );
-})->name('events.access-codes');
+    })->name('events.access-codes');
 
     Route::get('/access-cards/{accessCard}/print', [AccessCardController::class, 'adminPrint'])
-        ->name('access-cards.print');
+            ->name('access-cards.print');
+
+
+    // Admin News (CRUD)
+     Route::resource('news', NewsPostController::class)->names('news');
 
 });
 

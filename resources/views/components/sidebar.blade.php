@@ -81,6 +81,17 @@
                     </a>
                 </li>
 
+                {{-- News / Updates Section --}}
+                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Content</li>
+
+                <li class="menu-item {{ Request::is('admin/news*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.news.index') }}">
+                        <i class="fas fa-newspaper mr-3"></i>
+                        <span>News</span>
+                    </a>
+                </li>
+
+
                 {{-- Account Section --}}
                 <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
 
