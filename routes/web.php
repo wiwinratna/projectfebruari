@@ -16,6 +16,8 @@ use App\Http\Controllers\NewsPostController;
 use App\Models\NewsPost;
 use App\Services\SportsNewsService;
 use Illuminate\Support\Facades\Cache;
+use App\Services\SportsNewsRssService;
+
 
 // Landing page route
 Route::get('/', function () {
@@ -23,25 +25,25 @@ Route::get('/', function () {
     $recentJobs = $jobController->getRecentJobs();
 
     // 🔹 INTERNAL NEWS (ADMIN)
-    $internalNews = NewsPost::where('is_published', true)
-        ->orderByDesc('published_at')
-        ->limit(2)
-        ->get()
-        ->map(fn ($n) => [
-            'title' => $n->title,
-            'excerpt' => $n->excerpt,
-            'image' => $n->cover_image ? asset('storage/'.$n->cover_image) : null,
-            'url' => $n->source_url ?? '#',
-            'source' => $n->source_name ?? 'NOCIS',
-            'published_at' => optional($n->published_at)->toISOString(),
-            'type' => 'internal',
-        ])
-        ->toArray();
+$internalNews = NewsPost::where('is_published', true)
+  ->orderByDesc('published_at')
+  ->limit(2)
+  ->get()
+  ->map(fn ($n) => [
+      'id' => $n->id,
+      'title' => $n->title,
+      'excerpt' => $n->excerpt,
+      'image' => $n->cover_image ? asset('storage/'.$n->cover_image) : null,
+      'url' => route('news.show', $n->id), // ✅ ini link read more
+      'source' => $n->source_name ?? 'NOCIS',
+      'published_at' => optional($n->published_at)->toISOString(),
+      'type' => 'internal',
+  ])
+  ->toArray();
 
-    // 🔹 API SPORTS NEWS (CACHE 10 MENIT)
-    $apiNews = Cache::remember('landing:sports-news', 600, function () {
-        return app(SportsNewsService::class)->latest(4);
-    });
+
+        // 🔥 TARUH DI SINI
+    $apiNews = app(\App\Services\SportsNewsRssService::class)->latest(4);
 
     // 🔹 GABUNG
     $newsItems = array_merge($internalNews, $apiNews);
@@ -52,6 +54,10 @@ Route::get('/', function () {
 // Public Job Routes (accessible without login)
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
+
+// ✅ Public News Routes (accessible without login)
+Route::get('/news', [NewsPostController::class, 'publicIndex'])->name('news.index');
+Route::get('/news/{news}', [NewsPostController::class, 'publicShow'])->name('news.show');
 
 // Customer Authentication Routes
 Route::get('/login', function () {
@@ -280,6 +286,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
 
     // Admin News (CRUD)
      Route::resource('news', NewsPostController::class)->names('news');
+
 
 });
 

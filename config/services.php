@@ -35,4 +35,13 @@ return [
         ],
     ],
 
+    'sports_news' => [
+        'rss_url' => env(
+            'SPORTS_NEWS_RSS',
+            'https://news.google.com/rss/search?q=olympic+sports&hl=en-US&gl=US&ceid=US:en'
+        ),
+    ],
+
+
+
 ];
