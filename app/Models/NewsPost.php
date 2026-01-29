@@ -8,9 +8,11 @@ use Illuminate\Support\Str;
 class NewsPost extends Model
 {
     protected $fillable = [
-        'title','slug','excerpt','content','cover_image',
-        'source_name','source_url','published_at','is_published'
+    'title','excerpt','content','cover_image',
+    'source_name','source_url',
+    'is_published','published_at',
     ];
+
 
     protected $casts = [
         'published_at' => 'datetime',

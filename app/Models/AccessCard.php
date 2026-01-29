@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
+
 
 class AccessCard extends Model
 {
@@ -16,6 +18,16 @@ class AccessCard extends Model
         'qr_token',
         'status',
     ];
+
+    protected static function booted()
+    {
+        static::saving(function ($card) {
+            if (empty($card->qr_token)) {
+                $card->qr_token = (string) Str::uuid();
+            }
+        });
+    }
+
 
     public function application()
     {

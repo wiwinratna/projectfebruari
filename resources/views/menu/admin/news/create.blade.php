@@ -27,7 +27,7 @@
 
         <form action="{{ route('admin.news.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
             @csrf
-            @include('admin.news.partials.form', ['post' => null])
+            @include('menu.admin.news.form', ['post' => null])
         </form>
     </div>
 
