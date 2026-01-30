@@ -1,7 +1,7 @@
 <section id="flow" class="relative overflow-hidden py-20 md:py-28 section-bw">
   {{-- BW background image --}}
-  <div class="pointer-events-none absolute inset-0 -z-30 opacity-[0.08] md:opacity-[0.12]"
-       style="background-image: url('{{ asset('images/landing/athletes/Jadi BG Bagus.png') }}');
+  <div class="pointer-events-none absolute inset-0 -z-30 opacity-[0.08] md:opacity-[1]"
+       style="background-image: url('{{ asset('images/landing/athletes/Frame 1.png') }}');
               background-size: cover; background-position: center;">
   </div>
 

@@ -1,7 +1,7 @@
 <section class="relative overflow-hidden landing-hero section-bw">
   {{-- BW background image (per section) --}}
-  <div class="pointer-events-none absolute inset-0 -z-30 opacity-[0.10] md:opacity-[0.14]"
-       style="background-image: url('{{ asset('images/landing/athletes/Jadi BG Bagus.png') }}');">
+  <div class="pointer-events-none absolute inset-0 -z-30 opacity-[1] md:opacity-[1]"
+       style="background-image: url('{{ asset('images/landing/athletes/Frame 3.png') }}');">
   </div>
 
   {{-- BW overlay gradient biar elegan --}}
@@ -16,7 +16,7 @@
            radial-gradient(circle at 20% 30%, var(--blue) 0%, transparent 55%),
            radial-gradient(circle at 45% 65%, var(--green) 0%, transparent 55%),
            radial-gradient(circle at 70% 35%, var(--red) 0%, transparent 55%),
-           radial-gradient(circle at 55% 10%, var(--yellow) 0%, transparent 55%);">
+           radial-gradient(circle at 55% 10%, var(--orange) 0%, transparent 55%);">
     </div>
     <div class="absolute inset-0"
          style="background: linear-gradient(to bottom, rgba(255,255,255,.04), transparent 45%, rgba(0,0,0,.55));">
@@ -47,7 +47,7 @@
       <h1 class="mt-6 text-4xl md:text-6xl font-extrabold tracking-tight leading-[1.1] js-hero hero-title">
         Sports Event Workforce<br>
         <span class="text-transparent bg-clip-text"
-              style="background-image: linear-gradient(90deg, var(--blue), var(--green), var(--red));">
+              style="background-image: linear-gradient(90deg, var(--blue), var(--green), var(--orange), var(--red));">
           Information System
         </span>
       </h1>
@@ -71,9 +71,8 @@
            style="background: rgba(255,255,255,.10);">
         <div class="flex h-full w-full">
           <span class="flex-1" style="background: var(--blue);"></span>
-          <span class="flex-1" style="background: var(--yellow);"></span>
-          <span class="flex-1" style="background: var(--black);"></span>
           <span class="flex-1" style="background: var(--green);"></span>
+          <span class="flex-1" style="background: var(--orange);"></span>
           <span class="flex-1" style="background: var(--red);"></span>
         </div>
       </div>
