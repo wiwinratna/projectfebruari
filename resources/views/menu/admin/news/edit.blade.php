@@ -24,10 +24,14 @@
             <h3 class="text-lg font-semibold text-gray-800">News Information</h3>
         </div>
 
-        <form action="{{ route('admin.news.update', $post->id) }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-6">
-            @csrf
-            @method('PUT')
-            @include('admin.news.partials.form', ['post' => $post])
+        <form action="{{ route('admin.news.update', $post->id) }}"
+            method="POST"
+            enctype="multipart/form-data"
+            class="p-6 space-y-6">
+        @csrf
+        @method('PUT')
+
+        @include('menu.admin.news.form', ['post' => $post])
         </form>
     </div>
 
