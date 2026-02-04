@@ -14,20 +14,11 @@
 
     <!-- Tailwind + App -->
    @vite(['resources/css/app.css'])
-
-    @if(request()->routeIs('landing'))
-        @vite(['resources/js/landing.js'])
-    @else
-        @vite(['resources/js/app.js'])
-    @endif
+   @vite(['resources/js/app.js'])
 
 
     <!-- Custom CSS -->
-    @if(request()->routeIs('landing'))
-    <link href="{{ asset('css/landing.css') }}" rel="stylesheet">
-    @else
-        <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
-    @endif
+    <link href="{{ asset('css/custom.css') }}" rel="stylesheet">
 
 
     <!-- Meta Tags -->
@@ -48,17 +39,16 @@
     @stack('styles')
 </head>
 
-<body class="{{ request()->routeIs('landing') ? 'landing-scope font-sans' : 'bg-gray-50 font-sans' }}">
+<body class="bg-gray-50 font-sans">
 
-    {{-- ✅ HEADER (skip on landing because landing has its own nav partial) --}}
-    @if(!request()->routeIs('landing'))
+    {{-- ✅ HEADER --}}
     <!-- Modern Web3 Floating Header -->
     <header class="fixed top-4 left-0 right-0 z-50 transition-all duration-300">
         <div class="container mx-auto px-4 lg:px-6">
             <div class="bg-white/70 backdrop-blur-xl border border-white/40 shadow-lg shadow-gray-200/20 rounded-2xl mx-auto max-w-7xl transition-all duration-300">
                 <div class="flex justify-between items-center h-16 px-4 lg:px-6">
                     <!-- Logo -->
-                    <a href="{{ route('landing') }}" class="flex items-center gap-3 group">
+                    <a href="{{ url('/') }}" class="flex items-center gap-3 group">
                         <img src="{{ asset('images/nocis logo3.png') }}" alt="NOC Logo" class="h-10 w-auto group-hover:scale-105 transition-transform duration-300">
                     </a>
 
@@ -213,15 +203,14 @@
             </div>
         </div>
     </header>
-    @endif
 
     <!-- Main Content -->
     <main class="min-h-screen">
         @yield('content')
     </main>
 
-    {{-- ✅ FOOTER (skip on landing because landing has its own footer partial) --}}
-    @unless(request()->routeIs('customer.profile', 'customer.settings', 'landing'))
+    {{-- ✅ FOOTER --}}
+    @unless(request()->routeIs('customer.profile', 'customer.settings'))
     <footer class="bg-white border-t border-gray-200 py-12 relative z-50">
         <div class="container mx-auto px-4 max-w-7xl">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
@@ -310,9 +299,7 @@
     @endunless
 
     <!-- Flash Messages -->
-    @if(!request()->routeIs('landing'))
     @include('components.flash')
-    @endif
 
 
     <!-- Scripts -->
@@ -320,7 +307,6 @@
     @vite('resources/js/jobs.js')
     @endif
 
-    @if(!request()->routeIs('landing'))
     <script>
         // Initialize all functionality
         document.addEventListener('DOMContentLoaded', function() {
@@ -380,7 +366,6 @@
             document.addEventListener('DOMContentLoaded', () => showPublicFlash("{{ session('error') }}", 'error'));
         @endif
     </script>
-    @endif
 
     {{-- ✅ allow landing page (and others) to inject scripts --}}
     @stack('scripts')

@@ -1,0 +1,496 @@
+/* Olympics Themed CSS */
+
+* {
+    scroll-behavior: smooth;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+        sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background: linear-gradient(to bottom, #ffffff, #f0f9ff, #ffffff);
+}
+
+/* Olympic Colors Theme */
+:root {
+    --olympic-blue: #0085C7;
+    --olympic-yellow: #F4C300;
+    --olympic-black: #000000;
+    --olympic-green: #009F3D;
+    --olympic-red: #DF0024;
+    --maroon-dark: #6B1625;
+    --maroon-mid: #8B2332;
+    --maroon-darker: #4A0F1C;
+    --glowgreen: #D4FF00;
+}
+
+/* Premium Gradient Animations */
+@keyframes gradient-shift {
+
+    0%,
+    100% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+@keyframes olympic-pulse {
+
+    0%,
+    100% {
+        box-shadow: 0 0 20px rgba(0, 133, 199, 0.4),
+            0 0 40px rgba(244, 195, 0, 0.3),
+            0 0 60px rgba(223, 0, 36, 0.2);
+    }
+
+    50% {
+        box-shadow: 0 0 40px rgba(0, 133, 199, 0.6),
+            0 0 60px rgba(244, 195, 0, 0.5),
+            0 0 80px rgba(223, 0, 36, 0.4);
+    }
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes bounce-olympic {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -1000px 0;
+    }
+
+    100% {
+        background-position: 1000px 0;
+    }
+}
+
+@keyframes rings-glow {
+
+    0%,
+    100% {
+        filter: drop-shadow(0 0 10px rgba(0, 133, 199, 0.5));
+    }
+
+    20% {
+        filter: drop-shadow(0 0 10px rgba(244, 195, 0, 0.5));
+    }
+
+    40% {
+        filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5));
+    }
+
+    60% {
+        filter: drop-shadow(0 0 10px rgba(0, 159, 61, 0.5));
+    }
+
+    80% {
+        filter: drop-shadow(0 0 10px rgba(223, 0, 36, 0.5));
+    }
+}
+
+@keyframes slideshow-fade {
+
+    0%,
+    100% {
+        opacity: 0;
+        transform: scale(1.1);
+    }
+
+    10%,
+    90% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes hero-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes ring-bounce {
+
+    0%,
+    100% {
+        transform: translateY(0) scale(1);
+    }
+
+    50% {
+        transform: translateY(-5px) scale(1.05);
+    }
+}
+
+@keyframes logo-rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.gradient-animate {
+    background-size: 200% 200%;
+    animation: gradient-shift 8s ease infinite;
+}
+
+.float-animate {
+    animation: float 6s ease-in-out infinite;
+}
+
+.olympic-pulse {
+    animation: olympic-pulse 3s ease-in-out infinite;
+}
+
+.bounce-olympic {
+    animation: bounce-olympic 2s ease-in-out infinite;
+}
+
+.rings-glow {
+    animation: rings-glow 5s ease-in-out infinite;
+}
+
+/* Olympic Glassmorphism */
+.glass-olympic {
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark-olympic {
+    background: rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Olympic Gradient Backgrounds */
+.bg-olympic-gradient {
+    background: linear-gradient(135deg,
+            #0085C7 0%,
+            #F4C300 25%,
+            #000000 50%,
+            #009F3D 75%,
+            #DF0024 100%);
+}
+
+.bg-olympic-gradient-soft {
+    background: linear-gradient(135deg,
+            rgba(0, 133, 199, 0.1) 0%,
+            rgba(244, 195, 0, 0.1) 25%,
+            rgba(0, 0, 0, 0.05) 50%,
+            rgba(0, 159, 61, 0.1) 75%,
+            rgba(223, 0, 36, 0.1) 100%);
+}
+
+/* Olympic Text Gradient */
+.text-olympic-gradient {
+    background: linear-gradient(90deg,
+            #0085C7 0%,
+            #F4C300 25%,
+            #000000 50%,
+            #009F3D 75%,
+            #DF0024 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-size: 200% auto;
+    animation: gradient-shift 6s linear infinite;
+}
+
+/* Premium Shadows with Olympic Colors */
+.shadow-olympic {
+    box-shadow:
+        0 10px 30px rgba(0, 133, 199, 0.2),
+        0 5px 15px rgba(244, 195, 0, 0.1);
+}
+
+.shadow-olympic-hover {
+    box-shadow:
+        0 20px 60px rgba(0, 133, 199, 0.3),
+        0 10px 30px rgba(244, 195, 0, 0.2),
+        0 5px 15px rgba(223, 0, 36, 0.1);
+}
+
+.shadow-premium {
+    box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.3);
+}
+
+.shadow-luxury {
+    box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.4),
+        0 10px 30px -10px rgba(0, 133, 199, 0.2);
+}
+
+/* Smooth Transitions */
+.transition-olympic {
+    transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Premium Card Hover */
+.card-olympic {
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-olympic:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow:
+        0 30px 80px rgba(0, 133, 199, 0.25),
+        0 15px 40px rgba(244, 195, 0, 0.15);
+}
+
+/* Navbar Styles */
+.olympic-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 2px solid #e0f2fe;
+    box-shadow: 0 10px 40px rgba(0, 133, 199, 0.1);
+}
+
+.nav-link {
+    position: relative;
+    font-weight: 700;
+    color: #1f2937;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #0085C7, #F4C300, #DF0024);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-link:hover {
+    color: #0085C7;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+/* Olympic Premium Button */
+.btn-olympic {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #0085C7 0%, #0066A1 100%);
+    box-shadow: 0 10px 30px rgba(0, 133, 199, 0.4);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border: none;
+    color: white;
+    font-weight: 700;
+    padding: 0.75rem 2rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-olympic::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.6s;
+}
+
+.btn-olympic:hover::before {
+    left: 100%;
+}
+
+.btn-olympic:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(0, 133, 199, 0.5);
+}
+
+/* Olympic Rings Animation */
+.olympic-ring {
+    animation: ring-bounce 3s ease-in-out infinite;
+}
+
+.olympic-ring:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.olympic-ring:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.olympic-ring:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.olympic-ring:nth-child(4) {
+    animation-delay: 0.6s;
+}
+
+.olympic-ring:nth-child(5) {
+    animation-delay: 0.8s;
+}
+
+/* Custom Scrollbar with Olympic Colors */
+::-webkit-scrollbar {
+    width: 12px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+}
+
+::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #0085C7, #F4C300, #DF0024);
+    border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #0066A1, #D4A800, #B00020);
+}
+
+/* Parallax Effect */
+.parallax {
+    transform-style: preserve-3d;
+    transition: transform 0.1s ease-out;
+}
+
+/* Hero Section */
+.hero-slideshow {
+    position: relative;
+    height: 100vh;
+    overflow: hidden;
+    background: #000;
+}
+
+.hero-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    animation: slideshow-fade 25s infinite;
+}
+
+.hero-slide:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.hero-slide:nth-child(2) {
+    animation-delay: 5s;
+}
+
+.hero-slide:nth-child(3) {
+    animation-delay: 10s;
+}
+
+.hero-slide:nth-child(4) {
+    animation-delay: 15s;
+}
+
+.hero-slide:nth-child(5) {
+    animation-delay: 20s;
+}
+
+.hero-slide-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6));
+}
+
+.hero-content {
+    position: relative;
+    z-index: 10;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    animation: hero-slide-in 1s ease-out;
+}
+
+/* Logo Animation */
+.logo-circle {
+    transition: transform 0.8s ease;
+}
+
+.logo-circle:hover {
+    animation: logo-rotate 0.8s ease;
+}
+
+/* Utility Classes */
+.container-olympics {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.section-olympics {
+    padding: 6rem 0;
+}
+
+.text-shadow-olympic {
+    text-shadow: 4px 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.text-shadow-strong {
+    text-shadow: 2px 2px 6px rgba(0, 0, 0, 0.5);
+}
