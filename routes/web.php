@@ -1,5 +1,5 @@
 <?php
-
+use Illuminate\Support\Facades\File;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\WorkerController;
@@ -19,43 +19,17 @@ use Illuminate\Support\Facades\Cache;
 use App\Services\SportsNewsRssService;
 
 
-// Landing page route
+// Landing page route serving the React app
 Route::get('/', function () {
-    $jobController = new \App\Http\Controllers\JobController();
-    $recentJobs = $jobController->getRecentJobs();
+    return view('app');
+});
 
-    // 🔹 INTERNAL NEWS (ADMIN)
-$internalNews = NewsPost::where('is_published', true)
-  ->orderByDesc('published_at')
-  ->limit(2)
-  ->get()
-  ->map(fn ($n) => [
-      'id' => $n->id,
-      'title' => $n->title,
-      'excerpt' => $n->excerpt,
-      'image' => $n->cover_image ? asset('storage/'.$n->cover_image) : null,
-      'url' => route('news.show', $n->id), // ✅ ini link read more
-      'source' => $n->source_name ?? 'NOCIS',
-      'published_at' => optional($n->published_at)->toISOString(),
-      'type' => 'internal',
-  ])
-  ->toArray();
-
-
-        // 🔥 TARUH DI SINI
-    $apiNews = app(\App\Services\SportsNewsRssService::class)->latest(4);
-
-    // 🔹 GABUNG
-    $newsItems = array_merge($internalNews, $apiNews);
-
-    return view('landing', compact('recentJobs', 'newsItems'));
-})->name('landing');
 
 // Public Job Routes (accessible without login)
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
 
-// ✅ Public News Routes (accessible without login)
+//  Public News Routes (accessible without login)
 Route::get('/news', [NewsPostController::class, 'publicIndex'])->name('news.index');
 Route::get('/news/{news}', [NewsPostController::class, 'publicShow'])->name('news.show');
 
@@ -303,14 +277,14 @@ Route::middleware(['web'])->group(function () {
 // Storage file serving route (workaround for symlink permission issues)
 Route::get('/storage/{path}', function ($path) {
     $file = storage_path('app/public/' . $path);
-    
+
     if (!file_exists($file)) {
         abort(404);
     }
-    
+
     // Get file mime type
     $mimeType = mime_content_type($file);
-    
+
     // Return file with proper headers
     return response()->file($file, [
         'Content-Type' => $mimeType,

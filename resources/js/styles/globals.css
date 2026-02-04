@@ -1,0 +1,280 @@
+@import "tailwindcss";
+
+* {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(to bottom, #ffffff, #f0f9ff, #ffffff);
+}
+
+/* Hide scrollbar */
+* {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+*::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Olympic Colors Theme */
+:root {
+  --olympic-blue: #0085C7;
+  --olympic-yellow: #F4C300;
+  --olympic-black: #000000;
+  --olympic-green: #009F3D;
+  --olympic-red: #DF0024;
+}
+
+/* Premium Gradient Animations */
+@keyframes gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+@keyframes olympic-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 133, 199, 0.4),
+                0 0 40px rgba(244, 195, 0, 0.3),
+                0 0 60px rgba(223, 0, 36, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 133, 199, 0.6),
+                0 0 60px rgba(244, 195, 0, 0.5),
+                0 0 80px rgba(223, 0, 36, 0.4);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+@keyframes bounce-olympic {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+@keyframes rings-glow {
+  0%, 100% { filter: drop-shadow(0 0 10px rgba(0, 133, 199, 0.5)); }
+  20% { filter: drop-shadow(0 0 10px rgba(244, 195, 0, 0.5)); }
+  40% { filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.5)); }
+  60% { filter: drop-shadow(0 0 10px rgba(0, 159, 61, 0.5)); }
+  80% { filter: drop-shadow(0 0 10px rgba(223, 0, 36, 0.5)); }
+}
+
+.gradient-animate {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+.float-animate {
+  animation: float 6s ease-in-out infinite;
+}
+
+.olympic-pulse {
+  animation: olympic-pulse 3s ease-in-out infinite;
+}
+
+.bounce-olympic {
+  animation: bounce-olympic 2s ease-in-out infinite;
+}
+
+.rings-glow {
+  animation: rings-glow 5s ease-in-out infinite;
+}
+
+/* Olympic Glassmorphism */
+.glass-olympic {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark-olympic {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Olympic Gradient Backgrounds */
+.bg-olympic-gradient {
+  background: linear-gradient(135deg,
+    #0085C7 0%,
+    #F4C300 25%,
+    #000000 50%,
+    #009F3D 75%,
+    #DF0024 100%);
+}
+
+.bg-olympic-gradient-soft {
+  background: linear-gradient(135deg,
+    rgba(0, 133, 199, 0.1) 0%,
+    rgba(244, 195, 0, 0.1) 25%,
+    rgba(0, 0, 0, 0.05) 50%,
+    rgba(0, 159, 61, 0.1) 75%,
+    rgba(223, 0, 36, 0.1) 100%);
+}
+
+/* Olympic Text Gradient */
+.text-olympic-gradient {
+  background: linear-gradient(90deg,
+    #0085C7 0%,
+    #F4C300 25%,
+    #000000 50%,
+    #009F3D 75%,
+    #DF0024 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-size: 200% auto;
+  animation: gradient-shift 6s linear infinite;
+}
+
+/* Premium Shadows with Olympic Colors */
+.shadow-olympic {
+  box-shadow:
+    0 10px 30px rgba(0, 133, 199, 0.2),
+    0 5px 15px rgba(244, 195, 0, 0.1);
+}
+
+.shadow-olympic-hover {
+  box-shadow:
+    0 20px 60px rgba(0, 133, 199, 0.3),
+    0 10px 30px rgba(244, 195, 0, 0.2),
+    0 5px 15px rgba(223, 0, 36, 0.1);
+}
+
+/* Smooth Transitions */
+.transition-olympic {
+  transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Premium Card Hover */
+.card-olympic {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-olympic:hover {
+  transform: translateY(-12px) scale(1.02);
+  box-shadow:
+    0 30px 80px rgba(0, 133, 199, 0.25),
+    0 15px 40px rgba(244, 195, 0, 0.15);
+}
+
+/* Navbar Styles */
+.nav-link {
+  position: relative;
+  font-weight: 700;
+  color: #1f2937;
+  transition: color 0.3s ease;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #0085C7, #F4C300, #DF0024);
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-link:hover {
+  color: #0085C7;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Olympic Premium Button */
+.btn-olympic {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #0085C7 0%, #0066A1 100%);
+  box-shadow: 0 10px 30px rgba(0, 133, 199, 0.4);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-olympic::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s;
+}
+
+.btn-olympic:hover::before {
+  left: 100%;
+}
+
+.btn-olympic:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(0, 133, 199, 0.5);
+}
+
+/* Olympic Rings Animation */
+@keyframes ring-bounce {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.05); }
+}
+
+.olympic-ring {
+  animation: ring-bounce 3s ease-in-out infinite;
+}
+
+.olympic-ring:nth-child(1) { animation-delay: 0s; }
+.olympic-ring:nth-child(2) { animation-delay: 0.2s; }
+.olympic-ring:nth-child(3) { animation-delay: 0.4s; }
+.olympic-ring:nth-child(4) { animation-delay: 0.6s; }
+.olympic-ring:nth-child(5) { animation-delay: 0.8s; }
+
+/* Custom Scrollbar with Olympic Colors - HIDDEN */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+::-webkit-scrollbar-track {
+  display: none;
+}
+
+::-webkit-scrollbar-thumb {
+  display: none;
+}
+
+/* Firefox Scrollbar - HIDDEN */
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* IE/Edge - HIDDEN */
+body {
+  -ms-overflow-style: none;
+}
+
+/* Parallax Effect */
+.parallax {
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}

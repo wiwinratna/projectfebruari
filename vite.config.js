@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/js/app.js',
                 'resources/js/jobs.js',
                 'resources/js/landing.js', // 👈 TAMBAH INI
+                'resources/js/main.tsx',
             ],
             refresh: true,
         }),
