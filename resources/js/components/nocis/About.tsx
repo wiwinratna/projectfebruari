@@ -98,11 +98,11 @@ export function About() {
         >
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
-              <span className="text-6xl font-bold text-blue-600">N</span>
-              <span className="text-6xl font-bold text-yellow-500">O</span>
-              <span className="text-6xl font-bold text-red-600">C</span>
-              <span className="text-6xl font-bold text-green-600">I</span>
-              <span className="text-6xl font-bold text-purple-600">S</span>
+              <span className="text-6xl font-bold text-blue-600">A</span>
+              <span className="text-6xl font-bold text-yellow-500">R</span>
+              <span className="text-6xl font-bold text-red-600">I</span>
+              <span className="text-6xl font-bold text-green-600">S</span>
+              <span className="text-6xl font-bold text-purple-600">E</span>
             </div>
             <div className="text-gray-700 font-semibold text-lg">
               National Olympic Academy of<br />Indonesia System

@@ -6,7 +6,7 @@ export function RoyalHeroVideo() {
     {
       image: 'https://images.unsplash.com/photo-1600408942605-e39b013aaaea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
       title: 'ARISE',
-      subtitle: '2024',
+      subtitle: '2026',
       description: 'Always like never before',
       gradient: 'from-blue-600/40 to-purple-600/40'
     },
