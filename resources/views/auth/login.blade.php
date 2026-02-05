@@ -19,7 +19,7 @@
                  alt="NOA Indonesia"
                  class="h-20 w-auto mx-auto mb-4">
             <h1 class="text-2xl font-bold text-gray-800 mb-2">Login Account</h1>
-            <p class="text-gray-600">Welcome back to NOCIS</p>
+            <p class="text-gray-600">Welcome back to ARISE</p>
         </div>
 
         {{-- Simple Login Form - Same as working register --}}
