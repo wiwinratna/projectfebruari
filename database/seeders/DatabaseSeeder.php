@@ -15,9 +15,10 @@ class DatabaseSeeder extends Seeder
             CitySeeder::class,
             WorkerTypeSeeder::class,
             JobCategorySeeder::class,
-            SportSeeder::class, // Added SportSeeder
+            SportSeeder::class,
             UserSeeder::class,
             EventSeeder::class,
+            EventMasterDataSeeder::class,
             WorkerOpeningSeeder::class,
             ApplicationSeeder::class,
         ]);

@@ -85,23 +85,22 @@ class User extends Authenticatable
     {
         return $this->hasMany(Application::class);
     }
-public function reviewedApplications()
-{
-    return $this->hasMany(Application::class, 'reviewed_by');
-}
+    public function reviewedApplications()
+    {
+        return $this->hasMany(Application::class, 'reviewed_by');
+    }
 
-public function savedJobs()
-{
-    return $this->belongsToMany(WorkerOpening::class, 'saved_jobs')->withTimestamps();
-}
+    public function savedJobs()
+    {
+        return $this->belongsToMany(WorkerOpening::class, 'saved_jobs')->withTimestamps();
+    }
 
-public function profile()
-{
-    return $this->hasOne(UserProfile::class);
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+    public function certificates()
+    {
+        return $this->hasMany(\App\Models\UserCertificate::class);
+    }
 }
-public function certificates()
-{
-    return $this->hasMany(\App\Models\UserCertificate::class);
-}
-}
-

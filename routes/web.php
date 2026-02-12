@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Support\Facades\File;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\EventController;
@@ -146,7 +147,7 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
     Route::get('/saved-jobs', [CustomerDashboardController::class, 'savedJobs'])->name('saved-jobs');
 
     Route::get('/applications/{application}/card', [AccessCardController::class, 'customerPrint'])
-    ->name('applications.card');
+        ->name('applications.card');
 
     Route::post('/profile/upload-certificates', [CustomerDashboardController::class, 'uploadCertificates'])
         ->name('profile.upload-certificates');
@@ -156,7 +157,6 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
 
     Route::delete('/profile/certificates/{certificate}', [CustomerDashboardController::class, 'certificateDelete'])
         ->name('profile.certificate.delete');
-
 });
 
 // Admin Authentication Routes
@@ -246,22 +246,32 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     Route::post('/profile/password', [\App\Http\Controllers\AdminProfileController::class, 'updatePassword'])->name('profile.password');
 
     Route::get('/events/{event}/access-codes', function (Event $event) {
-    return response()->json(
-        $event->accessCodes()
-            ->select('id','code','label','color_hex')
-            ->orderBy('code')
-            ->get()
-    );
+        return response()->json(
+            $event->accessCodes()
+                ->select('id', 'code', 'label', 'color_hex')
+                ->orderBy('code')
+                ->get()
+        );
     })->name('events.access-codes');
 
     Route::get('/access-cards/{accessCard}/print', [AccessCardController::class, 'adminPrint'])
-            ->name('access-cards.print');
+        ->name('access-cards.print');
 
 
     // Admin News (CRUD)
-     Route::resource('news', NewsPostController::class)->names('news');
+    Route::resource('news', NewsPostController::class)->names('news');
 
-
+    // Event-scoped master data routes
+    Route::prefix('events/{event}')->name('events.')->group(function () {
+        Route::resource('venue-locations', \App\Http\Controllers\VenueLocationController::class)->except(['show']);
+        Route::resource('jabatan', \App\Http\Controllers\JabatanController::class)->except(['show']);
+        Route::resource('disciplins', \App\Http\Controllers\DisciplinController::class)->except(['show']);
+        Route::resource('accreditations', \App\Http\Controllers\AccreditationController::class)->except(['show']);
+        Route::resource('accommodation-codes', \App\Http\Controllers\AccommodationCodeController::class)->except(['show']);
+        Route::resource('transportation-codes', \App\Http\Controllers\TransportationCodeController::class)->except(['show']);
+        Route::resource('zone-access-codes', \App\Http\Controllers\ZoneAccessCodeController::class)->except(['show']);
+        Route::resource('venue-accesses', \App\Http\Controllers\VenueAccessController::class)->except(['show']);
+    });
 });
 
 // Prevent customer users from accessing admin routes directly
@@ -302,4 +312,3 @@ Route::middleware(['web'])->group(function () {
 
 Route::get('/verify/{token}', [AccessCardVerifyController::class, 'show'])
     ->name('access-cards.verify');
-
