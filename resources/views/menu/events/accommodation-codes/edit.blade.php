@@ -1,0 +1,51 @@
+@extends('layouts.app')
+
+@section('title', 'Edit Kode Akomodasi - ' . $event->title)
+@section('page-title')
+Edit Kode Akomodasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2">{{ $event->title }}</span>
+@endsection
+
+@section('content')
+<div class="space-y-6">
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Edit Kode Akomodasi</h2>
+            <p class="text-gray-600 mt-1">Update accommodation code information</p>
+        </div>
+        <a href="{{ route('admin.events.accommodation-codes.index', $event) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Kode Akomodasi
+        </a>
+    </div>
+    <div class="bg-white rounded-lg shadow">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h3 class="text-lg font-semibold text-gray-800">Kode Akomodasi Information</h3>
+        </div>
+        <form action="{{ route('admin.events.accommodation-codes.update', [$event, $accommodationCode]) }}" method="POST" class="p-6 space-y-6">
+            @csrf
+            @method('PUT')
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="kode" class="block text-sm font-medium text-gray-700 mb-2">Kode <span class="text-red-500">*</span></label>
+                    <input type="text" id="kode" name="kode" value="{{ old('kode', $accommodationCode->kode) }}"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent @error('kode') border-red-500 @enderror"
+                        placeholder="e.g., HTL-01" required>
+                    @error('kode') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    <p class="text-gray-500 text-sm mt-1">Unique code identifier</p>
+                </div>
+                <div>
+                    <label for="keterangan" class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
+                    <input type="text" id="keterangan" name="keterangan" value="{{ old('keterangan', $accommodationCode->keterangan) }}" maxlength="1000"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent @error('keterangan') border-red-500 @enderror"
+                        placeholder="e.g., Hotel Bintang 5 - Atlet Utama">
+                    @error('keterangan') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
+                    <p class="text-gray-500 text-sm mt-1">Description of this accommodation</p>
+                </div>
+            </div>
+            <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
+                <a href="{{ route('admin.events.accommodation-codes.index', $event) }}" class="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">Cancel</a>
+                <button type="submit" class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"><i class="fas fa-save mr-2"></i> Update Kode</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endsection

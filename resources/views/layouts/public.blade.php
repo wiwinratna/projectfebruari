@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,8 +14,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <!-- Tailwind + App -->
-   @vite(['resources/css/app.css'])
-   @vite(['resources/js/app.js'])
+    @vite(['resources/css/app.css'])
+    @vite(['resources/js/app.js'])
 
 
     <!-- Custom CSS -->
@@ -55,85 +56,85 @@
                     <!-- Desktop Navigation -->
                     <nav class="hidden lg:flex items-center gap-8">
                         @php
-                            // Robust Profile Photo Logic
-                            $headerProfilePhoto = session('customer_profile_photo');
+                        // Robust Profile Photo Logic
+                        $headerProfilePhoto = session('customer_profile_photo');
 
-                            // Fallback: Check DB if session is empty but user is logged in
-                            if (empty($headerProfilePhoto) && session('customer_id')) {
-                                $headerUser = \App\Models\User::with('profile')->find(session('customer_id'));
-                                if ($headerUser && $headerUser->profile && $headerUser->profile->profile_photo) {
-                                    $headerProfilePhoto = $headerUser->profile->profile_photo;
-                                    // Self-heal session
-                                    session(['customer_profile_photo' => $headerProfilePhoto]);
-                                }
-                            }
+                        // Fallback: Check DB if session is empty but user is logged in
+                        if (empty($headerProfilePhoto) && session('customer_id')) {
+                        $headerUser = \App\Models\User::with('profile')->find(session('customer_id'));
+                        if ($headerUser && $headerUser->profile && $headerUser->profile->profile_photo) {
+                        $headerProfilePhoto = $headerUser->profile->profile_photo;
+                        // Self-heal session
+                        session(['customer_profile_photo' => $headerProfilePhoto]);
+                        }
+                        }
                         @endphp
 
                         <a href="{{ route('jobs.index') }}"
-                           class="text-sm font-semibold {{ request()->routeIs('jobs.*') ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 relative py-2 group transition-colors">
+                            class="text-sm font-semibold {{ request()->routeIs('jobs.*') ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 relative py-2 group transition-colors">
                             Jobs
                             <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('jobs.*') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                         </a>
 
                         @if(session('customer_authenticated'))
-                            <a href="{{ route('customer.dashboard') }}"
-                               class="text-sm font-semibold {{ request()->routeIs('customer.dashboard') ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 relative py-2 group transition-colors">
-                                Dashboard
-                                <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('customer.dashboard') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
-                            </a>
+                        <a href="{{ route('customer.dashboard') }}"
+                            class="text-sm font-semibold {{ request()->routeIs('customer.dashboard') ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 relative py-2 group transition-colors">
+                            Dashboard
+                            <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('customer.dashboard') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
+                        </a>
                         @endif
                     </nav>
 
                     <!-- Desktop Actions -->
                     <div class="hidden lg:flex items-center gap-3">
                         @if(session('customer_authenticated'))
-                            <!-- Profile Dropdown -->
-                            <div class="relative group" x-data="{ open: false }">
-                                <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full border border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all">
-                                    <div class="w-8 h-8 rounded-full bg-gray-100 ring-2 ring-white shadow-md overflow-hidden flex items-center justify-center">
-                                        @if(!empty($headerProfilePhoto))
-                                            <img src="{{ asset('storage/' . $headerProfilePhoto) }}" alt="Profile" class="w-full h-full object-cover">
-                                        @else
-                                            <div class="w-full h-full bg-gradient-to-br from-red-500 to-red-600 text-white flex items-center justify-center text-xs font-bold">
-                                                {{ strtoupper(substr(session('customer_username') ?? 'U', 0, 2)) }}
-                                            </div>
-                                        @endif
+                        <!-- Profile Dropdown -->
+                        <div class="relative group" x-data="{ open: false }">
+                            <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full border border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all">
+                                <div class="w-8 h-8 rounded-full bg-gray-100 ring-2 ring-white shadow-md overflow-hidden flex items-center justify-center">
+                                    @if(!empty($headerProfilePhoto))
+                                    <img src="{{ asset('storage/' . $headerProfilePhoto) }}" alt="Profile" class="w-full h-full object-cover">
+                                    @else
+                                    <div class="w-full h-full bg-gradient-to-br from-red-500 to-red-600 text-white flex items-center justify-center text-xs font-bold">
+                                        {{ strtoupper(substr(session('customer_username') ?? 'U', 0, 2)) }}
                                     </div>
-                                    <i class="fas fa-chevron-down text-xs text-gray-400 mr-2 group-hover:text-red-400"></i>
-                                </button>
+                                    @endif
+                                </div>
+                                <i class="fas fa-chevron-down text-xs text-gray-400 mr-2 group-hover:text-red-400"></i>
+                            </button>
 
-                                <!-- Dropdown Menu -->
-                                <div class="absolute right-0 mt-3 w-56 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 ring-1 ring-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right">
-                                    <div class="p-4 border-b border-gray-100/50">
-                                        <p class="text-sm font-bold text-gray-900 truncate">{{ session('customer_username') }}</p>
-                                        <p class="text-xs text-gray-500 truncate">{{ session('customer_email') }}</p>
-                                    </div>
-                                    <div class="p-2 space-y-1">
-                                        <a href="{{ route('customer.profile') }}" class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
-                                            <div class="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center text-xs"><i class="fas fa-user"></i></div>
-                                            Profile
-                                        </a>
-                                        <a href="{{ route('customer.settings') }}" class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
-                                            <div class="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center text-xs"><i class="fas fa-cog"></i></div>
-                                            Settings
-                                        </a>
-                                        <form method="POST" action="{{ route('logout') }}">
-                                            @csrf
-                                            <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-all">
-                                                <div class="w-6 h-6 rounded-lg bg-red-100 flex items-center justify-center text-xs"><i class="fas fa-sign-out-alt"></i></div>
-                                                Logout
-                                            </button>
-                                        </form>
-                                    </div>
+                            <!-- Dropdown Menu -->
+                            <div class="absolute right-0 mt-3 w-56 bg-white/90 backdrop-blur-xl rounded-2xl shadow-xl border border-white/50 ring-1 ring-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right">
+                                <div class="p-4 border-b border-gray-100/50">
+                                    <p class="text-sm font-bold text-gray-900 truncate">{{ session('customer_username') }}</p>
+                                    <p class="text-xs text-gray-500 truncate">{{ session('customer_email') }}</p>
+                                </div>
+                                <div class="p-2 space-y-1">
+                                    <a href="{{ route('customer.profile') }}" class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
+                                        <div class="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center text-xs"><i class="fas fa-user"></i></div>
+                                        Profile
+                                    </a>
+                                    <a href="{{ route('customer.settings') }}" class="flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
+                                        <div class="w-6 h-6 rounded-lg bg-gray-100 flex items-center justify-center text-xs"><i class="fas fa-cog"></i></div>
+                                        Settings
+                                    </a>
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+                                        <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-all">
+                                            <div class="w-6 h-6 rounded-lg bg-red-100 flex items-center justify-center text-xs"><i class="fas fa-sign-out-alt"></i></div>
+                                            Logout
+                                        </button>
+                                    </form>
                                 </div>
                             </div>
+                        </div>
                         @else
-                            <a href="{{ route('login') }}" class="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:-translate-y-0.5">
-                                Login
-                            </a>
-                            <a href="{{ route('register') }}" class="px-5 py-2.5 text-sm font-semibold text-red-600 bg-red-50/50 hover:bg-red-100 border border-red-100 rounded-xl transition-all">
-                                Sign Up
-                            </a>
+                        <a href="{{ route('login') }}" class="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/40 hover:-translate-y-0.5">
+                            Login
+                        </a>
+                        <a href="{{ route('register') }}" class="px-5 py-2.5 text-sm font-semibold text-red-600 bg-red-50/50 hover:bg-red-100 border border-red-100 rounded-xl transition-all">
+                            Sign Up
+                        </a>
                         @endif
                     </div>
 
@@ -152,51 +153,51 @@
                                 <span class="text-xs font-semibold">Jobs</span>
                             </a>
                             @if(session('customer_authenticated'))
-                                <a href="{{ route('customer.dashboard') }}" class="flex flex-col items-center justify-center p-3 rounded-xl {{ request()->routeIs('customer.dashboard') ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-600' }} hover:bg-red-50 hover:text-red-600 transition-colors">
-                                    <i class="fas fa-chart-pie mb-1 text-lg"></i>
-                                    <span class="text-xs font-semibold">Dashboard</span>
-                                </a>
+                            <a href="{{ route('customer.dashboard') }}" class="flex flex-col items-center justify-center p-3 rounded-xl {{ request()->routeIs('customer.dashboard') ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-600' }} hover:bg-red-50 hover:text-red-600 transition-colors">
+                                <i class="fas fa-chart-pie mb-1 text-lg"></i>
+                                <span class="text-xs font-semibold">Dashboard</span>
+                            </a>
                             @endif
                         </div>
 
                         @if(session('customer_authenticated'))
-                            <div class="pt-2 border-t border-gray-100">
-                                <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-3">
-                                    <div class="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
-                                        @if(!empty($headerProfilePhoto))
-                                            <img src="{{ asset('storage/' . $headerProfilePhoto) }}" alt="Profile" class="w-full h-full object-cover">
-                                        @else
-                                            <div class="w-full h-full bg-red-500 text-white flex items-center justify-center text-sm font-bold">
-                                                {{ strtoupper(substr(session('customer_username') ?? 'U', 0, 2)) }}
-                                            </div>
-                                        @endif
+                        <div class="pt-2 border-t border-gray-100">
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-3">
+                                <div class="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
+                                    @if(!empty($headerProfilePhoto))
+                                    <img src="{{ asset('storage/' . $headerProfilePhoto) }}" alt="Profile" class="w-full h-full object-cover">
+                                    @else
+                                    <div class="w-full h-full bg-red-500 text-white flex items-center justify-center text-sm font-bold">
+                                        {{ strtoupper(substr(session('customer_username') ?? 'U', 0, 2)) }}
                                     </div>
-                                    <div class="overflow-hidden">
-                                        <p class="text-sm font-bold text-gray-900 truncate">{{ session('customer_username') }}</p>
-                                        <p class="text-xs text-gray-500 truncate">{{ session('customer_email') }}</p>
-                                    </div>
+                                    @endif
                                 </div>
-                                <div class="grid grid-cols-1 gap-2">
-                                    <a href="{{ route('customer.profile') }}" class="flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 text-sm font-medium text-gray-600">
-                                        <i class="fas fa-user w-6 text-center mr-2"></i> Profile
-                                    </a>
-                                    <form method="POST" action="{{ route('logout') }}">
-                                        @csrf
-                                        <button class="w-full flex items-center px-4 py-3 rounded-xl hover:bg-red-50 text-sm font-medium text-red-600">
-                                            <i class="fas fa-sign-out-alt w-6 text-center mr-2"></i> Logout
-                                        </button>
-                                    </form>
+                                <div class="overflow-hidden">
+                                    <p class="text-sm font-bold text-gray-900 truncate">{{ session('customer_username') }}</p>
+                                    <p class="text-xs text-gray-500 truncate">{{ session('customer_email') }}</p>
                                 </div>
                             </div>
+                            <div class="grid grid-cols-1 gap-2">
+                                <a href="{{ route('customer.profile') }}" class="flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 text-sm font-medium text-gray-600">
+                                    <i class="fas fa-user w-6 text-center mr-2"></i> Profile
+                                </a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button class="w-full flex items-center px-4 py-3 rounded-xl hover:bg-red-50 text-sm font-medium text-red-600">
+                                        <i class="fas fa-sign-out-alt w-6 text-center mr-2"></i> Logout
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
                         @else
-                            <div class="flex flex-col gap-3 pt-2">
-                                <a href="{{ route('login') }}" class="w-full py-3 text-center text-sm font-semibold text-white bg-red-600 rounded-xl shadow-lg shadow-red-500/20">
-                                    Login to Account
-                                </a>
-                                <a href="{{ route('register') }}" class="w-full py-3 text-center text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl">
-                                    Create Account
-                                </a>
-                            </div>
+                        <div class="flex flex-col gap-3 pt-2">
+                            <a href="{{ route('login') }}" class="w-full py-3 text-center text-sm font-semibold text-white bg-red-600 rounded-xl shadow-lg shadow-red-500/20">
+                                Login to Account
+                            </a>
+                            <a href="{{ route('register') }}" class="w-full py-3 text-center text-sm font-semibold text-gray-700 bg-gray-100 rounded-xl">
+                                Create Account
+                            </a>
+                        </div>
                         @endif
                     </div>
                 </div>
@@ -220,8 +221,8 @@
                         <!-- Logo Container -->
                         <div class="flex-shrink-0">
                             <img src="{{ asset('images/nocis logo.png') }}"
-                                 alt="NOC Indonesia Logo"
-                                 class="w-96 h-auto object-contain">
+                                alt="NOC Indonesia Logo"
+                                class="w-96 h-auto object-contain">
                         </div>
                     </div>
                     <p class="text-gray-600 text-sm mb-6">
@@ -275,7 +276,7 @@
                     <p class="text-sm text-gray-600 mb-3">Get the latest job opportunities delivered to your inbox</p>
                     <form class="space-y-3">
                         <input type="email" placeholder="Your email address"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all">
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all">
                         <button type="submit" class="w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg font-medium transition-colors">
                             Subscribe
                         </button>
@@ -360,10 +361,10 @@
 
         // Check for server-side flashes
         @if(session('success'))
-            document.addEventListener('DOMContentLoaded', () => showPublicFlash("{{ session('success') }}", 'success'));
+        document.addEventListener('DOMContentLoaded', () => showPublicFlash("{{ session('success') }}", 'success'));
         @endif
         @if(session('error'))
-            document.addEventListener('DOMContentLoaded', () => showPublicFlash("{{ session('error') }}", 'error'));
+        document.addEventListener('DOMContentLoaded', () => showPublicFlash("{{ session('error') }}", 'error'));
         @endif
     </script>
 
@@ -371,4 +372,5 @@
     @stack('scripts')
 
 </body>
+
 </html>

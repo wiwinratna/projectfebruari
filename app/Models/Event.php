@@ -46,7 +46,7 @@ class Event extends Model
         if ($this->city && is_object($this->city) && isset($this->city->name)) {
             return $this->city->name;
         }
-        
+
         return 'Lokasi belum ditentukan';
     }
 
@@ -58,7 +58,7 @@ class Event extends Model
         if ($this->city && is_object($this->city) && isset($this->city->province)) {
             return $this->city->province;
         }
-        
+
         return null;
     }
 
@@ -86,7 +86,7 @@ class Event extends Model
     public function scopeCustomerVisible($query)
     {
         return $query->whereIn('status', ['active', 'upcoming'])
-                    ->orderBy('start_at');
+            ->orderBy('start_at');
     }
 
     /**
@@ -141,4 +141,43 @@ class Event extends Model
         return $this->hasMany(\App\Models\EventAccessCode::class);
     }
 
+    public function venueLocations()
+    {
+        return $this->hasMany(VenueLocation::class);
+    }
+
+    public function jabatan()
+    {
+        return $this->hasMany(Jabatan::class);
+    }
+
+    public function disciplins()
+    {
+        return $this->hasMany(Disciplin::class);
+    }
+
+    public function accreditations()
+    {
+        return $this->hasMany(Accreditation::class);
+    }
+
+    public function accommodationCodes()
+    {
+        return $this->hasMany(AccommodationCode::class);
+    }
+
+    public function transportationCodes()
+    {
+        return $this->hasMany(TransportationCode::class);
+    }
+
+    public function zoneAccessCodes()
+    {
+        return $this->hasMany(ZoneAccessCode::class);
+    }
+
+    public function venueAccesses()
+    {
+        return $this->hasMany(VenueAccess::class);
+    }
 }
