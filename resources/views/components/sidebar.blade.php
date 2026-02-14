@@ -1,9 +1,9 @@
 <!-- Mobile Overlay -->
 <div id="sidebar-overlay" class="lg:hidden"></div>
 
-<div class="main-sidebar sidebar-style-2 bg-white text-gray-700 shadow-lg" id="sidebar"> 
+<div class="main-sidebar sidebar-style-2 bg-white text-gray-700 shadow-lg" id="sidebar">
     <aside id="sidebar-wrapper">
-        
+
         <div class="sidebar-brand p-4 border-b border-gray-200 relative">
             <div class="flex items-center justify-center">
                 @if(session('admin_authenticated'))
@@ -11,7 +11,7 @@
                 @else
                     <a href="{{ route('jobs.index') }}" class="flex items-center justify-center">
                 @endif
-                        <img src="{{ asset('images/Logo NOA Indonesia.png') }}?v={{ time() }}"
+                        <img src="{{ asset('images/Logo ARISE PNG.png') }}?v={{ time() }}"
                              alt="NOA Indonesia"
                              class="logo-img block">
                     </a>
@@ -21,11 +21,11 @@
             </button>
         </div>
         <ul class="sidebar-menu mt-8">
-            
+
             @if(session('admin_authenticated'))
                 {{-- Dashboard Section --}}
                 <li class="px-6 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
-                
+
                 <li class="menu-item {{ Request::is('admin/dashboard') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('admin.dashboard') }}">
                         <i class="fas fa-home mr-3"></i>
@@ -56,7 +56,7 @@
                         <span>Sports Master</span>
                     </a>
                 </li>
-                
+
                 {{-- Recruitment Section --}}
                 <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Recruitment</li>
 
@@ -121,7 +121,7 @@
             @endif
 
         </ul>
-        
+
         <div class="sidebar-footer p-4 mt-auto">
              <div class="flex justify-around">
                 <span class="w-3 h-3 rounded-full bg-blue-500"></span>
@@ -131,6 +131,6 @@
                 <span class="w-3 h-3 rounded-full bg-pink-500"></span>
             </div>
         </div>
-        
+
     </aside>
 </div>

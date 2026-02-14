@@ -33,7 +33,7 @@ class NewsPostController extends Controller
             'content'      => 'nullable|string',
             'cover_image'  => 'nullable|image|max:2048',
             'source_name'  => 'nullable|string|max:100',
-            'source_url'   => 'nullable|url|max:255',
+            'source_url'   => 'nullable|url|starts_with:http://,https://|max:255',
             'is_published' => 'nullable|boolean',
             'published_at' => 'nullable|date',
         ]);
@@ -75,7 +75,7 @@ class NewsPostController extends Controller
             'content' => 'nullable|string',
             'cover_image' => 'nullable|image|max:2048',
             'source_name' => 'nullable|string|max:100',
-            'source_url' => 'nullable|url|max:255',
+            'source_url' => 'nullable|url|starts_with:http://,https://|max:255',
             'is_published' => 'nullable|boolean',
             'published_at' => 'nullable|date',
         ]);
@@ -122,6 +122,63 @@ public function publicIndex(SportsNewsRssService $rss)
 
         $post = $news; // alias supaya view pakai $post
         return view('news.show', compact('post'));
+    }
+
+    /**
+     * API endpoint - Get all published news as JSON
+     */
+    public function apiIndex()
+    {
+        $posts = NewsPost::where('is_published', true)
+            ->orderByDesc('published_at')
+            ->select('id', 'title', 'excerpt', 'cover_image', 'source_name', 'source_url', 'published_at', 'created_at')
+            ->limit(6)
+            ->get()
+            ->map(function ($post) {
+                return [
+                    'id' => $post->id,
+                    'title' => $post->title,
+                    'excerpt' => $post->excerpt,
+                    'image' => $post->cover_image ? asset('storage/' . $post->cover_image) : 'https://via.placeholder.com/400x300?text=News',
+                    'date' => $post->published_at->format('M d, Y'),
+                    'source' => $post->source_name ?? 'NOCIS',
+                    'category' => 'News Update',
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $posts,
+            'total' => count($posts),
+        ]);
+    }
+
+    /**
+     * API endpoint - Get single news by ID as JSON
+     */
+    public function apiShow(NewsPost $news)
+    {
+        if (!$news->is_published) {
+            return response()->json([
+                'success' => false,
+                'message' => 'News not found'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $news->id,
+                'title' => $news->title,
+                'excerpt' => $news->excerpt,
+                'content' => $news->content,
+                'image' => $news->cover_image ? asset('storage/' . $news->cover_image) : 'https://via.placeholder.com/400x300?text=News',
+                'date' => $news->published_at->format('M d, Y'),
+                'source' => $news->source_name ?? 'NOCIS',
+                'source_url' => $news->source_url,
+                'category' => 'News Update',
+            ]
+        ]);
     }
 
 

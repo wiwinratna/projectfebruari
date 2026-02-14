@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Login - NOCIS</title>
-    
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body class="min-h-screen flex items-center justify-center bg-gray-50 p-8">
-    
+
     <div class="w-full max-w-md">
-        
+
         {{-- Logo --}}
         <div class="text-center mb-8">
-            <img src="{{ asset('images/Logo NOA Indonesia.png') }}?v={{ time() }}"
+            <img src="{{ asset('images/Logo ARISE PNG.png') }}?v={{ time() }}"
                  alt="NOA Indonesia"
                  class="h-20 w-auto mx-auto mb-4">
             <h1 class="text-2xl font-bold text-gray-800 mb-2">Admin Login</h1>
@@ -25,7 +25,7 @@
         {{-- Admin Login Form --}}
         <form method="POST" action="{{ route('admin.login.submit') }}" class="space-y-6">
             @csrf
-            
+
             {{-- Username Field --}}
             <div>
                 <label for="username" class="block text-sm font-medium text-gray-700 mb-2">Admin Username</label>
@@ -45,13 +45,13 @@
             <div>
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Admin Password</label>
                 <div class="relative">
-                    <input type="password" 
-                           id="password" 
-                           name="password" 
+                    <input type="password"
+                           id="password"
+                           name="password"
                            placeholder="Enter admin password"
                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors pr-12"
                            required>
-                    <button type="button" 
+                    <button type="button"
                             id="toggle-password"
                             class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600">
                         <i class="fas fa-eye" id="eye-icon"></i>
@@ -63,7 +63,7 @@
             </div>
 
             {{-- Login Button --}}
-            <button type="submit" 
+            <button type="submit"
                     class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2">
                 Admin Login
             </button>
@@ -129,7 +129,7 @@
         document.getElementById('toggle-password').addEventListener('click', function() {
             const passwordInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eye-icon');
-            
+
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
                 eyeIcon.classList.remove('fa-eye');
@@ -145,7 +145,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             const usernameInput = document.getElementById('username');
             const passwordInput = document.getElementById('password');
-            
+
             if (!usernameInput.value) {
                 usernameInput.focus();
             } else {

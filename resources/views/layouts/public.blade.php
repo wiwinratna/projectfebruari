@@ -50,7 +50,7 @@
                 <div class="flex justify-between items-center h-16 px-4 lg:px-6">
                     <!-- Logo -->
                     <a href="{{ url('/') }}" class="flex items-center gap-3 group">
-                        <img src="{{ asset('images/nocis logo3.png') }}" alt="NOC Logo" class="h-10 w-auto group-hover:scale-105 transition-transform duration-300">
+                        <img src="{{ asset('images/Logo ARISE PNG.png') }}" alt="NOC Logo" class="h-10 w-auto group-hover:scale-105 transition-transform duration-300">
                     </a>
 
                     <!-- Desktop Navigation -->
@@ -74,6 +74,11 @@
                             class="text-sm font-semibold {{ request()->routeIs('jobs.*') ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 relative py-2 group transition-colors">
                             Jobs
                             <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('jobs.*') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
+                        </a>
+                        <a href="{{ route('news.index') }}"
+                            class="text-sm font-semibold {{ request()->routeIs('news.*') ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 relative py-2 group transition-colors">
+                            News
+                            <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('news.*') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                         </a>
 
                         @if(session('customer_authenticated'))
@@ -220,7 +225,7 @@
                     <div class="flex items-center gap-4 mb-6">
                         <!-- Logo Container -->
                         <div class="flex-shrink-0">
-                            <img src="{{ asset('images/nocis logo.png') }}"
+                            <img src="{{ asset('images/Logo ARISE PNG.png') }}"
                                 alt="NOC Indonesia Logo"
                                 class="w-96 h-auto object-contain">
                         </div>

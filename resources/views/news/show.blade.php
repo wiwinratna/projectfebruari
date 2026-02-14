@@ -56,7 +56,7 @@
 
       @if($post->source_url)
         <div class="mt-6">
-          <a href="{{ $post->source_url }}" target="_blank"
+           <a href="{{ $post->source_url }}" target="_blank" rel="noopener noreferrer"
              class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white font-semibold">
             Source Link <i class="fas fa-arrow-right text-sm"></i>
           </a>

@@ -1,77 +1,89 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useMotionValue, useTransform } from 'motion/react';
 
+interface JobItem {
+  id: number;
+  title: string;
+  category: string;
+  location: string;
+  type: string;
+  applicants: number;
+  deadline: string;
+  slotsTotal: number;
+  slotsFilled: number;
+  color: string;
+  ringColor: string;
+}
+
 export function JobsSection() {
-  const jobs = [
-    {
-      id: 1,
-      title: "Liaison Officer - Athletics",
-      category: "Track & Field",
-      location: "Jakarta, Indonesia",
-      type: "Contract",
-      applicants: 45,
-      deadline: "Feb 15, 2026",
-      color: "from-blue-500 to-blue-600",
-      ringColor: "bg-blue-600"
-    },
-    {
-      id: 2,
-      title: "Liaison Officer - Swimming",
-      category: "Aquatics",
-      location: "Bali, Indonesia",
-      type: "Contract",
-      applicants: 32,
-      deadline: "Feb 20, 2026",
-      color: "from-yellow-400 to-yellow-500",
-      ringColor: "bg-yellow-400"
-    },
-    {
-      id: 3,
-      title: "Liaison Officer - Basketball",
-      category: "Team Sports",
-      location: "Surabaya, Indonesia",
-      type: "Contract",
-      applicants: 28,
-      deadline: "Feb 25, 2026",
-      color: "from-gray-800 to-black",
-      ringColor: "bg-black"
-    },
-    {
-      id: 4,
-      title: "Liaison Officer - Badminton",
-      category: "Racquet Sports",
-      location: "Bandung, Indonesia",
-      type: "Contract",
-      applicants: 51,
-      deadline: "Feb 18, 2026",
-      color: "from-green-500 to-green-600",
-      ringColor: "bg-green-600"
-    },
-    {
-      id: 5,
-      title: "Liaison Officer - Football",
-      category: "Team Sports",
-      location: "Jakarta, Indonesia",
-      type: "Contract",
-      applicants: 39,
-      deadline: "Feb 22, 2026",
-      color: "from-red-500 to-red-600",
-      ringColor: "bg-red-600"
-    },
-    {
-      id: 6,
-      title: "Liaison Officer - Gymnastics",
-      category: "Artistic Sports",
-      location: "Yogyakarta, Indonesia",
-      type: "Contract",
-      applicants: 42,
-      deadline: "Feb 28, 2026",
-      color: "from-cyan-500 to-blue-500",
-      ringColor: "bg-cyan-500"
-    }
+  const [jobs, setJobs] = useState<JobItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const colorSchemes = [
+    { color: "from-blue-500 to-blue-600", ringColor: "bg-blue-600" },
+    { color: "from-yellow-400 to-yellow-500", ringColor: "bg-yellow-400" },
+    { color: "from-gray-800 to-black", ringColor: "bg-black" },
+    { color: "from-green-500 to-green-600", ringColor: "bg-green-600" },
+    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
+    { color: "from-cyan-500 to-blue-500", ringColor: "bg-cyan-500" }
   ];
 
-  const CardWithParallax = ({ job, index }: { job: typeof jobs[0], index: number }) => {
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  useEffect(() => {
+    const metaTag = document.querySelector('meta[name="auth-user"]');
+    const content = metaTag?.getAttribute('content');
+
+    if (!content || content === 'null') {
+      setIsLoggedIn(false);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(content);
+      setIsLoggedIn(Boolean(parsed?.id));
+    } catch {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
+  const fetchJobs = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/jobs');
+      if (!response.ok) throw new Error('Failed to fetch jobs');
+      const result = await response.json();
+
+      if (result.success && result.data) {
+        const jobsWithColors = result.data.map((item: any, index: number) => ({
+          id: item.id,
+          title: item.title,
+          category: item.job_category ?? 'Uncategorized',
+          location: item.city ?? 'Indonesia',
+          type: item.event ?? 'Event',
+          applicants: item.applicant_count ?? 0,
+          deadline: item.application_deadline ?? 'TBD',
+          slotsTotal: item.slots_total ?? 0,
+          slotsFilled: item.slots_filled ?? 0,
+          ...colorSchemes[index % colorSchemes.length]
+        }));
+        setJobs(jobsWithColors);
+      }
+      setError(null);
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+      setJobs([]);
+      setError(err instanceof Error ? err.message : 'Failed to load jobs');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const CardWithParallax = ({ job, index }: { job: JobItem; index: number }) => {
     const x = useMotionValue(0);
     const y = useMotionValue(0);
     const rotateX = useTransform(y, [-100, 100], [10, -10]);
@@ -126,19 +138,24 @@ export function JobsSection() {
           </div>
 
           {/* Stats with Gold Accents */}
-          <div className="flex items-center justify-between mb-4 pb-4 border-b-2 border-gray-100">
+          <div className="space-y-2 mb-4 pb-4 border-b-2 border-gray-100">
             <div className="flex items-center gap-2 text-gray-600">
               <span className="font-bold text-red-600">👥</span>
               <span className="text-sm font-bold">{job.applicants} applicants</span>
             </div>
             <div className="flex items-center gap-2 text-gray-600">
-              <span className="font-bold text-red-600">⏰</span>
+              <span className="font-bold text-red-600">📅</span>
               <span className="text-sm font-medium">{job.deadline}</span>
+            </div>
+            <div className="flex items-center gap-2 text-gray-600">
+              <span className="font-bold text-red-600">👤</span>
+              <span className="text-sm font-medium">{job.slotsFilled}/{job.slotsTotal} slots</span>
             </div>
           </div>
 
           {/* Apply Button with Premium Effect */}
-          <motion.button
+          <motion.a
+            href={isLoggedIn ? `/jobs/${job.id}` : '/login'}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={`w-full py-3.5 bg-linear-to-r ${job.color} text-white font-bold rounded-xl shadow-lg hover:shadow-2xl transition-all flex items-center justify-center gap-2 group/btn relative overflow-hidden`}
@@ -150,7 +167,7 @@ export function JobsSection() {
               transition={{ duration: 0.6 }}
             />
             <span className="relative z-10">Apply Now →</span>
-          </motion.button>
+          </motion.a>
         </div>
 
         {/* Floating Sparkle Effect */}
@@ -325,11 +342,38 @@ export function JobsSection() {
         </motion.div>
 
         {/* Jobs Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {jobs.map((job, index) => (
-            <CardWithParallax key={job.id} job={job} index={index} />
-          ))}
-        </div>
+        {loading && (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-yellow-400 border-t-transparent"></div>
+            <p className="mt-4 text-gray-300">Loading jobs...</p>
+          </div>
+        )}
+
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-red-400 font-semibold mb-4">{error}</p>
+            <button
+              onClick={fetchJobs}
+              className="px-6 py-2 bg-yellow-400 text-gray-900 rounded-lg hover:bg-yellow-300 transition-colors font-semibold"
+            >
+              Retry
+            </button>
+          </div>
+        )}
+
+        {!loading && !error && jobs.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-gray-400">No jobs available at the moment.</p>
+          </div>
+        )}
+
+        {!loading && !error && jobs.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {jobs.map((job, index) => (
+              <CardWithParallax key={job.id} job={job} index={index} />
+            ))}
+          </div>
+        )}
 
         {/* View All Jobs Button */}
         <motion.div

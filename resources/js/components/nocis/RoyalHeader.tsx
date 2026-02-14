@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'motion/react';
 
 export function RoyalHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userName, setUserName] = useState('');
   const { scrollY } = useScroll();
   const headerOpacity = useTransform(scrollY, [0, 100], [0.95, 1]);
   const headerShadow = useTransform(
@@ -10,6 +12,23 @@ export function RoyalHeader() {
     [0, 100],
     ['0 0 0 rgba(0,0,0,0)', '0 10px 40px rgba(0, 133, 199, 0.2)']
   );
+
+  useEffect(() => {
+    // Check if user is logged in by looking for auth meta tag
+    const metaTag = document.querySelector('meta[name="auth-user"]');
+    if (metaTag) {
+      const userData = metaTag.getAttribute('content');
+      if (userData && userData !== 'null') {
+        try {
+          const user = JSON.parse(decodeURIComponent(userData));
+          setUserName(user.name || user.email || 'User');
+          setIsLoggedIn(true);
+        } catch (e) {
+          setIsLoggedIn(false);
+        }
+      }
+    }
+  }, []);
 
   return (
     <motion.header
@@ -26,36 +45,18 @@ export function RoyalHeader() {
         <div className="max-w-7xl mx-auto bg-white/10 backdrop-blur-2xl border border-white/20 rounded-xl shadow-2xl">
           <div className="px-4 py-2.5">
             <div className="flex items-center justify-between">
-              {/* Logo with Olympic Rings Style */}
+              {/* Logo */}
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="flex items-center gap-2 cursor-pointer"
               >
-                <motion.div
-                  className="relative w-10 h-10"
+                <motion.img
+                  src="/images/Logo%20ARISE%20PNG.png"
+                  alt="ARISE"
+                  className="h-10 w-auto"
                   whileHover={{ rotate: 360 }}
                   transition={{ duration: 0.8 }}
-                >
-                  {/* Olympic Rings Inspired Logo */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-9 h-9 rounded-full bg-linear-to-br from-blue-600 to-blue-700 flex items-center justify-center shadow-olympic olympic-pulse">
-                      <span className="text-white font-black text-base">A</span>
-                    </div>
-                  </div>
-                  {/* Mini Olympic Rings */}
-                  <div className="absolute -top-0.5 -right-0.5 flex gap-0.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 border border-yellow-500"></div>
-                    <div className="w-1.5 h-1.5 rounded-full bg-red-600 border border-red-700"></div>
-                  </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 flex gap-0.5">
-                    <div className="w-1.5 h-1.5 rounded-full bg-green-600 border border-green-700"></div>
-                  </div>
-                </motion.div>
-                <div>
-                  <h1 className="text-xl font-black text-white drop-shadow-lg">
-                    ARISE
-                  </h1>
-                </div>
+                />
               </motion.div>
 
               {/* Desktop Navigation */}
@@ -84,22 +85,59 @@ export function RoyalHeader() {
 
               {/* Right Actions */}
               <div className="flex items-center gap-2.5">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => window.location.href = '/login'}
-                  className="hidden md:flex items-center gap-2 px-5 py-2 bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold rounded-full relative overflow-hidden shadow-lg text-sm cursor-pointer"
-                >
-                  <span className="relative z-10">Login</span>
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => window.location.href = '/register'}
-                  className="hidden md:flex items-center gap-2 px-5 py-2 btn-olympic text-white font-bold rounded-full relative overflow-hidden shadow-lg text-sm cursor-pointer"
-                >
-                  <span className="relative z-10">Sign Up</span>
-                </motion.button>
+                {!isLoggedIn ? (
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => window.location.href = '/login'}
+                      className="hidden md:flex items-center gap-2 px-5 py-2 bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold rounded-full relative overflow-hidden shadow-lg text-sm cursor-pointer"
+                    >
+                      <span className="relative z-10">Login</span>
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => window.location.href = '/register'}
+                      className="hidden md:flex items-center gap-2 px-5 py-2 btn-olympic text-white font-bold rounded-full relative overflow-hidden shadow-lg text-sm cursor-pointer"
+                    >
+                      <span className="relative z-10">Sign Up</span>
+                    </motion.button>
+                  </>
+                ) : (
+                  <>
+                    <motion.a
+                      href="/dashboard/profile"
+                      className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/20 rounded-full"
+                      whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.3)' }}
+                    >
+                      <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                        {userName.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-white font-semibold text-sm hidden lg:inline">{userName}</span>
+                    </motion.a>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        // Get CSRF token from meta tag
+                        const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                        fetch('/logout', {
+                          method: 'POST',
+                          headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': token || ''
+                          }
+                        }).then(() => {
+                          window.location.href = '/';
+                        });
+                      }}
+                      className="hidden md:flex items-center gap-2 px-5 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full relative overflow-hidden shadow-lg text-sm cursor-pointer"
+                    >
+                      <span className="relative z-10">Logout</span>
+                    </motion.button>
+                  </>
+                )}
                 {/* Mobile Menu Toggle */}
                 <button
                   onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -134,18 +172,52 @@ export function RoyalHeader() {
                   <a className="text-white/90 hover:text-white font-semibold transition-colors py-2" href="#news">
                     News
                   </a>
-                  <button
-                    onClick={() => window.location.href = '/login'}
-                    className="w-full px-6 py-2.5 bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold rounded-full"
-                  >
-                    Login
-                  </button>
-                  <button
-                    onClick={() => window.location.href = 'resources\views\auth\register.blade.php  '}
-                    className="w-full px-6 py-2.5 btn-olympic text-white font-bold rounded-full flex items-center justify-center gap-2"
-                    >
-                    Apply Now
-                  </button>
+                  {!isLoggedIn ? (
+                    <>
+                      <button
+                        onClick={() => window.location.href = '/login'}
+                        className="w-full px-6 py-2.5 bg-linear-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white font-bold rounded-full"
+                      >
+                        Login
+                      </button>
+                      <button
+                        onClick={() => window.location.href = '/register'}
+                        className="w-full px-6 py-2.5 btn-olympic text-white font-bold rounded-full flex items-center justify-center gap-2"
+                      >
+                        Sign Up
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <a
+                        href="/dashboard/profile"
+                        className="w-full flex items-center gap-3 px-4 py-3 bg-white/20 rounded-full"
+                      >
+                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
+                          {userName.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="text-white font-semibold text-sm">{userName}</span>
+                      </a>
+                      <button
+                        onClick={() => {
+                          // Get CSRF token from meta tag
+                          const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                          fetch('/logout', {
+                            method: 'POST',
+                            headers: {
+                              'Content-Type': 'application/json',
+                              'X-CSRF-TOKEN': token || ''
+                            }
+                          }).then(() => {
+                            window.location.href = '/';
+                          });
+                        }}
+                        className="w-full px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-full"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  )}
                 </nav>
               </motion.div>
             )}
