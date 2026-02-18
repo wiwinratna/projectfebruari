@@ -30,7 +30,7 @@ class EventController extends Controller
         $searchQuery = $request->get('search');
         $statusFilter = $request->get('status');
         $showCompleted = $request->get('show_completed', false);
-        
+
         // Set default status filter
         // If there's a search query, default to 'all' to search across all statuses
         if (empty($statusFilter) && !$showCompleted) {
@@ -112,13 +112,13 @@ class EventController extends Controller
 
         $calendarMonth = now()->copy();
         $calendarDays = collect(range(1, $calendarMonth->daysInMonth()));
-        
+
         // Prepare event data untuk calendar (group events by date) - include ALL events for calendar
         $eventsByDate = [];
         $allEventsForCalendar = Event::forAdmin()
             ->with(['sports', 'city'])
             ->get();
-            
+
         foreach ($allEventsForCalendar as $event) {
             if ($event->start_at) {
                 $dateKey = $event->start_at->format('Y-m-d');
@@ -195,7 +195,7 @@ class EventController extends Controller
         $event->accessCodes()->delete(); // aman biar bersih dulu
         $event->accessCodes()->createMany($codes);
 
-        
+
         // Automatically calculate and update status based on dates
         EventStatusService::updateStatus($event);
 
@@ -300,7 +300,7 @@ class EventController extends Controller
         // Check if event has related data that prevents deletion
         $applicationsCount = $event->applications()->count();
         $workerOpeningsCount = $event->workerOpenings()->count();
-        
+
         if ($applicationsCount > 0 || $workerOpeningsCount > 0) {
             $issues = [];
             if ($applicationsCount > 0) {
@@ -309,9 +309,9 @@ class EventController extends Controller
             if ($workerOpeningsCount > 0) {
                 $issues[] = $workerOpeningsCount . ' worker openings';
             }
-            
+
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Cannot delete event that has ' . implode(' and ', $issues)
             ], 422);
         }
@@ -320,6 +320,38 @@ class EventController extends Controller
         $event->delete();
 
         return response()->json(['success' => true, 'message' => 'Event "' . $eventName . '" deleted successfully']);
+    }
+
+    /**
+     * API: Get active events (for React frontend)
+     */
+    public function apiIndex()
+    {
+        $events = Event::active()
+            ->with('city')
+            ->withCount('workerOpenings')
+            ->orderBy('start_at')
+            ->take(6)
+            ->get()
+            ->map(function ($event) {
+                return [
+                    'id' => $event->id,
+                    'title' => $event->title,
+                    'start_at' => $event->start_at?->toIso8601String(),
+                    'end_at' => $event->end_at?->toIso8601String(),
+                    'venue' => $event->venue,
+                    'city' => $event->city?->name,
+                    'status' => $event->status,
+                    'stage' => $event->stage,
+                    'worker_openings_count' => $event->worker_openings_count ?? 0,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $events,
+            'total' => count($events),
+        ]);
     }
 
     private function validatedEventData(Request $request, ?Event $event = null): array

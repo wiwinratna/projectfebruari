@@ -27,7 +27,7 @@ class JobController extends Controller
         $jobs = $query->paginate(10);
 
         $filterData = $this->getFilterData();
-        
+
         // Get saved job IDs for authenticated customer
         $savedJobIds = [];
         if (session('customer_authenticated') && session('customer_id')) {
@@ -92,6 +92,9 @@ class JobController extends Controller
             abort(404, 'Job is not currently accepting applications');
         }
 
+        // Eager load relationships to avoid lazy loading issues
+        $job->load('event.city', 'jobCategory', 'applications');
+
         // Decode requirements JSON field to array for the view
         if (is_string($job->requirements)) {
             $job->requirements = json_decode($job->requirements, true) ?: [];
@@ -127,7 +130,7 @@ class JobController extends Controller
         if ($user->profile_completion < 50) {
             if ($request->wantsJson()) {
                 return response()->json([
-                    'success' => false, 
+                    'success' => false,
                     'message' => 'Your profile is incomplete (' . $user->profile_completion . '%). Please complete at least 50% of your profile settings to apply.'
                 ]);
             }
@@ -174,8 +177,8 @@ class JobController extends Controller
         // Wait, if I change this, does it break anything?
         // Let's assume the ADMIN controller handles the increment on approval.
         // I will remove the increment here to be safe and consistent with "Approved Limit".
-        
-        /* 
+
+        /*
         if ($job->slots_filled < $job->slots_total) {
             $job->increment('slots_filled');
         }
@@ -200,6 +203,75 @@ class JobController extends Controller
             ->orderByDesc('created_at')
             ->take(3)
             ->get();
+    }
+
+    /**
+     * API: Get list of job openings (for React frontend)
+     */
+    public function apiIndex()
+    {
+        $jobs = WorkerOpening::with(['event.city', 'jobCategory'])
+            ->where('status', 'open')
+            ->where('application_deadline', '>', now())
+            ->whereColumn('slots_filled', '<', 'slots_total')
+            ->orderByDesc('created_at')
+            ->take(6)
+            ->get()
+            ->map(function($job) {
+                return [
+                    'id' => $job->id,
+                    'title' => $job->title,
+                    'description' => substr($job->description ?? '', 0, 150) . '...',
+                    'job_category' => $job->jobCategory?->name ?? 'Uncategorized',
+                    'city' => $job->event?->city?->name ?? 'Indonesia',
+                    'event' => $job->event?->title ?? 'Event TBD',
+                    'slots_total' => $job->slots_total,
+                    'slots_filled' => $job->slots_filled,
+                    'application_deadline' => $job->application_deadline?->format('Y-m-d') ?? 'TBD',
+                    'applicant_count' => $job->applications()->count() ?? 0,
+                ];
+            });
+
+        return response()->json([
+            'success' => true,
+            'data' => $jobs,
+            'total' => count($jobs)
+        ]);
+    }
+
+    /**
+     * API: Get single job opening (for React frontend)
+     */
+    public function apiShow(WorkerOpening $job)
+    {
+        if ($job->status !== 'open') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Job is not currently accepting applications'
+            ], 404);
+        }
+
+        // Ensure relationships are loaded
+        $job->load('event.city', 'jobCategory', 'applications');
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'id' => $job->id,
+                'title' => $job->title,
+                'description' => $job->description,
+                'requirements' => is_string($job->requirements) ? json_decode($job->requirements, true) : $job->requirements,
+                'benefits' => $job->benefits,
+                'job_category' => $job->jobCategory?->name ?? 'Uncategorized',
+                'city' => $job->event?->city?->name ?? 'Indonesia',
+                'event' => $job->event?->title ?? 'Event TBD',
+                'venue' => $job->event?->venue ?? 'TBD',
+                'slots_total' => $job->slots_total,
+                'slots_filled' => $job->slots_filled,
+                'application_deadline' => $job->application_deadline?->format('Y-m-d H:i') ?? 'TBD',
+                'applicant_count' => $job->applications()->count() ?? 0,
+            ]
+        ]);
     }
 
 }

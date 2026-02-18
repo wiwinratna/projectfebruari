@@ -23,7 +23,7 @@ use App\Services\SportsNewsRssService;
 // Landing page route serving the React app
 Route::get('/', function () {
     return view('app');
-});
+})->name('landing');
 
 
 // Public Job Routes (accessible without login)
@@ -36,6 +36,17 @@ Route::get('/news/{news}', [NewsPostController::class, 'publicShow'])->name('new
 
 // Customer Authentication Routes
 Route::get('/login', function () {
+    $redirect = request()->get('redirect');
+    if (
+        is_string($redirect)
+        && $redirect !== ''
+        && str_starts_with($redirect, '/')
+        && !str_starts_with($redirect, '//')
+        && !str_contains($redirect, '\\')
+    ) {
+        session(['intended_url' => $redirect]);
+    }
+
     return view('auth.login');
 })->name('login');
 
@@ -69,7 +80,7 @@ Route::post('/login', function () {
     }
 
     return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
-})->middleware('web')->name('login.submit');
+})->middleware(['web', 'throttle:login'])->name('login.submit');
 
 Route::get('/register', function () {
     return view('auth.register');
@@ -118,7 +129,13 @@ Route::get('/password/reset', function () {
 
 // Customer logout
 Route::post('/logout', function () {
-    session()->forget(['customer_authenticated', 'customer_username']);
+    session()->forget(['customer_authenticated', 'customer_username', 'customer_id', 'customer_login_time']);
+
+    // Handle AJAX requests
+    if (request()->wantsJson()) {
+        return response()->json(['success' => true, 'message' => 'Logged out successfully']);
+    }
+
     return redirect('/jobs');
 })->name('logout');
 

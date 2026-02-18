@@ -122,7 +122,8 @@
       <div class="mt-6 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         @forelse($apiNews as $item)
           @php
-            $href = $item['url'] ?? '#';
+            $hrefRaw = $item['url'] ?? '#';
+            $href = (is_string($hrefRaw) && preg_match('/^https?:\/\//i', $hrefRaw)) ? $hrefRaw : '#';
             $title = $item['title'] ?? '-';
             $excerpt = $item['excerpt'] ?? '';
             $source = $item['source'] ?? 'Sports';

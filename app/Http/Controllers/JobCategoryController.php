@@ -112,7 +112,7 @@ class JobCategoryController extends Controller
         $openingsCount = $category->workerOpenings()->count();
         if ($openingsCount > 0) {
             return response()->json([
-                'success' => false, 
+                'success' => false,
                 'message' => 'Cannot delete category that is being used by ' . $openingsCount . ' worker openings'
             ], 422);
         }
@@ -120,5 +120,24 @@ class JobCategoryController extends Controller
         $category->delete();
 
         return response()->json(['success' => true, 'message' => 'Category deleted successfully']);
+    }
+
+    /**
+     * API: Get all active job categories
+     */
+    public function apiIndex()
+    {
+        $categories = JobCategory::where('is_active', true)
+            ->orderBy('name')
+            ->get()
+            ->map(function ($category) {
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'description' => $category->description,
+                ];
+            });
+
+        return response()->json(['success' => true, 'data' => $categories, 'total' => count($categories)]);
     }
 }

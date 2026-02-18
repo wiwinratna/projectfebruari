@@ -1,7 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 
 export function FeatureCards() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    const metaTag = document.querySelector('meta[name="auth-user"]');
+    const content = metaTag?.getAttribute('content');
+
+    if (!content || content === 'null') {
+      setIsLoggedIn(false);
+      return;
+    }
+
+    try {
+      const parsed = JSON.parse(content);
+      setIsLoggedIn(Boolean(parsed?.id));
+    } catch {
+      setIsLoggedIn(false);
+    }
+  }, []);
+
   const features = [
     {
       emoji: "🛡️",
@@ -255,13 +274,14 @@ export function FeatureCards() {
             <p className="text-gray-600 max-w-xl">
               Dapatkan semua benefits di atas dan mulai perjalanan karir internasional Anda bersama ARISE
             </p>
-            <motion.button
+            <motion.a
+              href={isLoggedIn ? '/jobs' : '/login?redirect=/jobs'}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-10 py-4 btn-olympic text-white font-bold rounded-full shadow-olympic hover:shadow-olympic-hover flex items-center gap-2"
             >
               Apply Now
-            </motion.button>
+            </motion.a>
           </div>
         </motion.div>
       </div>

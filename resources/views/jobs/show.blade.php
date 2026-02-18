@@ -34,27 +34,27 @@
                         </span>
                     @endif
                 </div>
-                
+
                 <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight mb-4 leading-tight">
                     {{ $job->title }}
                 </h1>
-                
+
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 text-sm text-gray-500 font-medium">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-trophy text-red-500 text-xs"></i>
-                        <span>{{ $job->event->title }}</span>
+                        <span>{{ $job->event?->title ?? 'Event' }}</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <i class="fas fa-map-marker-alt text-red-500 text-xs"></i>
-                        <span>{{ $job->event->city->name }}, Indonesia</span>
+                        <span>{{ $job->event?->city?->name ?? 'Indonesia' }}, Indonesia</span>
                     </div>
                     <div class="flex items-center gap-2">
                         <i class="far fa-calendar-alt text-red-500 text-xs"></i>
-                        <span>{{ $job->event->start_at->format('d M Y') }} - {{ $job->event->end_at->format('d M Y') }}</span>
+                        <span>{{ $job->event?->start_at?->format('d M Y') ?? 'TBD' }} - {{ $job->event?->end_at?->format('d M Y') ?? 'TBD' }}</span>
                     </div>
                 </div>
             </div>
-            
+
             <!-- Quick Actions (Mobile Only) - Removed as per feedback -->
         </div>
     </div>
@@ -63,15 +63,15 @@
 <!-- Main Content -->
 <div class="container mx-auto px-4 max-w-7xl pb-20">
     <div class="grid lg:grid-cols-12 gap-8 lg:gap-12">
-        
+
         <!-- Left Column: Details (8 cols) -->
         <div class="lg:col-span-8 space-y-10">
-            
+
             <!-- Overview Grid -->
             <div class="grid sm:grid-cols-2 gap-4">
                 <div class="p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
                     <p class="text-xs font-medium text-gray-500 uppercase mb-1 tracking-wide">Venue</p>
-                    <p class="font-medium text-gray-800">{{ $job->event->venue }}</p>
+                    <p class="font-medium text-gray-800">{{ $job->event?->venue ?? 'TBD' }}</p>
                 </div>
                 <div class="p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
                     <p class="text-xs font-medium text-gray-500 uppercase mb-1 tracking-wide">Application Deadline</p>
@@ -80,7 +80,7 @@
                 <div class="p-4 rounded-xl border border-gray-100 bg-white shadow-sm hover:shadow-md transition-shadow">
                     <p class="text-xs font-medium text-gray-500 uppercase mb-1 tracking-wide">Slots Available</p>
                     <p class="font-medium text-gray-800">
-                        <span class="text-green-600 font-semibold">{{ $job->slots_total - $job->slots_filled }}</span> 
+                        <span class="text-green-600 font-semibold">{{ $job->slots_total - $job->slots_filled }}</span>
                         <span class="text-gray-400 text-xs font-normal">/ {{ $job->slots_total }} total</span>
                     </p>
                 </div>
@@ -102,7 +102,7 @@
                     {!! nl2br(e($job->description)) !!}
                 </div>
             </section>
-            
+
             <hr class="border-gray-100">
 
             <!-- Requirements -->
@@ -154,13 +154,13 @@
         <div class="lg:col-span-4">
             <div id="action-card" class="bg-white rounded-2xl p-6 shadow-xl shadow-gray-200/50 sticky top-24 lg:-mt-32 relative z-20">
                 <h3 class="font-bold text-gray-900 mb-2">Interested?</h3>
-                <p class="text-sm text-gray-500 mb-6 leading-relaxed">Don't miss out on this opportunity to be part of the NOCIS team for {{ $job->event->title }}.</p>
+                <p class="text-sm text-gray-500 mb-6 leading-relaxed">Don't miss out on this opportunity to be part of the NOCIS team for {{ $job->event?->title ?? 'this event' }}.</p>
 
                 @php
                     $isCustomerAuthenticated = session('customer_authenticated');
                     $customerId = session('customer_id');
                     $hasApplied = false;
-                    
+
                     if ($isCustomerAuthenticated && $customerId) {
                         $hasApplied = \App\Models\Application::where('worker_opening_id', $job->id)
                             ->where('user_id', $customerId)
@@ -229,7 +229,7 @@
                             <h3 class="text-lg font-bold leading-6 text-gray-900" id="modal-title">Apply for {{ $job->title }}</h3>
                             <div class="mt-2">
                                 <p class="text-sm text-gray-500">Please answer a few questions to complete your application.</p>
-                                
+
                                 <form id="applicationForm" onsubmit="event.preventDefault(); submitApplication();" class="mt-4 space-y-4">
                                     <div>
                                         <label for="motivation" class="block text-sm font-semibold text-gray-700 mb-1">
@@ -241,7 +241,7 @@
                                     </div>
 
 
-                                    
+
                                     <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-3">
                                         <button type="submit" id="submitBtn" class="inline-flex w-full justify-center rounded-xl bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 sm:w-auto">
                                             Submit Application
@@ -277,7 +277,7 @@
     function submitApplication() {
         const submitBtn = document.getElementById('submitBtn');
         const applyButton = document.getElementById('applyButton'); // Main page button
-        
+
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
 
@@ -301,7 +301,7 @@
             if (data.success) {
                 // Success State
                 alert('Application submitted successfully!');
-                
+
                 // Update UI without reload
                 hideApplyModal();
                 if(applyButton) {
@@ -329,14 +329,14 @@
         const button = document.getElementById('saveBtn');
         const icon = button.querySelector('i');
         const isSaved = icon.classList.contains('fas'); // simple check state
-        
+
         // Disable button strictly during fetch
         button.disabled = true;
 
-        const url = isSaved 
-            ? `/dashboard/jobs/${jobId}/unsave` 
+        const url = isSaved
+            ? `/dashboard/jobs/${jobId}/unsave`
             : `/dashboard/jobs/${jobId}/save`;
-        
+
         const method = isSaved ? 'DELETE' : 'POST';
 
         fetch(url, {

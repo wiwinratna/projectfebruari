@@ -11,7 +11,7 @@
                     @else
                     <a href="{{ route('jobs.index') }}" class="flex items-center justify-center">
                         @endif
-                        <img src="{{ asset('images/Logo NOA Indonesia.png') }}?v={{ time() }}"
+                        <img src="{{ asset('images/Logo ARISE PNG.png') }}?v={{ time() }}"
                             alt="NOA Indonesia"
                             class="logo-img block">
                     </a>

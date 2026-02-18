@@ -282,13 +282,14 @@ export function FlowSection() {
           viewport={{ once: true }}
           className="text-center mt-16"
         >
-          <motion.button
+          <motion.a
+            href="/register"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="px-10 py-5 bg-linear-to-r from-red-600 to-red-700 text-white font-bold rounded-full hover:shadow-2xl transition-all text-lg"
           >
             Start Registration Now
-          </motion.button>
+          </motion.a>
         </motion.div>
 
         {/* Info Box */}
