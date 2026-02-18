@@ -14,7 +14,7 @@ Tambah Disiplin <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-ful
             <h2 class="text-2xl font-bold text-gray-800">Create New Disiplin</h2>
             <p class="text-gray-600 mt-1">Add a new sport discipline for this event</p>
         </div>
-        <a href="{{ route('admin.events.disciplins.index', $event) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('admin.master-data.disciplins.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-arrow-left mr-2"></i> Back to Disiplin
         </a>
     </div>
@@ -25,7 +25,7 @@ Tambah Disiplin <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-ful
             <h3 class="text-lg font-semibold text-gray-800">Disiplin Information</h3>
         </div>
 
-        <form action="{{ route('admin.events.disciplins.store', $event) }}" method="POST" class="p-6 space-y-6">
+        <form action="{{ route('admin.master-data.disciplins.store') }}" method="POST" class="p-6 space-y-6">
             @csrf
 
             {{-- Form Fields --}}
@@ -101,7 +101,7 @@ Tambah Disiplin <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-ful
 
             {{-- Form Actions --}}
             <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                <a href="{{ route('admin.events.disciplins.index', $event) }}"
+                <a href="{{ route('admin.master-data.disciplins.index') }}"
                     class="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
                     Cancel
                 </a>

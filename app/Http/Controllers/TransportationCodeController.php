@@ -8,8 +8,16 @@ use Illuminate\Http\Request;
 
 class TransportationCodeController extends Controller
 {
-    public function index(Event $event)
+    private function getEvent(): Event
     {
+        $eventId = session('admin_event_id');
+        abort_unless($eventId, 403, 'Admin belum ditugaskan ke event.');
+        return Event::findOrFail($eventId);
+    }
+
+    public function index()
+    {
+        $event = $this->getEvent();
         $transportationCodes = $event->transportationCodes()
             ->orderBy('kode')
             ->get();
@@ -17,13 +25,16 @@ class TransportationCodeController extends Controller
         return view('menu.events.transportation-codes.index', compact('event', 'transportationCodes'));
     }
 
-    public function create(Event $event)
+    public function create()
     {
+        $event = $this->getEvent();
         return view('menu.events.transportation-codes.create', compact('event'));
     }
 
-    public function store(Request $request, Event $event)
+    public function store(Request $request)
     {
+        $event = $this->getEvent();
+
         $validated = $request->validate([
             'kode'       => 'required|string|max:50',
             'keterangan' => 'nullable|string|max:1000',
@@ -37,19 +48,21 @@ class TransportationCodeController extends Controller
         $event->transportationCodes()->create($validated);
 
         return redirect()
-            ->route('admin.events.transportation-codes.index', $event)
+            ->route('admin.master-data.transportation-codes.index')
             ->with('status', 'Kode transportasi berhasil ditambahkan.');
     }
 
-    public function edit(Event $event, TransportationCode $transportationCode)
+    public function edit(TransportationCode $transportationCode)
     {
+        $event = $this->getEvent();
         abort_unless($transportationCode->event_id === $event->id, 403);
 
         return view('menu.events.transportation-codes.edit', compact('event', 'transportationCode'));
     }
 
-    public function update(Request $request, Event $event, TransportationCode $transportationCode)
+    public function update(Request $request, TransportationCode $transportationCode)
     {
+        $event = $this->getEvent();
         abort_unless($transportationCode->event_id === $event->id, 403);
 
         $validated = $request->validate([
@@ -68,12 +81,13 @@ class TransportationCodeController extends Controller
         $transportationCode->update($validated);
 
         return redirect()
-            ->route('admin.events.transportation-codes.index', $event)
+            ->route('admin.master-data.transportation-codes.index')
             ->with('status', 'Kode transportasi berhasil diperbarui.');
     }
 
-    public function destroy(Event $event, TransportationCode $transportationCode)
+    public function destroy(TransportationCode $transportationCode)
     {
+        $event = $this->getEvent();
         abort_unless($transportationCode->event_id === $event->id, 403);
 
         $transportationCode->delete();

@@ -8,8 +8,16 @@ use Illuminate\Http\Request;
 
 class VenueAccessController extends Controller
 {
-    public function index(Event $event)
+    private function getEvent(): Event
     {
+        $eventId = session('admin_event_id');
+        abort_unless($eventId, 403, 'Admin belum ditugaskan ke event.');
+        return Event::findOrFail($eventId);
+    }
+
+    public function index()
+    {
+        $event = $this->getEvent();
         $venueAccesses = $event->venueAccesses()
             ->orderBy('nama_vanue')
             ->get();
@@ -17,13 +25,16 @@ class VenueAccessController extends Controller
         return view('menu.events.venue-accesses.index', compact('event', 'venueAccesses'));
     }
 
-    public function create(Event $event)
+    public function create()
     {
+        $event = $this->getEvent();
         return view('menu.events.venue-accesses.create', compact('event'));
     }
 
-    public function store(Request $request, Event $event)
+    public function store(Request $request)
     {
+        $event = $this->getEvent();
+
         $validated = $request->validate([
             'nama_vanue' => 'required|string|max:255',
             'keterangan' => 'nullable|string|max:1000',
@@ -32,19 +43,21 @@ class VenueAccessController extends Controller
         $event->venueAccesses()->create($validated);
 
         return redirect()
-            ->route('admin.events.venue-accesses.index', $event)
+            ->route('admin.master-data.venue-accesses.index')
             ->with('status', 'Venue access berhasil ditambahkan.');
     }
 
-    public function edit(Event $event, VenueAccess $venueAccess)
+    public function edit(VenueAccess $venueAccess)
     {
+        $event = $this->getEvent();
         abort_unless($venueAccess->event_id === $event->id, 403);
 
         return view('menu.events.venue-accesses.edit', compact('event', 'venueAccess'));
     }
 
-    public function update(Request $request, Event $event, VenueAccess $venueAccess)
+    public function update(Request $request, VenueAccess $venueAccess)
     {
+        $event = $this->getEvent();
         abort_unless($venueAccess->event_id === $event->id, 403);
 
         $validated = $request->validate([
@@ -55,12 +68,13 @@ class VenueAccessController extends Controller
         $venueAccess->update($validated);
 
         return redirect()
-            ->route('admin.events.venue-accesses.index', $event)
+            ->route('admin.master-data.venue-accesses.index')
             ->with('status', 'Venue access berhasil diperbarui.');
     }
 
-    public function destroy(Event $event, VenueAccess $venueAccess)
+    public function destroy(VenueAccess $venueAccess)
     {
+        $event = $this->getEvent();
         abort_unless($venueAccess->event_id === $event->id, 403);
 
         $venueAccess->delete();

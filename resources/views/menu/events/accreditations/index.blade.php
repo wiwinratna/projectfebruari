@@ -17,7 +17,7 @@ Akreditasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-
             <h2 class="text-2xl font-bold text-gray-800">Manage Akreditasi</h2>
             <p class="text-gray-600 mt-1">Kelola akreditasi untuk event ini</p>
         </div>
-        <a href="{{ route('admin.events.accreditations.create', $event) }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('admin.master-data.accreditations.create') }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-plus mr-2"></i> Tambah Akreditasi
         </a>
     </div>
@@ -63,7 +63,7 @@ Akreditasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-
                             <div class="text-sm text-gray-700">{{ Str::limit($accreditation->keterangan, 40) ?? '-' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('admin.events.accreditations.edit', [$event, $accreditation]) }}"
+                            <a href="{{ route('admin.master-data.accreditations.edit', $accreditation) }}"
                                 class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
@@ -103,7 +103,7 @@ Akreditasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-
             return;
         }
         showLoading();
-        fetch(`/admin/events/{{ $event->id }}/accreditations/${id}`, {
+        fetch(`/admin/master-data/accreditations/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken.getAttribute('content'),

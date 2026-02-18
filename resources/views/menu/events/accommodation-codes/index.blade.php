@@ -15,7 +15,7 @@ Kode Akomodasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full
             <h2 class="text-2xl font-bold text-gray-800">Manage Kode Akomodasi</h2>
             <p class="text-gray-600 mt-1">Kelola kode akomodasi untuk event ini</p>
         </div>
-        <a href="{{ route('admin.events.accommodation-codes.create', $event) }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('admin.master-data.accommodation-codes.create') }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-plus mr-2"></i> Tambah Kode
         </a>
     </div>
@@ -43,7 +43,7 @@ Kode Akomodasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full
                             <div class="text-sm text-gray-700">{{ $code->keterangan ?? '-' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('admin.events.accommodation-codes.edit', [$event, $code]) }}" class="text-blue-600 hover:text-blue-900 mr-3">
+                            <a href="{{ route('admin.master-data.accommodation-codes.edit', $code) }}" class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
                             <button onclick="deleteItem({{ $code->id }}, '{{ addslashes($code->kode) }}')" class="text-red-600 hover:text-red-900">
@@ -80,7 +80,7 @@ Kode Akomodasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full
             return;
         }
         showLoading();
-        fetch(`/admin/events/{{ $event->id }}/accommodation-codes/${id}`, {
+        fetch(`/admin/master-data/accommodation-codes/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken.getAttribute('content'),

@@ -12,7 +12,7 @@ Edit Venue Access <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-f
             <h2 class="text-2xl font-bold text-gray-800">Edit Venue Access</h2>
             <p class="text-gray-600 mt-1">Update venue access information</p>
         </div>
-        <a href="{{ route('admin.events.venue-accesses.index', $event) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('admin.master-data.venue-accesses.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-arrow-left mr-2"></i> Back to Venue Access
         </a>
     </div>
@@ -20,7 +20,7 @@ Edit Venue Access <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-f
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-800">Venue Access Information</h3>
         </div>
-        <form action="{{ route('admin.events.venue-accesses.update', [$event, $venueAccess]) }}" method="POST" class="p-6 space-y-6">
+        <form action="{{ route('admin.master-data.venue-accesses.update', $venueAccess) }}" method="POST" class="p-6 space-y-6">
             @csrf
             @method('PUT')
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -42,7 +42,7 @@ Edit Venue Access <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-f
                 </div>
             </div>
             <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                <a href="{{ route('admin.events.venue-accesses.index', $event) }}" class="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">Cancel</a>
+                <a href="{{ route('admin.master-data.venue-accesses.index') }}" class="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">Cancel</a>
                 <button type="submit" class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"><i class="fas fa-save mr-2"></i> Update Venue Access</button>
             </div>
         </form>

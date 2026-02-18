@@ -183,53 +183,6 @@ Event Details <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full 
                 @endif
             </div>
 
-            {{-- Master Data --}}
-            <div class="bg-white p-6 rounded-lg shadow">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">Master Data</h3>
-
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-                    <a href="{{ route('admin.events.venue-locations.index', $event) }}"
-                        class="flex items-center p-3 bg-gray-50 hover:bg-red-50 rounded-lg border border-gray-200 hover:border-red-200 transition">
-                        <i class="fas fa-map-marker-alt text-red-500 mr-3"></i>
-                        <span class="text-sm font-medium text-gray-700">Venue Locations</span>
-                    </a>
-                    <a href="{{ route('admin.events.jabatan.index', $event) }}"
-                        class="flex items-center p-3 bg-gray-50 hover:bg-red-50 rounded-lg border border-gray-200 hover:border-red-200 transition">
-                        <i class="fas fa-id-badge text-red-500 mr-3"></i>
-                        <span class="text-sm font-medium text-gray-700">Jabatan</span>
-                    </a>
-                    <a href="{{ route('admin.events.disciplins.index', $event) }}"
-                        class="flex items-center p-3 bg-gray-50 hover:bg-red-50 rounded-lg border border-gray-200 hover:border-red-200 transition">
-                        <i class="fas fa-trophy text-red-500 mr-3"></i>
-                        <span class="text-sm font-medium text-gray-700">Disiplin</span>
-                    </a>
-                    <a href="{{ route('admin.events.accreditations.index', $event) }}"
-                        class="flex items-center p-3 bg-gray-50 hover:bg-red-50 rounded-lg border border-gray-200 hover:border-red-200 transition">
-                        <i class="fas fa-certificate text-red-500 mr-3"></i>
-                        <span class="text-sm font-medium text-gray-700">Akreditasi</span>
-                    </a>
-                    <a href="{{ route('admin.events.accommodation-codes.index', $event) }}"
-                        class="flex items-center p-3 bg-gray-50 hover:bg-red-50 rounded-lg border border-gray-200 hover:border-red-200 transition">
-                        <i class="fas fa-bed text-red-500 mr-3"></i>
-                        <span class="text-sm font-medium text-gray-700">Kode Akomodasi</span>
-                    </a>
-                    <a href="{{ route('admin.events.transportation-codes.index', $event) }}"
-                        class="flex items-center p-3 bg-gray-50 hover:bg-red-50 rounded-lg border border-gray-200 hover:border-red-200 transition">
-                        <i class="fas fa-bus text-red-500 mr-3"></i>
-                        <span class="text-sm font-medium text-gray-700">Kode Transportasi</span>
-                    </a>
-                    <a href="{{ route('admin.events.zone-access-codes.index', $event) }}"
-                        class="flex items-center p-3 bg-gray-50 hover:bg-red-50 rounded-lg border border-gray-200 hover:border-red-200 transition">
-                        <i class="fas fa-shield-alt text-red-500 mr-3"></i>
-                        <span class="text-sm font-medium text-gray-700">Kode Zona Akses</span>
-                    </a>
-                    <a href="{{ route('admin.events.venue-accesses.index', $event) }}"
-                        class="flex items-center p-3 bg-gray-50 hover:bg-red-50 rounded-lg border border-gray-200 hover:border-red-200 transition">
-                        <i class="fas fa-door-open text-red-500 mr-3"></i>
-                        <span class="text-sm font-medium text-gray-700">Venue Access</span>
-                    </a>
-                </div>
-            </div>
 
             {{-- Contact Information --}}
             @if($event->instagram || $event->email)

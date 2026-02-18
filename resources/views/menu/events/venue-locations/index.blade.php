@@ -17,7 +17,7 @@ Venue Locations <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-ful
             <h2 class="text-2xl font-bold text-gray-800">Manage Venue Locations</h2>
             <p class="text-gray-600 mt-1">Kelola lokasi venue untuk event ini</p>
         </div>
-        <a href="{{ route('admin.events.venue-locations.create', $event) }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('admin.master-data.venue-locations.create') }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-plus mr-2"></i> Tambah Venue
         </a>
     </div>
@@ -57,7 +57,7 @@ Venue Locations <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-ful
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('admin.events.venue-locations.edit', [$event, $venue]) }}"
+                            <a href="{{ route('admin.master-data.venue-locations.edit', $venue) }}"
                                 class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
@@ -111,7 +111,7 @@ Venue Locations <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-ful
 
         showLoading();
 
-        fetch(`/admin/events/{{ $event->id }}/venue-locations/${id}`, {
+        fetch(`/admin/master-data/venue-locations/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken.getAttribute('content'),
