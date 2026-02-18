@@ -9,8 +9,16 @@ use Illuminate\Http\Request;
 
 class DisciplinController extends Controller
 {
-    public function index(Event $event)
+    private function getEvent(): Event
     {
+        $eventId = session('admin_event_id');
+        abort_unless($eventId, 403, 'Admin belum ditugaskan ke event.');
+        return Event::findOrFail($eventId);
+    }
+
+    public function index()
+    {
+        $event = $this->getEvent();
         $disciplins = $event->disciplins()
             ->with(['sport:id,name,code', 'venueLocation:id,nama'])
             ->orderBy('nama_disiplin')
@@ -19,8 +27,10 @@ class DisciplinController extends Controller
         return view('menu.events.disciplins.index', compact('event', 'disciplins'));
     }
 
-    public function create(Event $event)
+    public function create()
     {
+        $event = $this->getEvent();
+
         $sports = Sport::where('is_active', true)
             ->select('id', 'name', 'code')
             ->orderBy('name')
@@ -34,8 +44,10 @@ class DisciplinController extends Controller
         return view('menu.events.disciplins.create', compact('event', 'sports', 'venueLocations'));
     }
 
-    public function store(Request $request, Event $event)
+    public function store(Request $request)
     {
+        $event = $this->getEvent();
+
         $validated = $request->validate([
             'sport_id'          => 'required|integer|exists:sports,id',
             'venue_location_id' => 'required|integer|exists:venue_locations,id',
@@ -49,12 +61,13 @@ class DisciplinController extends Controller
         $event->disciplins()->create($validated);
 
         return redirect()
-            ->route('admin.events.disciplins.index', $event)
+            ->route('admin.master-data.disciplins.index')
             ->with('status', 'Disiplin berhasil ditambahkan.');
     }
 
-    public function edit(Event $event, Disciplin $disciplin)
+    public function edit(Disciplin $disciplin)
     {
+        $event = $this->getEvent();
         abort_unless($disciplin->event_id === $event->id, 403);
 
         $sports = Sport::where('is_active', true)
@@ -70,8 +83,9 @@ class DisciplinController extends Controller
         return view('menu.events.disciplins.edit', compact('event', 'disciplin', 'sports', 'venueLocations'));
     }
 
-    public function update(Request $request, Event $event, Disciplin $disciplin)
+    public function update(Request $request, Disciplin $disciplin)
     {
+        $event = $this->getEvent();
         abort_unless($disciplin->event_id === $event->id, 403);
 
         $validated = $request->validate([
@@ -87,12 +101,13 @@ class DisciplinController extends Controller
         $disciplin->update($validated);
 
         return redirect()
-            ->route('admin.events.disciplins.index', $event)
+            ->route('admin.master-data.disciplins.index')
             ->with('status', 'Disiplin berhasil diperbarui.');
     }
 
-    public function destroy(Event $event, Disciplin $disciplin)
+    public function destroy(Disciplin $disciplin)
     {
+        $event = $this->getEvent();
         abort_unless($disciplin->event_id === $event->id, 403);
 
         $disciplin->delete();

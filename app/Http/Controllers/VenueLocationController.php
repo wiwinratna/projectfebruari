@@ -8,8 +8,19 @@ use Illuminate\Http\Request;
 
 class VenueLocationController extends Controller
 {
-    public function index(Event $event)
+    /**
+     * Ambil event dari session admin yang sedang login.
+     */
+    private function getEvent(): Event
     {
+        $eventId = session('admin_event_id');
+        abort_unless($eventId, 403, 'Admin belum ditugaskan ke event.');
+        return Event::findOrFail($eventId);
+    }
+
+    public function index()
+    {
+        $event = $this->getEvent();
         $venueLocations = $event->venueLocations()
             ->withCount('disciplins')
             ->orderBy('nama')
@@ -18,13 +29,16 @@ class VenueLocationController extends Controller
         return view('menu.events.venue-locations.index', compact('event', 'venueLocations'));
     }
 
-    public function create(Event $event)
+    public function create()
     {
+        $event = $this->getEvent();
         return view('menu.events.venue-locations.create', compact('event'));
     }
 
-    public function store(Request $request, Event $event)
+    public function store(Request $request)
     {
+        $event = $this->getEvent();
+
         $validated = $request->validate([
             'gugus'     => 'required|string|max:255',
             'nama'      => 'required|string|max:255',
@@ -34,19 +48,21 @@ class VenueLocationController extends Controller
         $event->venueLocations()->create($validated);
 
         return redirect()
-            ->route('admin.events.venue-locations.index', $event)
+            ->route('admin.master-data.venue-locations.index')
             ->with('status', 'Venue location berhasil ditambahkan.');
     }
 
-    public function edit(Event $event, VenueLocation $venueLocation)
+    public function edit(VenueLocation $venueLocation)
     {
+        $event = $this->getEvent();
         abort_unless($venueLocation->event_id === $event->id, 403);
 
         return view('menu.events.venue-locations.edit', compact('event', 'venueLocation'));
     }
 
-    public function update(Request $request, Event $event, VenueLocation $venueLocation)
+    public function update(Request $request, VenueLocation $venueLocation)
     {
+        $event = $this->getEvent();
         abort_unless($venueLocation->event_id === $event->id, 403);
 
         $validated = $request->validate([
@@ -58,12 +74,13 @@ class VenueLocationController extends Controller
         $venueLocation->update($validated);
 
         return redirect()
-            ->route('admin.events.venue-locations.index', $event)
+            ->route('admin.master-data.venue-locations.index')
             ->with('status', 'Venue location berhasil diperbarui.');
     }
 
-    public function destroy(Event $event, VenueLocation $venueLocation)
+    public function destroy(VenueLocation $venueLocation)
     {
+        $event = $this->getEvent();
         abort_unless($venueLocation->event_id === $event->id, 403);
 
         if ($venueLocation->disciplins()->exists()) {

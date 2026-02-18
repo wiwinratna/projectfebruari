@@ -12,7 +12,7 @@ Tambah Kode Akomodasi <span class="bg-red-500 text-white text-sm px-2 py-1 round
             <h2 class="text-2xl font-bold text-gray-800">Create New Kode Akomodasi</h2>
             <p class="text-gray-600 mt-1">Add a new accommodation code for this event</p>
         </div>
-        <a href="{{ route('admin.events.accommodation-codes.index', $event) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('admin.master-data.accommodation-codes.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-arrow-left mr-2"></i> Back to Kode Akomodasi
         </a>
     </div>
@@ -20,7 +20,7 @@ Tambah Kode Akomodasi <span class="bg-red-500 text-white text-sm px-2 py-1 round
         <div class="px-6 py-4 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-800">Kode Akomodasi Information</h3>
         </div>
-        <form action="{{ route('admin.events.accommodation-codes.store', $event) }}" method="POST" class="p-6 space-y-6">
+        <form action="{{ route('admin.master-data.accommodation-codes.store') }}" method="POST" class="p-6 space-y-6">
             @csrf
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -41,7 +41,7 @@ Tambah Kode Akomodasi <span class="bg-red-500 text-white text-sm px-2 py-1 round
                 </div>
             </div>
             <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                <a href="{{ route('admin.events.accommodation-codes.index', $event) }}" class="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">Cancel</a>
+                <a href="{{ route('admin.master-data.accommodation-codes.index') }}" class="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">Cancel</a>
                 <button type="submit" class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors duration-200"><i class="fas fa-save mr-2"></i> Create Kode</button>
             </div>
         </form>

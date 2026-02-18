@@ -17,7 +17,7 @@ Disiplin <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2"
             <h2 class="text-2xl font-bold text-gray-800">Manage Disiplin</h2>
             <p class="text-gray-600 mt-1">Kelola disiplin olahraga untuk event ini</p>
         </div>
-        <a href="{{ route('admin.events.disciplins.create', $event) }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('admin.master-data.disciplins.create') }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-plus mr-2"></i> Tambah Disiplin
         </a>
     </div>
@@ -55,7 +55,7 @@ Disiplin <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2"
                             <div class="text-sm text-gray-700">{{ $disciplin->venueLocation->nama ?? '-' }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('admin.events.disciplins.edit', [$event, $disciplin]) }}"
+                            <a href="{{ route('admin.master-data.disciplins.edit', $disciplin) }}"
                                 class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
@@ -103,7 +103,7 @@ Disiplin <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2"
 
         showLoading();
 
-        fetch(`/admin/events/{{ $event->id }}/disciplins/${id}`, {
+        fetch(`/admin/master-data/disciplins/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken.getAttribute('content'),

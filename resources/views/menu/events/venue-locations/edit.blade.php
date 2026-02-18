@@ -14,7 +14,7 @@ Edit Venue Location <span class="bg-red-500 text-white text-sm px-2 py-1 rounded
             <h2 class="text-2xl font-bold text-gray-800">Edit Venue Location</h2>
             <p class="text-gray-600 mt-1">Update venue location information</p>
         </div>
-        <a href="{{ route('admin.events.venue-locations.index', $event) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('admin.master-data.venue-locations.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-arrow-left mr-2"></i> Back to Venue Locations
         </a>
     </div>
@@ -25,7 +25,7 @@ Edit Venue Location <span class="bg-red-500 text-white text-sm px-2 py-1 rounded
             <h3 class="text-lg font-semibold text-gray-800">Venue Location Information</h3>
         </div>
 
-        <form action="{{ route('admin.events.venue-locations.update', [$event, $venueLocation]) }}" method="POST" class="p-6 space-y-6">
+        <form action="{{ route('admin.master-data.venue-locations.update', $venueLocation) }}" method="POST" class="p-6 space-y-6">
             @csrf
             @method('PUT')
 
@@ -85,7 +85,7 @@ Edit Venue Location <span class="bg-red-500 text-white text-sm px-2 py-1 rounded
 
             {{-- Form Actions --}}
             <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                <a href="{{ route('admin.events.venue-locations.index', $event) }}"
+                <a href="{{ route('admin.master-data.venue-locations.index') }}"
                     class="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
                     Cancel
                 </a>

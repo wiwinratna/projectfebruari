@@ -56,6 +56,7 @@ class User extends Authenticatable
         'password',
         'username',
         'role',
+        'event_id',
     ];
 
     /**
@@ -102,5 +103,15 @@ class User extends Authenticatable
     public function certificates()
     {
         return $this->hasMany(\App\Models\UserCertificate::class);
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
     }
 }

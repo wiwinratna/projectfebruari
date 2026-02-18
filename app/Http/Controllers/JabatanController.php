@@ -7,12 +7,20 @@ use App\Models\Jabatan;
 use Illuminate\Http\Request;
 
 /**
- * CRUD Controller for Jabatan, scoped to an Event.
+ * CRUD Controller for Jabatan, scoped to admin's event via session.
  */
 class JabatanController extends Controller
 {
-    public function index(Event $event)
+    private function getEvent(): Event
     {
+        $eventId = session('admin_event_id');
+        abort_unless($eventId, 403, 'Admin belum ditugaskan ke event.');
+        return Event::findOrFail($eventId);
+    }
+
+    public function index()
+    {
+        $event = $this->getEvent();
         $jabatanList = $event->jabatan()
             ->withCount('accreditations')
             ->orderBy('nama_jabatan')
@@ -21,13 +29,16 @@ class JabatanController extends Controller
         return view('menu.events.jabatan.index', compact('event', 'jabatanList'));
     }
 
-    public function create(Event $event)
+    public function create()
     {
+        $event = $this->getEvent();
         return view('menu.events.jabatan.create', compact('event'));
     }
 
-    public function store(Request $request, Event $event)
+    public function store(Request $request)
     {
+        $event = $this->getEvent();
+
         $validated = $request->validate([
             'nama_jabatan' => 'required|string|max:255',
         ]);
@@ -35,19 +46,21 @@ class JabatanController extends Controller
         $event->jabatan()->create($validated);
 
         return redirect()
-            ->route('admin.events.jabatan.index', $event)
+            ->route('admin.master-data.jabatan.index')
             ->with('status', 'Jabatan berhasil ditambahkan.');
     }
 
-    public function edit(Event $event, Jabatan $jabatan)
+    public function edit(Jabatan $jabatan)
     {
+        $event = $this->getEvent();
         abort_unless($jabatan->event_id === $event->id, 403);
 
         return view('menu.events.jabatan.edit', compact('event', 'jabatan'));
     }
 
-    public function update(Request $request, Event $event, Jabatan $jabatan)
+    public function update(Request $request, Jabatan $jabatan)
     {
+        $event = $this->getEvent();
         abort_unless($jabatan->event_id === $event->id, 403);
 
         $validated = $request->validate([
@@ -57,12 +70,13 @@ class JabatanController extends Controller
         $jabatan->update($validated);
 
         return redirect()
-            ->route('admin.events.jabatan.index', $event)
+            ->route('admin.master-data.jabatan.index')
             ->with('status', 'Jabatan berhasil diperbarui.');
     }
 
-    public function destroy(Event $event, Jabatan $jabatan)
+    public function destroy(Jabatan $jabatan)
     {
+        $event = $this->getEvent();
         abort_unless($jabatan->event_id === $event->id, 403);
 
         $accreditationsCount = $jabatan->accreditations()->count();

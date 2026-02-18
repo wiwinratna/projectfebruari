@@ -17,7 +17,7 @@ Jabatan <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2">
             <h2 class="text-2xl font-bold text-gray-800">Manage Jabatan</h2>
             <p class="text-gray-600 mt-1">Kelola jabatan/posisi untuk event ini</p>
         </div>
-        <a href="{{ route('admin.events.jabatan.create', $event) }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('admin.master-data.jabatan.create') }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-plus mr-2"></i> Tambah Jabatan
         </a>
     </div>
@@ -49,7 +49,7 @@ Jabatan <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2">
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('admin.events.jabatan.edit', [$event, $jabatan]) }}"
+                            <a href="{{ route('admin.master-data.jabatan.edit', $jabatan) }}"
                                 class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
@@ -103,7 +103,7 @@ Jabatan <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2">
 
         showLoading();
 
-        fetch(`/admin/events/{{ $event->id }}/jabatan/${id}`, {
+        fetch(`/admin/master-data/jabatan/${id}`, {
                 method: 'DELETE',
                 headers: {
                     'X-CSRF-TOKEN': csrfToken.getAttribute('content'),

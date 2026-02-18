@@ -14,7 +14,7 @@ Edit Jabatan <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full m
             <h2 class="text-2xl font-bold text-gray-800">Edit Jabatan</h2>
             <p class="text-gray-600 mt-1">Update jabatan information</p>
         </div>
-        <a href="{{ route('admin.events.jabatan.index', $event) }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('admin.master-data.jabatan.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-arrow-left mr-2"></i> Back to Jabatan
         </a>
     </div>
@@ -25,7 +25,7 @@ Edit Jabatan <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full m
             <h3 class="text-lg font-semibold text-gray-800">Jabatan Information</h3>
         </div>
 
-        <form action="{{ route('admin.events.jabatan.update', [$event, $jabatan]) }}" method="POST" class="p-6 space-y-6">
+        <form action="{{ route('admin.master-data.jabatan.update', $jabatan) }}" method="POST" class="p-6 space-y-6">
             @csrf
             @method('PUT')
 
@@ -48,7 +48,7 @@ Edit Jabatan <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full m
 
             {{-- Form Actions --}}
             <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-                <a href="{{ route('admin.events.jabatan.index', $event) }}"
+                <a href="{{ route('admin.master-data.jabatan.index') }}"
                     class="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
                     Cancel
                 </a>

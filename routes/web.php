@@ -179,12 +179,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 return back()->withErrors(['username' => 'Invalid admin credentials'])->withInput();
             }
 
+            // Validasi admin harus punya event yang ditugaskan
+            if (!$user->event_id) {
+                return back()->withErrors(['username' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.'])->withInput();
+            }
+
             session([
                 'admin_authenticated' => true,
                 'admin_id' => $user->id,
                 'admin_username' => $user->username,
                 'admin_role' => $user->role,
-                'admin_login_time' => now()
+                'admin_login_time' => now(),
+                'admin_event_id' => $user->event_id,
+                'admin_event_name' => $user->event->title ?? 'Unknown Event',
             ]);
 
             return redirect('/admin/dashboard');
@@ -261,8 +268,8 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     // Admin News (CRUD)
     Route::resource('news', NewsPostController::class)->names('news');
 
-    // Event-scoped master data routes
-    Route::prefix('events/{event}')->name('events.')->group(function () {
+    // Master Data Routes (otomatis pakai event_id dari session admin)
+    Route::prefix('master-data')->name('master-data.')->group(function () {
         Route::resource('venue-locations', \App\Http\Controllers\VenueLocationController::class)->except(['show']);
         Route::resource('jabatan', \App\Http\Controllers\JabatanController::class)->except(['show']);
         Route::resource('disciplins', \App\Http\Controllers\DisciplinController::class)->except(['show']);

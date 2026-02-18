@@ -8,8 +8,16 @@ use Illuminate\Http\Request;
 
 class ZoneAccessCodeController extends Controller
 {
-    public function index(Event $event)
+    private function getEvent(): Event
     {
+        $eventId = session('admin_event_id');
+        abort_unless($eventId, 403, 'Admin belum ditugaskan ke event.');
+        return Event::findOrFail($eventId);
+    }
+
+    public function index()
+    {
+        $event = $this->getEvent();
         $zoneAccessCodes = $event->zoneAccessCodes()
             ->orderBy('kode_zona')
             ->get();
@@ -17,13 +25,16 @@ class ZoneAccessCodeController extends Controller
         return view('menu.events.zone-access-codes.index', compact('event', 'zoneAccessCodes'));
     }
 
-    public function create(Event $event)
+    public function create()
     {
+        $event = $this->getEvent();
         return view('menu.events.zone-access-codes.create', compact('event'));
     }
 
-    public function store(Request $request, Event $event)
+    public function store(Request $request)
     {
+        $event = $this->getEvent();
+
         $validated = $request->validate([
             'kode_zona'  => 'required|string|max:50',
             'keterangan' => 'nullable|string|max:1000',
@@ -37,19 +48,21 @@ class ZoneAccessCodeController extends Controller
         $event->zoneAccessCodes()->create($validated);
 
         return redirect()
-            ->route('admin.events.zone-access-codes.index', $event)
+            ->route('admin.master-data.zone-access-codes.index')
             ->with('status', 'Kode zona akses berhasil ditambahkan.');
     }
 
-    public function edit(Event $event, ZoneAccessCode $zoneAccessCode)
+    public function edit(ZoneAccessCode $zoneAccessCode)
     {
+        $event = $this->getEvent();
         abort_unless($zoneAccessCode->event_id === $event->id, 403);
 
         return view('menu.events.zone-access-codes.edit', compact('event', 'zoneAccessCode'));
     }
 
-    public function update(Request $request, Event $event, ZoneAccessCode $zoneAccessCode)
+    public function update(Request $request, ZoneAccessCode $zoneAccessCode)
     {
+        $event = $this->getEvent();
         abort_unless($zoneAccessCode->event_id === $event->id, 403);
 
         $validated = $request->validate([
@@ -68,12 +81,13 @@ class ZoneAccessCodeController extends Controller
         $zoneAccessCode->update($validated);
 
         return redirect()
-            ->route('admin.events.zone-access-codes.index', $event)
+            ->route('admin.master-data.zone-access-codes.index')
             ->with('status', 'Kode zona akses berhasil diperbarui.');
     }
 
-    public function destroy(Event $event, ZoneAccessCode $zoneAccessCode)
+    public function destroy(ZoneAccessCode $zoneAccessCode)
     {
+        $event = $this->getEvent();
         abort_unless($zoneAccessCode->event_id === $event->id, 403);
 
         $zoneAccessCode->delete();
