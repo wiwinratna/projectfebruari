@@ -17,23 +17,30 @@ class WorkerController extends Controller
             return redirect('/admin/login');
         }
 
+        // Get admin's assigned event
+        $adminEventId = session('admin_event_id');
+        if (!$adminEventId) {
+            return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.']);
+        }
+
         $statusFilter = $request->input('status', 'active');
         $now = now();
 
-        // Get ALL openings for statistics calculation
-        $allOpenings = WorkerOpening::with(['event', 'jobCategory'])
+        // Get openings ONLY for admin's assigned event
+        $allOpenings = WorkerOpening::where('event_id', $adminEventId)
+            ->with(['event', 'jobCategory'])
             ->withCount('applications')
             ->get();
 
-        // Calculate statistics consistent with new logic
+        // Calculate statistics for admin's event only
         $openCount = $allOpenings->filter(function ($opening) use ($now) {
-            return $opening->status === 'open' && 
-                   $opening->application_deadline > $now && 
+            return $opening->status === 'open' &&
+                   $opening->application_deadline > $now &&
                    $opening->slots_filled < $opening->slots_total;
         })->count();
 
         $closedCount = $allOpenings->filter(function ($opening) use ($now) {
-            return $opening->status === 'closed' || 
+            return $opening->status === 'closed' ||
                    ($opening->status === 'open' && $opening->application_deadline <= $now) ||
                    ($opening->status === 'open' && $opening->slots_filled >= $opening->slots_total);
         })->count();
@@ -42,12 +49,15 @@ class WorkerController extends Controller
             'total_openings' => $allOpenings->count(),
             'active_openings' => $openCount,
             'closed_openings' => $closedCount,
-            'total_applications' => Application::count(),
+            'total_applications' => Application::whereHas('opening', function($q) use ($adminEventId) {
+                $q->where('event_id', $adminEventId);
+            })->count(),
             'positions_filled' => $allOpenings->sum('slots_filled'),
         ];
 
         // Apply filtering for display
-        $query = WorkerOpening::with(['event', 'jobCategory'])
+        $query = WorkerOpening::where('event_id', $adminEventId)
+            ->with(['event', 'jobCategory'])
             ->withCount('applications');
 
         if ($request->filled('search')) {
@@ -58,10 +68,8 @@ class WorkerController extends Controller
                       $sq->where('title', 'like', '%'.$search.'%');
                   });
             });
-            
-            // When searching, we ignore status filter to show ALL matches
-            // But we can conceptually treat it as 'all' for the view
-            $statusFilter = 'all'; 
+
+            $statusFilter = 'all';
         } else {
             // Only apply status filter if NOT searching
             if ($statusFilter === 'active') {
@@ -82,15 +90,15 @@ class WorkerController extends Controller
                 });
             }
         }
-        // 'all' shows everything
 
         $openings = $query->orderByDesc('status')
             ->orderBy('application_deadline')
             ->get();
 
         $categories = JobCategory::orderBy('name')->get();
-        // Show events that are active/upcoming for filter (or all) - keeping simple for now
-        $events = Event::orderBy('start_at')->get(['id', 'title', 'venue']);
+        // Only show admin's assigned event
+        $event = Event::findOrFail($adminEventId);
+        $events = collect([$event]);
 
         return view('menu.workers.index', [
             'openings' => $openings,
@@ -107,12 +115,17 @@ class WorkerController extends Controller
             return redirect('/admin/login');
         }
 
+        // Get admin's assigned event
+        $adminEventId = session('admin_event_id');
+        if (!$adminEventId) {
+            return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.']);
+        }
+
         $categories = JobCategory::orderBy('name')->get();
-        // Only show events that are not closed for new worker openings
-        $events = Event::whereIn('status', ['planning', 'upcoming', 'active'])
-                      ->orderBy('start_at')
-                      ->get(['id', 'title', 'venue']);
-        $opening = new WorkerOpening(['status' => 'planned', 'slots_filled' => 0]);
+        // Only show admin's assigned event
+        $adminEvent = Event::findOrFail($adminEventId);
+        $events = collect([$adminEvent]);
+        $opening = new WorkerOpening(['status' => 'planned', 'slots_filled' => 0, 'event_id' => $adminEventId]);
 
         return view('menu.workers.create', [
             'opening' => $opening,
@@ -127,10 +140,15 @@ class WorkerController extends Controller
             return redirect('/admin/login');
         }
 
+        // Get admin's assigned event
+        $adminEventId = session('admin_event_id');
+        if (!$adminEventId) {
+            return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun.']);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'job_category_id' => 'required|exists:job_categories,id',
-            'event_id' => 'required|exists:events,id',
             'description' => 'nullable|string',
             'application_deadline' => 'required|date',
             'slots_total' => 'required|integer|min:1',
@@ -147,10 +165,11 @@ class WorkerController extends Controller
             $requirements = array_filter(array_map('trim', explode("\n", $validated['requirements_text'])));
         }
 
+        // Force event_id to admin's assigned event
         $opening = WorkerOpening::create([
             'title' => $validated['title'],
             'job_category_id' => $validated['job_category_id'],
-            'event_id' => $validated['event_id'],
+            'event_id' => $adminEventId,
             'description' => $validated['description'],
             'application_deadline' => $validated['application_deadline'],
             'slots_total' => $validated['slots_total'],
@@ -171,10 +190,18 @@ class WorkerController extends Controller
             return redirect('/admin/login');
         }
 
+        // Check if opening belongs to admin's assigned event
+        $adminEventId = session('admin_event_id');
+        if ($worker->event_id !== $adminEventId) {
+            return back()->withErrors(['message' => 'You are not authorized to edit this opening.']);
+        }
+
         $worker->load(['accessCodes', 'event.accessCodes']);
 
         $categories = JobCategory::orderBy('name')->get();
-        $events = Event::orderBy('start_at')->get(['id', 'title', 'venue', 'status']);
+        // Only show admin's assigned event
+        $adminEvent = Event::findOrFail($adminEventId);
+        $events = collect([$adminEvent]);
 
         return view('menu.workers.edit', [
             'opening' => $worker,
@@ -190,10 +217,15 @@ class WorkerController extends Controller
             return redirect('/admin/login');
         }
 
+        // Check if opening belongs to admin's assigned event
+        $adminEventId = session('admin_event_id');
+        if ($worker->event_id !== $adminEventId) {
+            return back()->withErrors(['message' => 'You are not authorized to update this opening.']);
+        }
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'job_category_id' => 'required|exists:job_categories,id',
-            'event_id' => 'required|exists:events,id',
             'description' => 'nullable|string',
             'application_deadline' => 'required|date',
             'slots_total' => 'required|integer|min:1',
@@ -213,7 +245,7 @@ class WorkerController extends Controller
         $worker->update([
             'title' => $validated['title'],
             'job_category_id' => $validated['job_category_id'],
-            'event_id' => $validated['event_id'],
+            'event_id' => $adminEventId,
             'description' => $validated['description'],
             'application_deadline' => $validated['application_deadline'],
             'slots_total' => $validated['slots_total'],
@@ -250,6 +282,12 @@ class WorkerController extends Controller
     {
         if (!session('admin_authenticated')) {
             return redirect('/admin/login');
+        }
+
+        // Check if opening belongs to admin's assigned event
+        $adminEventId = session('admin_event_id');
+        if ($worker->event_id !== $adminEventId) {
+            return back()->withErrors(['message' => 'You are not authorized to view this opening.']);
         }
 
         $worker->load(['event', 'jobCategory', 'applications.user.profile']);

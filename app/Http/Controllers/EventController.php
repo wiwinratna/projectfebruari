@@ -24,6 +24,14 @@ class EventController extends Controller
             return redirect('/admin/login');
         }
 
+        // Get admin's assigned event
+        $adminEventId = session('admin_event_id');
+
+        // If admin nicht has assigned event, redirect to login
+        if (!$adminEventId) {
+            return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.']);
+        }
+
         // Automatically update all event statuses based on current date
         EventStatusService::updateAllStatuses();
 
@@ -41,7 +49,8 @@ class EventController extends Controller
             }
         }
 
-        $query = Event::forAdmin()
+        // ONLY fetch the admin's assigned event
+        $query = Event::where('id', $adminEventId)
             ->with([
                 'sports',
                 'city',
@@ -62,9 +71,8 @@ class EventController extends Controller
             // By default, exclude completed events unless explicitly requested
             $query->where('status', '!=', 'completed');
         }
-        // If show_completed is true OR statusFilter is 'all', we include all events (no additional where clause needed)
 
-        // Apply search filter if provided
+        // Apply search filter if provided (though admin only has 1 event)
         if (!empty($searchQuery)) {
             $query->where(function ($q) use ($searchQuery) {
                 $q->where('title', 'like', '%' . $searchQuery . '%')
@@ -76,7 +84,7 @@ class EventController extends Controller
                                ->orWhere('province', 'like', '%' . $searchQuery . '%');
                   })
                   ->orWhereHas('sports', function ($sportQuery) use ($searchQuery) {
-                      $sportQuery->where('name', 'like', '%' . $searchQuery . '%')
+                      $sportQuery->where('name', 'like', '%' . $sportQuery . '%')
                                ->orWhere('code', 'like', '%' . $searchQuery . '%');
                   });
             });
@@ -84,38 +92,40 @@ class EventController extends Controller
 
         $events = $query->orderBy('start_at')->get();
 
-        // Get all events for consistent stats (regardless of filters)
-        $allEvents = Event::forAdmin()
-            ->with([
-                'sports',
-                'city',
-                'workerOpenings' => function ($query) {
-                    $query->select('id', 'event_id', 'status', 'slots_total', 'slots_filled');
-                },
-            ])
+        // Get ONLY the admin's event for stats
+        $adminEvent = Event::with([
+            'sports',
+            'city',
+            'workerOpenings' => function ($query) {
+                $query->select('id', 'event_id', 'status', 'slots_total', 'slots_filled');
+            },
+        ])
             ->withCount([
                 'workerOpenings',
                 'applications',
             ])
             ->withSum('workerOpenings as slots_total_sum', 'slots_total')
-            ->get();
+            ->where('id', $adminEventId)
+            ->first();
+
+        $allEvents = collect([$adminEvent]);
 
         $stats = [
-            'total_events' => $allEvents->count(),
-            'active_events' => $allEvents->where('status', 'active')->count(),
-            'upcoming_events' => $allEvents->where('status', 'upcoming')->count(),
-            'planning_events' => $allEvents->where('status', 'planning')->count(),
-            'completed_events' => $allEvents->where('status', 'completed')->count(),
-            'worker_openings' => $allEvents->sum('worker_openings_count'),
-            'total_applications' => $allEvents->sum('applications_count'),
+            'total_events' => 1,
+            'active_events' => in_array($adminEvent->status, ['active']) ? 1 : 0,
+            'upcoming_events' => in_array($adminEvent->status, ['upcoming']) ? 1 : 0,
+            'planning_events' => in_array($adminEvent->status, ['planning']) ? 1 : 0,
+            'completed_events' => in_array($adminEvent->status, ['completed']) ? 1 : 0,
+            'worker_openings' => $adminEvent->worker_openings_count ?? 0,
+            'total_applications' => $adminEvent->applications_count ?? 0,
         ];
 
         $calendarMonth = now()->copy();
         $calendarDays = collect(range(1, $calendarMonth->daysInMonth()));
 
-        // Prepare event data untuk calendar (group events by date) - include ALL events for calendar
+        // Prepare event data untuk calendar - ONLY the admin's event
         $eventsByDate = [];
-        $allEventsForCalendar = Event::forAdmin()
+        $allEventsForCalendar = Event::where('id', $adminEventId)
             ->with(['sports', 'city'])
             ->get();
 
@@ -155,16 +165,22 @@ class EventController extends Controller
             return redirect('/admin/login');
         }
 
-        $event = new Event([
-            'status' => 'planning',
-            'stage' => 'province',
-        ]);
+        // Admin can only create events for their assigned event (if needed)
+        // For now, prevent creation since admin must have assigned event
+        $adminEventId = session('admin_event_id');
+        if (!$adminEventId) {
+            return back()->withErrors(['message' => 'You must have an assigned event to create events.']);
+        }
+
+        // Get the admin's assigned event to edit
+        $event = Event::findOrFail($adminEventId);
 
         return view('menu.events.create', [
             'event' => $event,
             'statuses' => self::STATUS_OPTIONS,
             'stages' => self::STAGE_OPTIONS,
             'cities' => City::active()->orderBy('province')->orderBy('name')->get(),
+            'isEditingAssignedEvent' => true,
         ]);
     }
 
@@ -213,9 +229,12 @@ class EventController extends Controller
     {
         if (!session('admin_authenticated')) {
             return redirect('/admin/login');
-        }
 
-        // Load event with all relationships
+        // Check if admin is allowed to view this event
+        $adminEventId = session('admin_event_id');
+        if ($adminEventId && $event->id !== $adminEventId) {
+            return back()->withErrors(['message' => 'You are not authorized to view this event.']);
+        }
         $event->load([
             'sports',
             'city',
@@ -243,6 +262,12 @@ class EventController extends Controller
             return redirect('/admin/login');
         }
 
+        // Check if admin is allowed to edit this event
+        $adminEventId = session('admin_event_id');
+        if ($adminEventId && $event->id !== $adminEventId) {
+            return back()->withErrors(['message' => 'You are not authorized to edit this event.']);
+        }
+
         return view('menu.events.edit', [
             'event' => $event,
             'statuses' => self::STATUS_OPTIONS,
@@ -258,6 +283,12 @@ class EventController extends Controller
     {
         if (!session('admin_authenticated')) {
             return redirect('/admin/login');
+        }
+
+        // Check if admin is allowed to update this event
+        $adminEventId = session('admin_event_id');
+        if ($adminEventId && $event->id !== $adminEventId) {
+            return back()->withErrors(['message' => 'You are not authorized to update this event.']);
         }
 
         $data = $this->validatedEventData($request, $event);
@@ -295,6 +326,12 @@ class EventController extends Controller
     {
         if (!session('admin_authenticated')) {
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 401);
+        }
+
+        // Check if admin is allowed to delete this event
+        $adminEventId = session('admin_event_id');
+        if ($adminEventId && $event->id !== $adminEventId) {
+            return response()->json(['success' => false, 'message' => 'You are not authorized to delete this event.'], 403);
         }
 
         // Check if event has related data that prevents deletion

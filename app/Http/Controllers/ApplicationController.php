@@ -17,6 +17,13 @@ class ApplicationController extends Controller
         if (!session('admin_authenticated')) {
             return redirect('/admin/login');
         }
+
+        // Check if application's opening belongs to admin's assigned event
+        $adminEventId = session('admin_event_id');
+        if ($application->opening->event_id !== $adminEventId) {
+            return back()->withErrors(['message' => 'You are not authorized to view this application.']);
+        }
+
         $application->load([
             'user.profile',
             'user.certificates' => fn($q) => $q->latest(), //paling baru cenah
@@ -31,6 +38,12 @@ public function update(Request $request, Application $application)
 {
     if (!session('admin_authenticated')) {
         return redirect('/admin/login');
+    }
+
+    // Check if application's opening belongs to admin's assigned event
+    $adminEventId = session('admin_event_id');
+    if ($application->opening->event_id !== $adminEventId) {
+        return back()->withErrors(['message' => 'You are not authorized to update this application.']);
     }
 
     $validated = $request->validate([

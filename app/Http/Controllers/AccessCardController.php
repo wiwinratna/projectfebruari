@@ -13,6 +13,16 @@ class AccessCardController extends Controller
     // =========================
     public function adminPrint(AccessCard $accessCard)
     {
+        if (!session('admin_authenticated')) {
+            return redirect('/admin/login');
+        }
+
+        // Check if access card belongs to admin's assigned event
+        $adminEventId = session('admin_event_id');
+        if ($accessCard->event_id !== $adminEventId) {
+            return back()->withErrors(['message' => 'You are not authorized to view this access card.']);
+        }
+
         $accessCard->load([
             'accessCodes',
             'workerOpening.event',

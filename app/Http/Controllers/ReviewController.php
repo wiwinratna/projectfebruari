@@ -20,27 +20,41 @@ class ReviewController extends Controller
             return redirect('/admin/login');
         }
 
-        // Calculate statistics independently of search
+        // Get admin's assigned event
+        $adminEventId = session('admin_event_id');
+        if (!$adminEventId) {
+            return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.']);
+        }
+
+        // Calculate statistics for admin's assigned event only
         $stats = [
-            'total_applicants' => Application::count(),
-            'pending_review' => Application::where('status', 'pending')->count(),
-            'approved_members' => Application::where('status', 'approved')->count(),
-            'rejected_members' => Application::where('status', 'rejected')->count(),
+            'total_applicants' => Application::whereHas('opening', function($q) use ($adminEventId) {
+                $q->where('event_id', $adminEventId);
+            })->count(),
+            'pending_review' => Application::where('status', 'pending')
+                ->whereHas('opening', function($q) use ($adminEventId) {
+                    $q->where('event_id', $adminEventId);
+                })->count(),
+            'approved_members' => Application::where('status', 'approved')
+                ->whereHas('opening', function($q) use ($adminEventId) {
+                    $q->where('event_id', $adminEventId);
+                })->count(),
+            'rejected_members' => Application::where('status', 'rejected')
+                ->whereHas('opening', function($q) use ($adminEventId) {
+                    $q->where('event_id', $adminEventId);
+                })->count(),
         ];
 
-        // Get all events for filter dropdown
-        $events = Event::orderBy('title')->get();
+        // Only show admin's assigned event
+        $adminEvent = Event::findOrFail($adminEventId);
+        $events = collect([$adminEvent]);
 
-        // Get query builder
+        // Get query builder - filter by admin's assigned event
         $query = Application::with(['user.profile', 'opening.jobCategory', 'opening.event.city'])
+            ->whereHas('opening', function($q) use ($adminEventId) {
+                $q->where('event_id', $adminEventId);
+            })
             ->orderBy('created_at', 'desc');
-
-        // Apply event filter if present
-        if (request('event_id')) {
-            $query->whereHas('opening', function($q) {
-                $q->where('event_id', request('event_id'));
-            });
-        }
 
         // Apply search if present
         if (request('search')) {
@@ -77,19 +91,20 @@ class ReviewController extends Controller
             return redirect('/admin/login');
         }
 
-        $eventId = request('event_id');
-        $search = request('search');
-        $eventName = null;
-
-        if ($eventId) {
-            $event = Event::find($eventId);
-            $eventName = $event ? $event->title : null;
+        // Get admin's assigned event
+        $adminEventId = session('admin_event_id');
+        if (!$adminEventId) {
+            return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun.']);
         }
 
-        $baseName = $eventName ? Str::slug($eventName, '_') : 'all_events';
+        $search = request('search');
+        $event = Event::find($adminEventId);
+        $eventName = $event ? $event->title : null;
+
+        $baseName = $eventName ? Str::slug($eventName, '_') : 'applications';
         $filename = $baseName . '_' . date('Y-m-d_His') . '.xlsx';
 
-        return Excel::download(new ApplicationsExport($eventId, $search), $filename);
+        return Excel::download(new ApplicationsExport($adminEventId, $search), $filename);
     }
 
 public function update(Request $request, Application $application)
@@ -100,6 +115,12 @@ public function update(Request $request, Application $application)
     ]);
 
     if (!session('admin_authenticated')) {
+        return response()->json(['error' => 'Unauthorized'], 401);
+    }
+
+    // Check if application belongs to admin's assigned event
+    $adminEventId = session('admin_event_id');
+    if ($application->opening->event_id !== $adminEventId) {
         return response()->json(['error' => 'Unauthorized'], 401);
     }
 
