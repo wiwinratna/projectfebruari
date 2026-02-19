@@ -165,23 +165,8 @@ class EventController extends Controller
             return redirect('/admin/login');
         }
 
-        // Admin can only create events for their assigned event (if needed)
-        // For now, prevent creation since admin must have assigned event
-        $adminEventId = session('admin_event_id');
-        if (!$adminEventId) {
-            return back()->withErrors(['message' => 'You must have an assigned event to create events.']);
-        }
-
-        // Get the admin's assigned event to edit
-        $event = Event::findOrFail($adminEventId);
-
-        return view('menu.events.create', [
-            'event' => $event,
-            'statuses' => self::STATUS_OPTIONS,
-            'stages' => self::STAGE_OPTIONS,
-            'cities' => City::active()->orderBy('province')->orderBy('name')->get(),
-            'isEditingAssignedEvent' => true,
-        ]);
+        // Only super admin can create events, not regular admin
+        return redirect('/admin/events')->withErrors(['message' => 'Only super admin can create events. Contact super admin to create a new event.']);
     }
 
     /**
@@ -193,33 +178,8 @@ class EventController extends Controller
             return redirect('/admin/login');
         }
 
-        $data = $this->validatedEventData($request);
-        $sports = $data['sports'] ?? [];
-        unset($data['sports']);
-
-        $event = Event::create($data);
-        $codes = collect($request->input('access_codes', []))
-            ->filter(fn($r) => !empty(trim($r['code'] ?? '')))
-            ->map(fn($r) => [
-                'code' => strtoupper(trim($r['code'])),
-                'label' => trim($r['label'] ?? ''),
-                'color_hex' => $r['color_hex'] ?? '#EF4444',
-            ])
-            ->values()
-            ->all();
-
-        $event->accessCodes()->delete(); // aman biar bersih dulu
-        $event->accessCodes()->createMany($codes);
-
-
-        // Automatically calculate and update status based on dates
-        EventStatusService::updateStatus($event);
-
-        if (!empty($sports)) {
-            $event->sports()->sync($sports);
-        }
-
-        return redirect()->route('admin.events.index', ['flash' => 'created', 'name' => $event->title]);
+        // Only super admin can create events, not regular admin
+        return redirect('/admin/events')->withErrors(['message' => 'Only super admin can create events. Contact super admin to create a new event.']);
     }
 
     /**

@@ -7,17 +7,13 @@
 
 @section('content')
 <div class="space-y-6">
-    
-    {{-- Header with Add Button --}}
+
+    {{-- Header --}}
     <div class="flex items-center justify-between">
         <div>
             <h2 class="text-2xl font-bold text-gray-800">Manage Events</h2>
-            <p class="text-gray-600 mt-1">Organize sports events and competitions</p>
+            <p class="text-gray-600 mt-1">View your assigned event</p>
         </div>
-        <a href="{{ route('admin.events.create') }}"
-           class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
-            <i class="fas fa-plus mr-2"></i> Create Event
-        </a>
     </div>
 
     {{-- Search Bar --}}
@@ -26,15 +22,15 @@
             <form method="GET" action="{{ route('admin.events.index') }}" id="search-form">
                 <div class="relative flex items-center border border-gray-300 rounded-lg py-2 px-4 pl-10 bg-white">
                     <i class="fas fa-search absolute left-3 text-gray-400"></i>
-                    <input type="text" 
-                           name="search" 
-                           value="{{ $searchQuery ?? '' }}" 
-                           placeholder="Search events (title, penyelenggara, venue, dll)..." 
+                    <input type="text"
+                           name="search"
+                           value="{{ $searchQuery ?? '' }}"
+                           placeholder="Search events (title, penyelenggara, venue, dll)..."
                            class="focus:outline-none w-full ml-2"
                            id="search-input">
                     @if(!empty($searchQuery))
-                        <button type="button" 
-                                onclick="clearSearch()" 
+                        <button type="button"
+                                onclick="clearSearch()"
                                 class="absolute right-2 text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100"
                                 title="Clear search">
                             <i class="fas fa-times text-sm"></i>
@@ -121,18 +117,18 @@
                 {{-- Mobile tabs (horizontal scroll) --}}
                 <div class="md:hidden">
                     {{-- Scroll indicator arrows for mobile --}}
-                    <button type="button" 
+                    <button type="button"
                             class="absolute left-0 top-0 z-10 h-full px-2 bg-gradient-to-r from-white to-transparent pointer-events-none"
                             id="scroll-left-indicator">
                         <i class="fas fa-chevron-left text-gray-400"></i>
                     </button>
-                    <button type="button" 
+                    <button type="button"
                             class="absolute right-0 top-0 z-10 h-full px-2 bg-gradient-to-l from-white to-transparent pointer-events-none"
                             id="scroll-right-indicator">
                         <i class="fas fa-chevron-right text-gray-400"></i>
                     </button>
 
-                    <div class="flex overflow-x-auto scrollbar-hide px-8 py-2 space-x-4" 
+                    <div class="flex overflow-x-auto scrollbar-hide px-8 py-2 space-x-4"
                          style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;"
                          id="mobile-tabs-container">
                         <a href="{{ route('admin.events.index', ['status' => 'active']) }}"
@@ -144,7 +140,7 @@
                                 <span class="mt-1 bg-green-100 text-green-600 py-0.5 px-2 rounded-full text-xs font-medium">{{ $stats['active_events'] }}</span>
                             @endif
                         </a>
-                        
+
                         <a href="{{ route('admin.events.index', ['status' => 'upcoming']) }}"
                            class="{{ (!$showCompleted && ($statusFilter ?? '') === 'upcoming') ? 'bg-red-50 border-red-500 text-red-600' : 'bg-gray-50 border-gray-200 text-gray-500' }} flex-shrink-0 scroll-snap-start flex flex-col items-center justify-center py-3 px-4 rounded-lg border-2 min-w-[120px] transition-all duration-200 hover:shadow-md"
                            style="scroll-snap-align: start;">
@@ -154,7 +150,7 @@
                                 <span class="mt-1 bg-blue-100 text-blue-600 py-0.5 px-2 rounded-full text-xs font-medium">{{ $stats['upcoming_events'] }}</span>
                             @endif
                         </a>
-                        
+
                         <a href="{{ route('admin.events.index', ['status' => 'planning']) }}"
                            class="{{ (!$showCompleted && ($statusFilter ?? '') === 'planning') ? 'bg-red-50 border-red-500 text-red-600' : 'bg-gray-50 border-gray-200 text-gray-500' }} flex-shrink-0 scroll-snap-start flex flex-col items-center justify-center py-3 px-4 rounded-lg border-2 min-w-[120px] transition-all duration-200 hover:shadow-md"
                            style="scroll-snap-align: start;">
@@ -164,7 +160,7 @@
                                 <span class="mt-1 bg-yellow-100 text-yellow-600 py-0.5 px-2 rounded-full text-xs font-medium">{{ $stats['planning_events'] }}</span>
                             @endif
                         </a>
-                        
+
                         <a href="{{ route('admin.events.index', ['show_completed' => 'true']) }}"
                            class="{{ ($showCompleted ?? false) ? 'bg-red-50 border-red-500 text-red-600' : 'bg-gray-50 border-gray-200 text-gray-500' }} flex-shrink-0 scroll-snap-start flex flex-col items-center justify-center py-3 px-4 rounded-lg border-2 min-w-[120px] transition-all duration-200 hover:shadow-md"
                            style="scroll-snap-align: start;">
@@ -174,7 +170,7 @@
                                 <span class="mt-1 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs font-medium">{{ $stats['completed_events'] }}</span>
                             @endif
                         </a>
-                        
+
                         <a href="{{ route('admin.events.index', ['status' => 'all']) }}"
                            class="{{ (!$showCompleted && ($statusFilter ?? 'all') === 'all') ? 'bg-red-50 border-red-500 text-red-600' : 'bg-gray-50 border-gray-200 text-gray-500' }} flex-shrink-0 scroll-snap-start flex flex-col items-center justify-center py-3 px-4 rounded-lg border-2 min-w-[120px] transition-all duration-200 hover:shadow-md"
                            style="scroll-snap-align: start;">
@@ -201,7 +197,7 @@
                     'planning' => 'bg-yellow-500 text-white',
                     'completed' => 'bg-gray-400 text-white',
                 ];
-                
+
                 $stageColors = [
                     'province' => 'bg-green-100 text-green-800 border-green-200',
                     'national' => 'bg-blue-100 text-blue-800 border-blue-200',
@@ -310,7 +306,7 @@
                             </div>
                         @endif
                         @if($event->applications_count == 0 && $event->worker_openings_count == 0)
-                            <button onclick="deleteEvent({{ $event->id }}, '{{ addslashes($event->title) }}')" 
+                            <button onclick="deleteEvent({{ $event->id }}, '{{ addslashes($event->title) }}')"
                                     data-event-id="{{ $event->id }}"
                                     class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm">
                                 <i class="fas fa-trash mr-1"></i> Delete
@@ -339,7 +335,7 @@
                     <h3 class="text-xl font-bold text-gray-800">Event Calendar</h3>
                     <span class="text-sm text-gray-500">{{ $calendarMonth->translatedFormat('F Y') }}</span>
                 </div>
-                
+
                 <div class="calendar-widget">
                     {{-- Calendar Header --}}
                     <div class="grid grid-cols-7 gap-1 text-xs text-gray-600 mb-2 text-center font-medium">
@@ -351,9 +347,9 @@
                         <div class="py-2">Jum</div>
                         <div class="py-2">Sab</div>
                     </div>
-                    
+
                     {{-- Calendar Days --}}
-                    @php 
+                    @php
                         $firstDayOfMonth = $calendarMonth->copy()->startOfMonth();
                         $startDayOfWeek = $firstDayOfMonth->dayOfWeek; // 0 = Sunday
                         $daysInMonth = $calendarMonth->daysInMonth;
@@ -361,13 +357,13 @@
                         $currentMonth = $calendarMonth->month;
                         $currentYear = $calendarMonth->year;
                     @endphp
-                    
+
                     <div class="grid grid-cols-7 gap-1 text-sm">
                         {{-- Empty cells untuk first week --}}
                         @for ($i = 0; $i < $startDayOfWeek; $i++)
                             <div class="py-2"></div>
                         @endfor
-                        
+
                         {{-- Calendar days --}}
                         @for ($day = 1; $day <= $daysInMonth; $day++)
                             @php
@@ -377,16 +373,16 @@
                                 $dayEvents = $eventsByDate[$dateString] ?? [];
                                 $eventCount = count($dayEvents);
                             @endphp
-                            
+
                             <div class="relative py-2 text-center cursor-pointer hover:bg-gray-50 transition-colors
                                 {{ $isToday ? 'bg-blue-100 rounded-lg border-2 border-blue-500' : 'hover:rounded-lg' }}"
                                 onclick="{{ $hasEvents ? 'showDayEvents(\'' . $dateString . '\')' : '' }}"
                                 title="{{ $hasEvents ? $eventCount . ' event(s) on ' . date('d M Y', strtotime($dateString)) : 'No events' }}">
-                                
+
                                 <span class="{{ $isToday ? 'font-bold text-blue-700' : 'text-gray-700' }}">
                                     {{ $day }}
                                 </span>
-                                
+
                                 {{-- Event dots --}}
                                 @if($hasEvents)
                                     <div class="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex space-x-1">
@@ -406,7 +402,7 @@
                             </div>
                         @endfor
                     </div>
-                    
+
                     {{-- Calendar Legend --}}
                     <div class="mt-4 pt-4 border-t border-gray-100">
                         <div class="flex items-center justify-between text-xs text-gray-500">
@@ -460,49 +456,49 @@
         titleEl.textContent = title;
         messageEl.textContent = message;
         detailsEl.textContent = details || '';
-        
+
         // Remove previous event listeners
         yesBtn.replaceWith(yesBtn.cloneNode(true));
         cancelBtn.replaceWith(cancelBtn.cloneNode(true));
-        
+
         // Get new references after cloning
         const newYesBtn = document.getElementById('confirm-yes');
         const newCancelBtn = document.getElementById('confirm-cancel');
-        
+
         // Add event listeners
         newYesBtn.addEventListener('click', () => {
             hideConfirmModal();
             onConfirm();
         });
-        
+
         newCancelBtn.addEventListener('click', hideConfirmModal);
-        
+
         // Show modal
         modal.classList.remove('hidden');
-        
+
         // Focus management for accessibility
         newYesBtn.focus();
     }
-    
+
     function hideConfirmModal() {
         const modal = document.getElementById('confirm-modal');
         modal.classList.add('hidden');
     }
-    
+
     function showLoading() {
         const overlay = document.getElementById('loading-overlay');
         overlay.classList.remove('hidden');
     }
-    
+
     function hideLoading() {
         const overlay = document.getElementById('loading-overlay');
         overlay.classList.add('hidden');
     }
-    
+
     function showFlashMessage(message, type = 'status') {
         // Create flash message directly in DOM
         const flashContainer = document.getElementById('flash-container') || createFlashContainer();
-        
+
         // Prevent duplicate messages
         const existingMessages = flashContainer.querySelectorAll('.flash-message');
         for (let msg of existingMessages) {
@@ -510,19 +506,19 @@
                 return; // Don't show duplicate
             }
         }
-        
+
         const iconMap = {
             'status': 'fas fa-check-circle',
             'error': 'fas fa-exclamation-circle',
             'warning': 'fas fa-exclamation-triangle'
         };
-        
+
         const classMap = {
             'status': 'bg-green-500 text-white',
             'error': 'bg-red-500 text-white',
             'warning': 'bg-yellow-500 text-white'
         };
-        
+
         const flashMessage = document.createElement('div');
         flashMessage.className = `flash-message ${classMap[type]} shadow-lg rounded-lg px-4 py-3 text-sm flex items-start gap-3 transition duration-300 ease-out`;
         flashMessage.setAttribute('data-timeout', '4500');
@@ -534,35 +530,35 @@
                 <i class="fas fa-times"></i>
             </button>
         `;
-        
+
         // Set initial styles for animation
         flashMessage.style.opacity = '0';
         flashMessage.style.transform = 'translateX(100%)';
-        
+
         flashContainer.appendChild(flashMessage);
-        
+
         // Auto hide after timeout
         setTimeout(() => hideFlashMessage(flashMessage), 4500);
-        
+
         // Manual close button
         flashMessage.querySelector('[data-flash-close]').addEventListener('click', () => {
             hideFlashMessage(flashMessage);
         });
-        
+
         // Show with animation
         requestAnimationFrame(() => {
             flashMessage.style.opacity = '1';
             flashMessage.style.transform = 'translateX(0)';
         });
     }
-    
+
     function createFlashContainer() {
         // Use the existing flash container from server-side, don't create new one
         const existingContainer = document.getElementById('flash-container');
         if (existingContainer) {
             return existingContainer;
         }
-        
+
         // If no existing container, create one
         const container = document.createElement('div');
         container.id = 'flash-container';
@@ -570,7 +566,7 @@
         document.body.appendChild(container);
         return container;
     }
-    
+
     function hideFlashMessage(element) {
         element.style.opacity = '0';
         element.style.transform = 'translateX(100%)';
@@ -580,10 +576,10 @@
             }
         }, 300);
     }
-    
+
     function deleteEvent(id, eventTitle) {
         const details = eventTitle ? `Event: "${eventTitle}"` : `This action cannot be undone.`;
-        
+
         showConfirmModal(
             'Delete Event',
             'Are you sure you want to delete this event?',
@@ -591,7 +587,7 @@
             () => performDelete(id)
         );
     }
-    
+
     function performDelete(id) {
         const csrfToken = document.querySelector('meta[name="csrf-token"]');
         if (!csrfToken) {
@@ -600,7 +596,7 @@
         }
 
         showLoading();
-        
+
         fetch(`/events/${id}`, {
             method: 'DELETE',
             headers: {
@@ -619,12 +615,12 @@
         .then(data => {
             if (data.success) {
                 showFlashMessage('Event deleted successfully!', 'status');
-                
+
                 // Auto refresh page after successful deletion
                 setTimeout(() => {
                     window.location.reload();
                 }, 500);
-                
+
             } else {
                 showFlashMessage(data.message || 'Failed to delete event', 'error');
             }
@@ -635,7 +631,7 @@
             showFlashMessage('Error deleting event: ' + error.message, 'error');
         });
     }
-    
+
     // Close modal when clicking outside
     document.addEventListener('click', function(e) {
         const modal = document.getElementById('confirm-modal');
@@ -643,20 +639,20 @@
             hideConfirmModal();
         }
     });
-    
+
     // Close modal with Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
             hideConfirmModal();
         }
     });
-    
+
     // Check for URL flash parameters
     function checkUrlFlashMessages() {
         const urlParams = new URLSearchParams(window.location.search);
         const flash = urlParams.get('flash');
         const name = urlParams.get('name');
-        
+
         if (flash === 'created' && name) {
             showFlashMessage(`Event "${name}" created successfully!`, 'status');
             // Remove parameters from URL and refresh page
@@ -675,7 +671,7 @@
             }, 500);
         }
     }
-    
+
     // Search functionality
     function clearSearch() {
         document.getElementById('search-input').value = '';
@@ -687,9 +683,9 @@
         // Find events untuk date tersebut dari PHP data
         const eventsData = @json($eventsByDate);
         const dayEvents = eventsData[dateString] || [];
-        
+
         if (dayEvents.length === 0) return;
-        
+
         // Format date untuk display
         const date = new Date(dateString);
         const formattedDate = date.toLocaleDateString('id-ID', {
@@ -698,7 +694,7 @@
             month: 'long',
             day: 'numeric'
         });
-        
+
         // Create modal content
         let eventsList = '';
         dayEvents.forEach(event => {
@@ -708,7 +704,7 @@
                 'planning': 'bg-yellow-100 text-yellow-800',
                 'completed': 'bg-gray-100 text-gray-800'
             };
-            
+
             eventsList += `
                 <div class="p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                     <div class="flex items-start justify-between">
@@ -725,7 +721,7 @@
                 </div>
             `;
         });
-        
+
         // Create dan show modal
         const modalHtml = `
             <div id="day-events-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -748,7 +744,7 @@
                         </div>
                     </div>
                     <div class="p-4 border-t border-gray-200 bg-gradient-to-r from-gray-50 to-blue-50">
-                        <button onclick="closeDayEventsModal()" 
+                        <button onclick="closeDayEventsModal()"
                                 class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors">
                             Close
                         </button>
@@ -756,16 +752,16 @@
                 </div>
             </div>
         `;
-        
+
         // Remove existing modal jika ada
         const existingModal = document.getElementById('day-events-modal');
         if (existingModal) {
             existingModal.remove();
         }
-        
+
         // Add new modal
         document.body.insertAdjacentHTML('beforeend', modalHtml);
-        
+
         // Add escape key listener
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
@@ -773,7 +769,7 @@
             }
         });
     }
-    
+
     function closeDayEventsModal() {
         const modal = document.getElementById('day-events-modal');
         if (modal) {
@@ -806,10 +802,10 @@
                 </button>
             </div>
         `;
-        
+
         // Add to page
         document.body.appendChild(toast);
-        
+
         // Auto-remove after 5 seconds
         setTimeout(() => {
             if (toast.parentNode) {
@@ -830,7 +826,7 @@
         clearTimeout(searchTimeout);
         const query = e.target.value.trim();
         const form = document.getElementById('search-form');
-        
+
         // Auto-submit after 500ms pause in typing
         if (query.length >= 2) {
             searchTimeout = setTimeout(() => {
@@ -857,7 +853,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const searchQuery = '{{ $searchQuery ?? '' }}';
         const resultsCount = {{ $events->count() }};
-        
+
         if (searchQuery && resultsCount > 0) {
             // Small delay to ensure page is fully loaded
             setTimeout(() => {
@@ -874,7 +870,7 @@
         const container = document.getElementById('mobile-tabs-container');
         const leftIndicator = document.getElementById('scroll-left-indicator');
         const rightIndicator = document.getElementById('scroll-right-indicator');
-        
+
         if (!container || !leftIndicator || !rightIndicator) return;
 
         // Update scroll indicators
@@ -882,11 +878,11 @@
             const scrollLeft = container.scrollLeft;
             const scrollWidth = container.scrollWidth;
             const clientWidth = container.clientWidth;
-            
+
             // Show/hide left indicator
             leftIndicator.style.opacity = scrollLeft > 0 ? '1' : '0.3';
-            
-            // Show/hide right indicator  
+
+            // Show/hide right indicator
             rightIndicator.style.opacity = scrollLeft < scrollWidth - clientWidth ? '1' : '0.3';
         }
 
@@ -895,7 +891,7 @@
             const containerRect = container.getBoundingClientRect();
             const tabRect = tabElement.getBoundingClientRect();
             const scrollLeft = tabElement.offsetLeft - (container.clientWidth - tabElement.clientWidth) / 2;
-            
+
             container.scrollTo({
                 left: scrollLeft,
                 behavior: 'smooth'
@@ -926,13 +922,13 @@
                 const currentTab = document.querySelector('#mobile-tabs-container a[style*="border-red-500"]') || tabLinks[0];
                 const currentIndex = Array.from(tabLinks).indexOf(currentTab);
                 let nextIndex;
-                
+
                 if (e.key === 'ArrowLeft') {
                     nextIndex = currentIndex > 0 ? currentIndex - 1 : tabLinks.length - 1;
                 } else {
                     nextIndex = currentIndex < tabLinks.length - 1 ? currentIndex + 1 : 0;
                 }
-                
+
                 scrollToTab(tabLinks[nextIndex]);
                 tabLinks[nextIndex].focus();
             }
