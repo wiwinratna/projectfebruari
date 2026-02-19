@@ -229,6 +229,7 @@ class EventController extends Controller
     {
         if (!session('admin_authenticated')) {
             return redirect('/admin/login');
+        }
 
         // Check if admin is allowed to view this event
         $adminEventId = session('admin_event_id');
