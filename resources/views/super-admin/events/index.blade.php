@@ -11,8 +11,12 @@
     <div class="flex items-center justify-between">
         <div>
             <h2 class="text-2xl font-bold text-gray-800">All Events</h2>
-            <p class="text-gray-600 mt-1">Monitor all system events</p>
+            <p class="text-gray-600 mt-1">Monitor and manage all system events</p>
         </div>
+        <a href="{{ route('super-admin.events.create') }}"
+           class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center font-semibold">
+            <i class="fas fa-plus mr-2"></i> Create Event
+        </a>
     </div>
 
     {{-- Search/Filter Bar --}}
@@ -74,10 +78,16 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <a href="{{ route('super-admin.events.show', $event) }}"
-                                   class="text-blue-600 hover:text-blue-900 font-semibold">
-                                    <i class="fas fa-eye mr-1"></i> View
-                                </a>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('super-admin.events.show', $event) }}"
+                                       class="text-blue-600 hover:text-blue-900 font-semibold">
+                                        <i class="fas fa-eye mr-1"></i> View
+                                    </a>
+                                    <a href="{{ route('super-admin.events.edit', $event) }}"
+                                       class="text-gray-600 hover:text-gray-900 font-semibold">
+                                        <i class="fas fa-pencil-alt mr-1"></i> Edit
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                     @empty

@@ -288,7 +288,12 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_ad
 
     // Events Management
     Route::get('/events', [\App\Http\Controllers\SuperAdminDashboardController::class, 'events'])->name('events.index');
+    Route::get('/events/create', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventCreate'])->name('events.create');
+    Route::post('/events', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventStore'])->name('events.store');
     Route::get('/events/{event}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventView'])->name('events.show');
+    Route::get('/events/{event}/edit', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventEdit'])->name('events.edit');
+    Route::put('/events/{event}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventUpdate'])->name('events.update');
+    Route::delete('/events/{event}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventDelete'])->name('events.delete');
 
     // News Management
     Route::resource('news', NewsPostController::class)->names('news');

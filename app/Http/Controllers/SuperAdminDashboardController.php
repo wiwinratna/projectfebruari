@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Event;
+use App\Models\City;
+use App\Models\Sport;
+use App\Services\EventStatusService;
+use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 
 class SuperAdminDashboardController extends Controller
 {
@@ -204,5 +209,150 @@ class SuperAdminDashboardController extends Controller
         ]);
 
         return back()->with('status', 'Password updated successfully!');
+    }
+
+    // Event Management
+    public function eventCreate()
+    {
+        $event = new Event([
+            'status' => 'planning',
+            'stage' => 'province',
+        ]);
+
+        return view('super-admin.events.create', [
+            'event' => $event,
+            'statuses' => ['planning', 'upcoming', 'active', 'completed'],
+            'stages' => ['province', 'national', 'asean/sea', 'asia', 'world'],
+            'cities' => City::active()->orderBy('province')->orderBy('name')->get(),
+            'sports' => Sport::orderBy('name')->get(),
+        ]);
+    }
+
+    public function eventStore(Request $request)
+    {
+        $data = $this->validateEventData($request);
+        $sports = $data['sports'] ?? [];
+        unset($data['sports']);
+
+        $event = Event::create($data);
+
+        // Handle access codes
+        $codes = collect($request->input('access_codes', []))
+            ->filter(fn($r) => !empty(trim($r['code'] ?? '')))
+            ->map(fn($r) => [
+                'code' => strtoupper(trim($r['code'])),
+                'label' => trim($r['label'] ?? ''),
+                'color_hex' => $r['color_hex'] ?? '#EF4444',
+            ])
+            ->values()
+            ->all();
+
+        $event->accessCodes()->createMany($codes);
+
+        // Update status based on dates
+        EventStatusService::updateStatus($event);
+
+        // Attach sports
+        if (!empty($sports)) {
+            $event->sports()->sync($sports);
+        }
+
+        return redirect()->route('super-admin.events.index')->with('success', 'Event created successfully!');
+    }
+
+    public function eventEdit(Event $event)
+    {
+        return view('super-admin.events.edit', [
+            'event' => $event,
+            'statuses' => ['planning', 'upcoming', 'active', 'completed'],
+            'stages' => ['province', 'national', 'asean/sea', 'asia', 'world'],
+            'cities' => City::active()->orderBy('province')->orderBy('name')->get(),
+            'sports' => Sport::orderBy('name')->get(),
+        ]);
+    }
+
+    public function eventUpdate(Request $request, Event $event)
+    {
+        $data = $this->validateEventData($request);
+        $sports = $data['sports'] ?? [];
+        unset($data['sports']);
+
+        $event->update($data);
+
+        // Handle access codes
+        $codes = collect($request->input('access_codes', []))
+            ->filter(fn($r) => !empty(trim($r['code'] ?? '')))
+            ->map(fn($r) => [
+                'code' => strtoupper(trim($r['code'])),
+                'label' => trim($r['label'] ?? ''),
+                'color_hex' => $r['color_hex'] ?? '#EF4444',
+            ])
+            ->values()
+            ->all();
+
+        $event->accessCodes()->delete();
+        $event->accessCodes()->createMany($codes);
+
+        // Update status based on dates
+        EventStatusService::updateStatus($event);
+
+        // Update sports
+        if (!empty($sports)) {
+            $event->sports()->sync($sports);
+        } else {
+            $event->sports()->detach();
+        }
+
+        return redirect()->route('super-admin.events.index')->with('success', 'Event updated successfully!');
+    }
+
+    public function eventDelete(Event $event)
+    {
+        $event->delete();
+        return back()->with('success', 'Event deleted successfully!');
+    }
+
+    private function validateEventData(Request $request, ?Event $event = null): array
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string'],
+            'start_at' => ['required', 'date'],
+            'end_at' => ['nullable', 'date', 'after_or_equal:start_at'],
+            'venue' => ['nullable', 'string', 'max:255'],
+            'city_id' => ['nullable', 'exists:cities,id'],
+            'status' => ['required', Rule::in(['planning', 'upcoming', 'active', 'completed'])],
+            'stage' => ['required', Rule::in(['province', 'national', 'asean/sea', 'asia', 'world'])],
+            'penyelenggara' => ['required', 'string', 'max:255'],
+            'instagram' => ['nullable', 'string', 'max:255'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'sports' => ['nullable', 'array'],
+            'sports.*' => ['exists:sports,id'],
+            'access_codes' => ['nullable','array'],
+            'access_codes.*.code' => ['nullable','string','max:50'],
+            'access_codes.*.label' => ['nullable','string','max:255'],
+            'access_codes.*.color_hex' => ['nullable','string','max:20'],
+        ]);
+
+        $data = collect($validated)
+            ->only([
+                'title',
+                'description',
+                'start_at',
+                'end_at',
+                'venue',
+                'city_id',
+                'status',
+                'stage',
+                'penyelenggara',
+                'instagram',
+                'email',
+                'sports',
+            ])->toArray();
+
+        $data['start_at'] = Carbon::parse($data['start_at']);
+        $data['end_at'] = isset($data['end_at']) ? Carbon::parse($data['end_at']) : null;
+
+        return $data;
     }
 }
