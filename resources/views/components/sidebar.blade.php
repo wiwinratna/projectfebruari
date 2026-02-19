@@ -8,6 +8,8 @@
             <div class="flex items-center justify-center">
                 @if(session('admin_authenticated'))
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-center">
+                    @elseif(session('super_admin_authenticated'))
+                    <a href="{{ route('super-admin.dashboard') }}" class="flex items-center justify-center">
                     @else
                     <a href="{{ route('jobs.index') }}" class="flex items-center justify-center">
                         @endif
@@ -22,7 +24,55 @@
         </div>
         <ul class="sidebar-menu mt-8">
 
-            @if(session('admin_authenticated'))
+            @if(session('super_admin_authenticated'))
+            {{-- Dashboard Section --}}
+            <li class="px-6 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
+
+            <li class="menu-item {{ Request::is('super-admin/dashboard') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('super-admin.dashboard') }}">
+                    <i class="fas fa-home mr-3"></i>
+                    <span>Super Admin Dashboard</span>
+                </a>
+            </li>
+
+            {{-- System Management Section --}}
+            <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">System Management</li>
+
+            <li class="menu-item {{ Request::is('super-admin/admins*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('super-admin.admins.index') }}">
+                    <i class="fas fa-user-tie mr-3"></i>
+                    <span>Manage Admins</span>
+                </a>
+            </li>
+
+            <li class="menu-item {{ Request::is('super-admin/events*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('super-admin.events.index') }}">
+                    <i class="fas fa-calendar-alt mr-3"></i>
+                    <span>All Events</span>
+                </a>
+            </li>
+
+            {{-- Content Section --}}
+            <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Content</li>
+
+            <li class="menu-item {{ Request::is('super-admin/news*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('super-admin.news.index') }}">
+                    <i class="fas fa-newspaper mr-3"></i>
+                    <span>Manage News</span>
+                </a>
+            </li>
+
+            {{-- Account Section --}}
+            <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
+
+            <li class="menu-item {{ Request::is('super-admin/profile*') ? 'active' : '' }}">
+                <a class="nav-link text-blue-600 font-bold hover:bg-blue-50" href="{{ route('super-admin.profile') }}">
+                    <i class="fas fa-user-cog mr-3"></i>
+                    <span>Profile & Settings</span>
+                </a>
+            </li>
+
+            @elseif(session('admin_authenticated'))
             {{-- Dashboard Section --}}
             <li class="px-6 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
 
@@ -138,17 +188,6 @@
                     <span>Job Categories</span>
                 </a>
             </li>
-
-            {{-- News / Updates Section --}}
-            <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Content</li>
-
-            <li class="menu-item {{ Request::is('admin/news*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.news.index') }}">
-                    <i class="fas fa-newspaper mr-3"></i>
-                    <span>News</span>
-                </a>
-            </li>
-
 
             {{-- Account Section --}}
             <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
