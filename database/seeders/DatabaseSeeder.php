@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
             WorkerTypeSeeder::class,
             JobCategorySeeder::class,
             SportSeeder::class,
+            SuperAdminSeeder::class,
             UserSeeder::class,
             EventSeeder::class,
             EventMasterDataSeeder::class,

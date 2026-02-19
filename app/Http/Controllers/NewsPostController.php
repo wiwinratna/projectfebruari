@@ -12,20 +12,20 @@ class NewsPostController extends Controller
 {
     public function index()
     {
-        if (!session('admin_authenticated')) return redirect('/admin/login');
+        if (!session('super_admin_authenticated')) return redirect('/super-admin/login');
         $posts = NewsPost::latest()->paginate(10);
         return view('menu.admin.news.index', compact('posts'));
     }
 
     public function create()
     {
-        if (!session('admin_authenticated')) return redirect('/admin/login');
+        if (!session('super_admin_authenticated')) return redirect('/super-admin/login');
         return view('menu.admin.news.create');
     }
 
     public function store(Request $request)
     {
-        if (!session('admin_authenticated')) return redirect('/admin/login');
+        if (!session('super_admin_authenticated')) return redirect('/super-admin/login');
 
         $data = $request->validate([
             'title'        => 'required|string|max:180',
@@ -53,12 +53,12 @@ class NewsPostController extends Controller
 
         NewsPost::create($data);
 
-        return redirect()->route('admin.news.index')->with('success', 'News created!');
+        return redirect()->route('super-admin.news.index')->with('success', 'News created!');
     }
 
     public function edit(NewsPost $news)
     {
-        if (!session('admin_authenticated')) return redirect('/admin/login');
+        if (!session('super_admin_authenticated')) return redirect('/super-admin/login');
 
         $post = $news; // alias biar view pakai $post
         return view('menu.admin.news.edit', compact('post'));
@@ -67,7 +67,7 @@ class NewsPostController extends Controller
 
     public function update(Request $request, NewsPost $news)
     {
-        if (!session('admin_authenticated')) return redirect('/admin/login');
+        if (!session('super_admin_authenticated')) return redirect('/super-admin/login');
 
         $data = $request->validate([
             'title' => 'required|string|max:180',
@@ -92,12 +92,12 @@ class NewsPostController extends Controller
 
         $news->update($data);
 
-        return redirect()->route('admin.news.index')->with('success','News updated!');
+        return redirect()->route('super-admin.news.index')->with('success','News updated!');
     }
 
     public function destroy(NewsPost $news)
     {
-        if (!session('admin_authenticated')) return redirect('/admin/login');
+        if (!session('super_admin_authenticated')) return redirect('/super-admin/login');
         $news->delete();
         return back()->with('success','News deleted!');
     }

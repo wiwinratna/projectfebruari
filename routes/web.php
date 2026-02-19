@@ -224,6 +224,47 @@ Route::prefix('admin')->name('admin.')->group(function () {
     })->name('logout');
 });
 
+// Super Admin Authentication Routes
+Route::prefix('super-admin')->name('super-admin.')->group(function () {
+    // Super Admin login page
+    Route::get('/login', function () {
+        return view('auth.super-admin-login');
+    })->name('login');
+
+    // Super Admin login processing
+    Route::post('/login', function () {
+        $credentials = request()->only('username', 'password');
+
+        // Database-backed authentication
+        $user = \App\Models\User::where('username', $credentials['username'])->first();
+
+        if ($user && \Hash::check($credentials['password'], $user->password)) {
+            // Only allow super admin users to login via super admin portal
+            if ($user->role !== 'super_admin') {
+                return back()->withErrors(['username' => 'Invalid super admin credentials'])->withInput();
+            }
+
+            session([
+                'super_admin_authenticated' => true,
+                'super_admin_id' => $user->id,
+                'super_admin_username' => $user->username,
+                'super_admin_role' => $user->role,
+                'super_admin_login_time' => now(),
+            ]);
+
+            return redirect('/super-admin/dashboard');
+        }
+
+        return back()->withErrors(['username' => 'Invalid super admin credentials'])->withInput();
+    })->name('login.submit');
+
+    // Super Admin logout
+    Route::post('/logout', function () {
+        session()->forget(['super_admin_authenticated', 'super_admin_username', 'super_admin_id']);
+        return redirect('/super-admin/login');
+    })->name('logout');
+});
+
 // Flash message handler
 Route::post('/flash-message', function () {
     $data = request()->only(['message', 'type']);
@@ -231,6 +272,45 @@ Route::post('/flash-message', function () {
 
     return back()->with($type, $data['message']);
 })->name('flash.message');
+
+// Protected Super Admin Routes (require super admin authentication)
+Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_admin'])->group(function () {
+    // Super Admin Dashboard - Protected
+    Route::get('/dashboard', [\App\Http\Controllers\SuperAdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Admins Management (CRUD)
+    Route::get('/admins', [\App\Http\Controllers\SuperAdminDashboardController::class, 'admins'])->name('admins.index');
+    Route::get('/admins/create', [\App\Http\Controllers\SuperAdminDashboardController::class, 'adminCreate'])->name('admins.create');
+    Route::post('/admins', [\App\Http\Controllers\SuperAdminDashboardController::class, 'adminStore'])->name('admins.store');
+    Route::get('/admins/{user}/edit', [\App\Http\Controllers\SuperAdminDashboardController::class, 'adminEdit'])->name('admins.edit');
+    Route::put('/admins/{user}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'adminUpdate'])->name('admins.update');
+    Route::delete('/admins/{user}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'adminDelete'])->name('admins.delete');
+
+    // Events Management
+    Route::get('/events', [\App\Http\Controllers\SuperAdminDashboardController::class, 'events'])->name('events.index');
+    Route::get('/events/{event}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventView'])->name('events.show');
+
+    // News Management
+    Route::resource('news', NewsPostController::class)->names('news');
+
+    // Super Admin Profile & Settings
+    Route::get('/profile', [\App\Http\Controllers\SuperAdminDashboardController::class, 'profile'])->name('profile');
+    Route::post('/profile', [\App\Http\Controllers\SuperAdminDashboardController::class, 'updateProfile'])->name('profile.update');
+    Route::post('/profile/password', [\App\Http\Controllers\SuperAdminDashboardController::class, 'updatePassword'])->name('profile.password');
+});
+
+// Prevent customer users from accessing super admin routes directly
+Route::middleware(['web'])->group(function () {
+    Route::get('/super-admin/{any}', function () {
+        if (session('customer_authenticated')) {
+            return redirect('/jobs')->with('error', 'Access denied. Super admin area restricted.');
+        }
+        if (session('admin_authenticated')) {
+            return redirect('/admin/dashboard')->with('error', 'Access denied. Super admin area restricted.');
+        }
+        return redirect('/super-admin/login')->with('error', 'Please login to access super admin area.');
+    })->where('any', '.*');
+});
 
 // Protected Admin Routes (require admin authentication)
 Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(function () {
@@ -282,9 +362,6 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
         ->name('access-cards.print');
 
 
-    // Admin News (CRUD)
-    Route::resource('news', NewsPostController::class)->names('news');
-
     // Master Data Routes (otomatis pakai event_id dari session admin)
     Route::prefix('master-data')->name('master-data.')->group(function () {
         Route::resource('venue-locations', \App\Http\Controllers\VenueLocationController::class)->except(['show']);
@@ -303,6 +380,9 @@ Route::middleware(['web'])->group(function () {
     Route::get('/admin/{any}', function () {
         if (session('customer_authenticated')) {
             return redirect('/jobs')->with('error', 'Access denied. Admin area restricted.');
+        }
+        if (session('super_admin_authenticated')) {
+            return redirect('/super-admin/dashboard')->with('error', 'Please use super admin portal.');
         }
         return redirect('/admin/login')->with('error', 'Please login to access admin area.');
     })->where('any', '.*');

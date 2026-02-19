@@ -180,4 +180,9 @@ class Event extends Model
     {
         return $this->hasMany(VenueAccess::class);
     }
-}
+
+    public function admins()
+    {
+        return $this->hasMany(User::class, 'event_id')
+            ->where('role', 'admin');
+    }}
