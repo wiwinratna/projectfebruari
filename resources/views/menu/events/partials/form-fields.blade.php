@@ -7,10 +7,10 @@
         'end_at',
         optional($event->end_at)->format('Y-m-d\TH:i')
     );
-    
+
     // Get all available sports
     $availableSports = \App\Models\Sport::where('is_active', true)->orderBy('name')->get();
-    
+
     // Get currently selected sports for edit mode
     $selectedSports = old('sports', $event->sports->pluck('id')->toArray() ?? []);
 @endphp
@@ -88,7 +88,7 @@
                     <optgroup label="{{ $city->province }}">
                     @php $currentProvince = $city->province; @endphp
                 @endif
-                <option value="{{ $city->id }}" 
+                <option value="{{ $city->id }}"
                         @selected(old('city_id', $event->city_id) == $city->id)>
                     {{ $city->name }}
                 </option>
@@ -165,8 +165,8 @@
     <div class="border border-gray-300 rounded-lg p-4 max-h-48 overflow-y-auto">
         @foreach ($availableSports as $sport)
             <label class="flex items-center space-x-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
-                <input type="checkbox" 
-                       name="sports[]" 
+                <input type="checkbox"
+                       name="sports[]"
                        value="{{ $sport->id }}"
                        @checked(in_array($sport->id, $selectedSports))
                        class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
@@ -209,70 +209,7 @@
     : [['code' => '', 'label' => '', 'color_hex' => '#EF4444']];
 @endphp
 
-<div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-  <div class="flex items-start justify-between gap-4 mb-3">
-    <div>
-      <h3 class="font-semibold text-gray-800">Kode Akses Event</h3>
-      <p class="text-xs text-gray-500 mt-0.5">
-        Tambahkan kode, arti, dan warna untuk ditampilkan sebagai badge akses.
-      </p>
-    </div>
 
-    <button type="button" id="addAccessRow"
-      class="shrink-0 px-3 py-1.5 rounded-lg bg-gray-900 text-white text-sm hover:bg-gray-800">
-      + Tambah Kode
-    </button>
-  </div>
-
-  {{-- Header kolom (flex biar match row) --}}
-  <div class="hidden md:flex items-center gap-2 mb-2 text-xs font-semibold text-gray-500">
-    <div class="w-56 shrink-0">Kode</div>
-    <div class="flex-1 min-w-0">Arti / Deskripsi</div>
-    <div class="w-10 text-center">Warna</div>
-    <div class="w-10 text-center">Hapus</div>
-  </div>
-
-  <div id="accessRows" class="space-y-2">
-    @foreach($rowsToRender as $i => $row)
-      <div class="flex items-center gap-2 access-row">
-        {{-- KODE (kecil, fixed width) --}}
-        <div class="w-56 shrink-0">
-          <input
-            name="access_codes[{{ $i }}][code]"
-            value="{{ $row['code'] ?? '' }}"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-            placeholder="VIP / GATE-A / ROOM-1">
-        </div>
-
-        {{-- DESKRIPSI (paling lebar) --}}
-        <div class="flex-1 min-w-0">
-          <input
-            name="access_codes[{{ $i }}][label]"
-            value="{{ $row['label'] ?? '' }}"
-            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500"
-            placeholder="Arti / Deskripsi kode">
-        </div>
-
-        {{-- WARNA (sejajar) --}}
-        <div class="w-10 shrink-0 flex justify-center">
-          <input
-            type="color"
-            name="access_codes[{{ $i }}][color_hex]"
-            value="{{ $row['color_hex'] ?? '#EF4444' }}"
-            class="w-9 h-9 p-0 border border-gray-300 rounded-md cursor-pointer bg-white">
-        </div>
-
-        {{-- HAPUS (sejajar) --}}
-        <div class="w-10 shrink-0 flex justify-center">
-          <button type="button"
-            class="removeAccessRow text-gray-400 hover:text-red-500 px-2 py-2"
-            title="Hapus baris">
-            ✕
-          </button>
-        </div>
-      </div>
-    @endforeach
-  </div>
 
   @error('access_codes')
     <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
