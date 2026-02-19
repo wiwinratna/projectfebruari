@@ -1,8 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'News - NOCIS Admin')
+@section('title', 'News - NOCIS Super Admin')
 @section('page-title')
-    News <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2">Admin</span>
+    News <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Super Admin</span>
 @endsection
 
 @section('content')
@@ -14,8 +14,8 @@
             <h2 class="text-2xl font-bold text-gray-800">News Posts</h2>
             <p class="text-gray-600 mt-1">Create and manage news for landing page updates</p>
         </div>
-        <a href="{{ route('admin.news.create') }}"
-           class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('super-admin.news.create') }}"
+           class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-plus mr-2"></i> Create News
         </a>
     </div>
@@ -99,12 +99,12 @@
 
                             <td class="px-6 py-4">
                                 <div class="flex justify-end gap-2">
-                                    <a href="{{ route('admin.news.edit', $post->id) }}"
+                                    <a href="{{ route('super-admin.news.edit', $post->id) }}"
                                        class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold">
                                         <i class="fas fa-pen mr-1"></i> Edit
                                     </a>
 
-                                    <form action="{{ route('admin.news.destroy', $post->id) }}"
+                                    <form action="{{ route('super-admin.news.destroy', $post->id) }}"
                                           method="POST"
                                           onsubmit="return confirm('Delete this news?')">
                                         @csrf

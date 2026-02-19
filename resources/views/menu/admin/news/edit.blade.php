@@ -2,7 +2,7 @@
 
 @section('title', 'Edit News - NOCIS')
 @section('page-title')
-    Edit News <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2">Admin</span>
+    Edit News <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Super Admin</span>
 @endsection
 
 @section('content')
@@ -14,7 +14,7 @@
             <h2 class="text-2xl font-bold text-gray-800">Edit News</h2>
             <p class="text-gray-600 mt-1">Update news details and publication status</p>
         </div>
-        <a href="{{ route('admin.news.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
+        <a href="{{ route('super-admin.news.index') }}" class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg flex items-center">
             <i class="fas fa-arrow-left mr-2"></i> Back to News
         </a>
     </div>
@@ -24,7 +24,7 @@
             <h3 class="text-lg font-semibold text-gray-800">News Information</h3>
         </div>
 
-        <form action="{{ route('admin.news.update', $post->id) }}"
+        <form action="{{ route('super-admin.news.update', $post->id) }}"
             method="POST"
             enctype="multipart/form-data"
             class="p-6 space-y-6">

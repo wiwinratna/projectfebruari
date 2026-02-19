@@ -122,7 +122,7 @@
 
 {{-- Actions --}}
 <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
-    <a href="{{ route('admin.news.index') }}"
+    <a href="{{ route('super-admin.news.index') }}"
        class="px-6 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors duration-200">
         Cancel
     </a>
