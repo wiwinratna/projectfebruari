@@ -22,12 +22,13 @@ export function JobsSection() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const colorSchemes = [
-    { color: "from-blue-500 to-blue-600", ringColor: "bg-blue-600" },
-    { color: "from-yellow-400 to-yellow-500", ringColor: "bg-yellow-400" },
-    { color: "from-gray-800 to-black", ringColor: "bg-black" },
-    { color: "from-green-500 to-green-600", ringColor: "bg-green-600" },
     { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
-    { color: "from-cyan-500 to-blue-500", ringColor: "bg-cyan-500" }
+    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
+    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
+    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
+    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
+    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
+
   ];
 
   useEffect(() => {
@@ -113,7 +114,7 @@ export function JobsSection() {
         <div className={`h-2 bg-linear-to-r ${job.color} gradient-animate`}></div>
 
         <div className="p-6 relative z-10">
-          {/* Job Type Badge */}
+          {/* Job Type Badge */ }
           <div className="flex items-center justify-between mb-4">
             <motion.span
               className={`px-3 py-1.5 bg-linear-to-r ${job.color} text-white rounded-full text-xs font-bold shadow-lg`}
