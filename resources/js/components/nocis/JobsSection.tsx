@@ -133,7 +133,7 @@ export function JobsSection() {
 
           {/* Location */}
           <div className="flex items-center gap-2 text-gray-600 mb-4">
-            <span className="text-sm font-bold">📍</span>
+            <span className="text-sm font-bold"></span>
             <span className="text-sm font-medium">{job.location}</span>
           </div>
 
