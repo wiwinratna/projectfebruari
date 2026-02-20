@@ -22,11 +22,10 @@ export function JobsSection() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const colorSchemes = [
-    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
-    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
-    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
-    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
-    { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
+    { color: "from-blue-500 to-blue-600", ringColor: "bg-blue-600" },
+    { color: "from-yellow-400 to-yellow-500", ringColor: "bg-yellow-400" },
+    { color: "from-gray-800 to-black", ringColor: "bg-black" },
+    { color: "from-green-500 to-green-600", ringColor: "bge-green-600" },
     { color: "from-red-500 to-red-600", ringColor: "bg-red-600" },
 
   ];
