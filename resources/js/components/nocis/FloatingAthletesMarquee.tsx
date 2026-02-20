@@ -104,6 +104,19 @@ export function FloatingAthletesMarquee() {
       </div>
 
       {/* Row 2 - Moving Left */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+        <motion.h2
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="text-5xl md:text-7xl font-black text-white text-center mb-4"
+        >
+          Our Client
+        </motion.h2>
+        <p className="text-xl text-gray-400 text-center">
+          Athletes in motion, excellence in action
+        </p>
+      </div>
       <div className="relative">
         <motion.div
           animate={{ x: [-1400, 0] }}
