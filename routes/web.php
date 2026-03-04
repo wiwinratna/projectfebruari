@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\Card\CardAccessController;
 use App\Http\Controllers\PublicCardVerifyController;
 use App\Http\Controllers\CardVerifyController;
 use App\Http\Controllers\admin\card\CardPrintController;
+use App\Http\Controllers\Customer\CustomerCardController;
 
 // Landing page route serving the React app
 Route::get('/', function () {
@@ -186,8 +187,8 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
     Route::delete('/profile/certificates/{certificate}', [CustomerDashboardController::class, 'certificateDelete'])
         ->name('profile.certificate.delete');
 
-    Route::get('/cards/{card}/pdf-a5', [CardPrintController::class, 'pdfA5Customer'])
-        ->name('cards.pdfA5');
+    Route::get('/applications/{application}/card', [CustomerCardController::class, 'show'])
+    ->name('applications.card');
 });
 
 // Admin Authentication Routes
