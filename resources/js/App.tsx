@@ -22,7 +22,6 @@ export default function App() {
       <FlowSection />
       <FeatureCards />
       <NewsSection />
-      <AnimatedAthletes />
       <FloatingAthletesMarquee />
       <RoyalFooter />
     </div>

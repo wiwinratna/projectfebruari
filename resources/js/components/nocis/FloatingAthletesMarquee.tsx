@@ -1,52 +1,80 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 
+interface Item {
+  id: number;
+  name: string;
+  logo_url: string | null;
+  website: string | null;
+  initial: string;
+}
+
+function MarqueeCard({ item, badgeColor }: { item: Item; badgeColor: string }) {
+  const inner = (
+    <motion.div
+      whileHover={{ scale: 1.08, zIndex: 10 }}
+      className="relative shrink-0 w-52 h-52 rounded-2xl overflow-hidden group cursor-pointer bg-white/10 backdrop-blur-sm border border-white/20 flex flex-col items-center justify-center gap-3 px-4"
+    >
+      {item.logo_url ? (
+        <img
+          src={item.logo_url}
+          alt={item.name}
+          className="w-20 h-20 object-contain rounded-xl bg-white p-2"
+        />
+      ) : (
+        <div className={`w-20 h-20 rounded-xl flex items-center justify-center text-2xl font-black ${badgeColor}`}>
+          {item.initial}
+        </div>
+      )}
+      <p className="text-white text-sm font-semibold text-center leading-tight line-clamp-2">
+        {item.name}
+      </p>
+      {/* Hover Overlay */}
+      <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300 rounded-2xl" />
+    </motion.div>
+  );
+
+  if (item.website) {
+    return (
+      <a href={item.website} target="_blank" rel="noopener noreferrer" className="shrink-0">
+        {inner}
+      </a>
+    );
+  }
+  return <div className="shrink-0">{inner}</div>;
+}
+
 export function FloatingAthletesMarquee() {
-  const athletesRow1 = [
-    {
-      image: "https://images.unsplash.com/photo-1658702041515-18275b138fda?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxvbHltcGljJTIwYXRobGV0ZSUyMHJ1bm5pbmclMjBwb3J0cmFpdHxlbnwxfHx8fDE3Njk4NTcwNzd8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      sport: "Track"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1710350427868-1c5cd7d79fb4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmZW1hbGUlMjBzd2ltbWVyJTIwYXRobGV0ZSUyMHBvcnRyYWl0fGVufDF8fHx8MTc2OTg1NzA3N3ww&ixlib=rb-4.1.0&q=80&w=1080",
-      sport: "Swimming"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1763893312677-f408d814a244?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxiYXNrZXRiYWxsJTIwcGxheWVyJTIwanVtcGluZyUyMGFjdGlvbnxlbnwxfHx8fDE3Njk3ODY4MDh8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      sport: "Basketball"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1669627960958-b4a809aa76ef?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxneW1uYXN0JTIwYXRobGV0ZSUyMHBvcnRyYWl0fGVufDF8fHx8MTc2OTg1NzA3OHww&ixlib=rb-4.1.0&q=80&w=1080",
-      sport: "Gymnastics"
-    }
-  ];
+  const [partners, setPartners] = useState<Item[]>([]);
+  const [clients, setClients] = useState<Item[]>([]);
 
-  const athletesRow2 = [
-    {
-      image: "https://images.unsplash.com/photo-1759659479017-f428353584eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjeWNsaXN0JTIwYXRobGV0ZSUyMHJhY2luZyUyMGFjdGlvbnxlbnwxfHx8fDE3Njk4NTcwNzl8MA&ixlib=rb-4.1.0&q=80&w=1080",
-      sport: "Cycling"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1765728617086-5d16a7bac916?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3ZWlnaHRsaWZ0ZXIlMjBhdGhsZXRlJTIwdHJhaW5pbmd8ZW58MXx8fHwxNzY5ODU3MDc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      sport: "Weightlifting"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1763639700615-225fe7fdffff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx0cmFjayUyMGF0aGxldGUlMjBzcHJpbnRpbmd8ZW58MXx8fHwxNzY5ODU3MDc5fDA&ixlib=rb-4.1.0&q=80&w=1080",
-      sport: "Sprint"
-    },
-    {
-      image: "https://images.unsplash.com/photo-1762341582293-1563fb50b330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx2b2xsZXliYWxsJTIwcGxheWVyJTIwYWN0aW9uJTIwc3BvcnR8ZW58MXx8fHwxNzY5ODU3MDgwfDA&ixlib=rb-4.1.0&q=80&w=1080",
-      sport: "Volleyball"
-    }
-  ];
+  useEffect(() => {
+    fetch('/api/partners')
+      .then((r) => r.json())
+      .then((data) => setPartners(data))
+      .catch(() => {});
 
-  // Duplicate arrays for seamless loop
-  const duplicatedRow1 = [...athletesRow1, ...athletesRow1, ...athletesRow1];
-  const duplicatedRow2 = [...athletesRow2, ...athletesRow2, ...athletesRow2];
+    fetch('/api/clients')
+      .then((r) => r.json())
+      .then((data) => setClients(data))
+      .catch(() => {});
+  }, []);
+
+  // Duplicate items enough times to fill the marquee seamlessly
+  const fill = <T,>(arr: T[]) => {
+    if (arr.length === 0) return [];
+    const repeat = Math.max(3, Math.ceil(12 / arr.length));
+    return Array.from({ length: repeat }, () => arr).flat();
+  };
+
+  const duplicatedPartners = fill(partners);
+  const duplicatedClients  = fill(clients);
 
   return (
     <section className="relative py-24 bg-linear-to-b from-red-950 to-black overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+
+      {/* --- Our Partner Row --- */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -56,55 +84,28 @@ export function FloatingAthletesMarquee() {
           Our Partner
         </motion.h2>
         <p className="text-xl text-gray-400 text-center">
-          Athletes in motion, excellence in action
+          Trusted organizations powering Indonesian sports
         </p>
       </div>
 
-      {/* Row 1 - Moving Right */}
-      <div className="relative mb-8">
-        <motion.div
-          animate={{ x: [0, -1400] }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          className="flex gap-6"
-        >
-          {duplicatedRow1.map((athlete, index) => (
-            <motion.div
-              key={index}
-              whileHover={{ scale: 1.1, zIndex: 10 }}
-              className="relative shrink-0 w-80 h-96 rounded-2xl overflow-hidden group cursor-pointer"
-            >
-              {/* Image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                style={{ backgroundImage: `url('${athlete.image}')` }}
-              >
-                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
-              </div>
-
-              {/* Badge */}
-              <div className="absolute top-4 right-4">
-                <motion.div
-                  animate={{ rotate: [0, 5, -5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="px-4 py-2 bg-[#C5D82F] text-black font-bold rounded-full text-sm"
-                >
-                  {athlete.sport}
-                </motion.div>
-              </div>
-
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-red-600/0 group-hover:bg-red-600/20 transition-colors duration-300"></div>
-            </motion.div>
-          ))}
-        </motion.div>
+      <div className="relative mb-16 overflow-hidden min-h-[100px] flex items-center justify-center">
+        {duplicatedPartners.length > 0 ? (
+          <motion.div
+            animate={{ x: [0, -(duplicatedPartners.length / 2) * (208 + 24)] }}
+            transition={{ duration: duplicatedPartners.length * 3, repeat: Infinity, ease: 'linear' }}
+            className="flex gap-6"
+          >
+            {duplicatedPartners.map((item, index) => (
+              <MarqueeCard key={`p-${item.id}-${index}`} item={item} badgeColor="bg-purple-600 text-white" />
+            ))}
+          </motion.div>
+        ) : (
+          <p className="text-gray-500 text-lg italic">Partner belum ditambahkan</p>
+        )}
       </div>
 
-      {/* Row 2 - Moving Left */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
+      {/* --- Our Client Row --- */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -114,49 +115,24 @@ export function FloatingAthletesMarquee() {
           Our Client
         </motion.h2>
         <p className="text-xl text-gray-400 text-center">
-          Athletes in motion, excellence in action
+          Organizations we proudly serve
         </p>
       </div>
-      <div className="relative">
-        <motion.div
-          animate={{ x: [-1400, 0] }}
-          transition={{
-            duration: 30,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          className="flex gap-6"
-        >
-          {duplicatedRow2.map((athlete, index) => (
-            <motion.div
-              key={index}
-              whileHover={{ scale: 1.1, zIndex: 10 }}
-              className="relative shrink-0 w-80 h-96 rounded-2xl overflow-hidden group cursor-pointer"
-            >
-              {/* Image */}
-              <div
-                className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
-                style={{ backgroundImage: `url('${athlete.image}')` }}
-              >
-                <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/20 to-transparent"></div>
-              </div>
 
-              {/* Badge */}
-              <div className="absolute top-4 right-4">
-                <motion.div
-                  animate={{ rotate: [0, -5, 5, 0] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                  className="px-4 py-2 bg-white text-black font-bold rounded-full text-sm"
-                >
-                  {athlete.sport}
-                </motion.div>
-              </div>
-
-              {/* Hover Overlay */}
-              <div className="absolute inset-0 bg-red-600/0 group-hover:bg-red-600/20 transition-colors duration-300"></div>
-            </motion.div>
-          ))}
-        </motion.div>
+      <div className="relative overflow-hidden min-h-[100px] flex items-center justify-center">
+        {duplicatedClients.length > 0 ? (
+          <motion.div
+            animate={{ x: [-(duplicatedClients.length / 2) * (208 + 24), 0] }}
+            transition={{ duration: duplicatedClients.length * 3, repeat: Infinity, ease: 'linear' }}
+            className="flex gap-6"
+          >
+            {duplicatedClients.map((item, index) => (
+              <MarqueeCard key={`c-${item.id}-${index}`} item={item} badgeColor="bg-blue-600 text-white" />
+            ))}
+          </motion.div>
+        ) : (
+          <p className="text-gray-500 text-lg italic">Client belum ditambahkan</p>
+        )}
       </div>
 
       {/* Decorative Gradient Overlays */}
