@@ -13,6 +13,9 @@ class TransportationCode extends Model
         'event_id',
         'kode',
         'keterangan',
+        'show_icon',
+        'show_code',
+        'icon_key',
     ];
 
     public function event()

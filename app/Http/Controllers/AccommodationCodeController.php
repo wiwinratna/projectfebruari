@@ -36,8 +36,11 @@ class AccommodationCodeController extends Controller
         $event = $this->getEvent();
 
         $validated = $request->validate([
-            'kode'       => 'required|string|max:50',
-            'keterangan' => 'nullable|string|max:1000',
+            'kode'       => ['required','string','max:50'],
+            'keterangan' => ['nullable','string','max:1000'],
+            'icon_key'   => ['nullable','string','max:50'],
+            'show_icon'  => ['nullable'],
+            'show_code'  => ['nullable'],
         ]);
 
         $exists = $event->accommodationCodes()->where('kode', $validated['kode'])->exists();
@@ -45,7 +48,15 @@ class AccommodationCodeController extends Controller
             return back()->withErrors(['kode' => 'Kode sudah digunakan untuk event ini.'])->withInput();
         }
 
-        $event->accommodationCodes()->create($validated);
+        $data = [
+            'kode'       => $validated['kode'],
+            'keterangan' => $validated['keterangan'] ?? null,
+            'icon_key'   => $validated['icon_key'] ?? null,
+            'show_icon'  => $request->boolean('show_icon'),
+            'show_code'  => $request->boolean('show_code'),
+        ];
+
+        $event->accommodationCodes()->create($data);
 
         return redirect()
             ->route('admin.master-data.accommodation-codes.index')
@@ -66,19 +77,31 @@ class AccommodationCodeController extends Controller
         abort_unless($accommodationCode->event_id === $event->id, 403);
 
         $validated = $request->validate([
-            'kode'       => 'required|string|max:50',
-            'keterangan' => 'nullable|string|max:1000',
+            'kode'       => ['required','string','max:50'],
+            'keterangan' => ['nullable','string','max:1000'],
+            'icon_key'   => ['nullable','string','max:50'],
+            'show_icon'  => ['nullable'],
+            'show_code'  => ['nullable'],
         ]);
 
         $exists = $event->accommodationCodes()
             ->where('kode', $validated['kode'])
             ->where('id', '!=', $accommodationCode->id)
             ->exists();
+
         if ($exists) {
             return back()->withErrors(['kode' => 'Kode sudah digunakan untuk event ini.'])->withInput();
         }
 
-        $accommodationCode->update($validated);
+        $data = [
+            'kode'       => $validated['kode'],
+            'keterangan' => $validated['keterangan'] ?? null,
+            'icon_key'   => $validated['icon_key'] ?? null,
+            'show_icon'  => $request->boolean('show_icon'),
+            'show_code'  => $request->boolean('show_code'),
+        ];
+
+        $accommodationCode->update($data);
 
         return redirect()
             ->route('admin.master-data.accommodation-codes.index')

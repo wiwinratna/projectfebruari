@@ -37,7 +37,22 @@ Kode Transportasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-f
                     @forelse ($transportationCodes as $code)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $code->kode }}</div>
+                            @php $tb = transportBadge($code); @endphp
+                            <div class="flex items-center gap-2">
+                                {{-- Icon (jika ada dan diizinkan) --}}
+                                @if($tb['type'] === 'icon' && !empty($tb['icon']))
+                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 text-gray-700">
+                                        <x-catalog-icon :key="$tb['icon']" size="16px" />
+                                    </span>
+                                @endif
+
+                                {{-- Code (fallback / atau ditampilkan bersama icon) --}}
+                                @if(!empty($tb['code']))
+                                    <div class="text-sm font-medium text-gray-900">{{ $tb['code'] }}</div>
+                                @else
+                                    <div class="text-sm text-gray-400">—</div>
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4">
                             <div class="text-sm text-gray-700">{{ $code->keterangan ?? '-' }}</div>
