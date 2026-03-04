@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Application;
 use App\Models\WorkerOpening;
 use Illuminate\Http\Request;
-use App\Models\AccessCard;
-use Illuminate\Support\Str;
+use App\Models\Card;
+use App\Models\AccessCardConfig;
+use App\Services\Card\CardAccessResolver;
+use App\Models\AccreditationMapping;
 use Illuminate\Support\Facades\DB;
 
 
@@ -81,34 +83,63 @@ public function update(Request $request, Application $application)
             }
         }
 
-        // ===== 🔥 ACCESS CARD LOGIC =====
+        // ===== ✅ CARD (NEW) LOGIC =====
         if ($validated['status'] === 'approved') {
 
-            // ambil akses dari opening (yang bisa diubah-ubah admin)
-            $application->load('opening.accessCodes');
+            $eventId = $application->opening->event_id;        // event dari opening
+            $jobCategoryId = $application->opening->job_category_id;
 
-            $card = AccessCard::updateOrCreate(
-                ['application_id' => $application->id],
+            // cari mapping utk job category ini (khusus event)
+            $pivot = DB::table('accreditation_mapping_job_category')
+                ->where('event_id', $eventId)
+                ->where('job_category_id', $jobCategoryId)
+                ->first();
+
+            if (!$pivot) {
+                // stop transaksi biar admin sadar mapping belum diset
+                throw new \Exception("Job Category belum dimapping ke Accreditation untuk event ini. Set dulu di Accreditation Mapping.");
+            }
+
+            $mappingId = (int) $pivot->accreditation_mapping_id;
+
+            // cari default access config utk mapping tsb
+            $config = AccessCardConfig::where('event_id', $eventId)
+                ->where('accreditation_mapping_id', $mappingId)
+                ->first();
+
+            // create / get draft card (idempotent)
+            $card = Card::firstOrCreate(
+                ['event_id' => $eventId, 'application_id' => $application->id],
                 [
-                    'user_id' => $application->user_id,
-                    'event_id' => $application->opening->event_id,
-                    'worker_opening_id' => $application->worker_opening_id,
-                    'registration_code' => AccessCard::where('application_id', $application->id)->value('registration_code')
-                        ?? strtoupper(Str::random(10)),
-                    'issued_at' => now(),
+                    'accreditation_mapping_id' => $mappingId,
+                    'access_card_config_id' => $config?->id,
+                    'status' => 'draft',
+                    'snapshot' => [
+                        'name' => $application->user->name ?? null,
+                        'email' => $application->user->email ?? null,
+                        'opening_title' => $application->opening->title ?? null,
+                        'job_category_id' => $jobCategoryId,
+                        'job_category_name' => $application->opening->jobCategory->name ?? null,
+                        'mapping_name' => optional(AccreditationMapping::find($mappingId))->nama_akreditasi,
+                        'mapping_color' => optional(AccreditationMapping::find($mappingId))->warna,
+                    ],
                 ]
             );
 
-            // PENTING: pivot table kamu namanya access_card_access_codes
-            $card->accessCodes()->sync(
-                $application->opening->accessCodes->pluck('id')->all()
-            );
+            // seed default overrides (venues/zones/transport/accommodation) supaya otomatis terisi
+            app(CardAccessResolver::class)->seedDefaultOverrides($card);
 
         } else {
-            // kalau status bukan approved -> hapus kartu (opsional tapi recommended)
-            $card = AccessCard::where('application_id', $application->id)->first();
-            if ($card) {
-                $card->accessCodes()->detach();
+            // kalau status bukan approved -> hapus card draft (opsional)
+            $eventId = $application->opening->event_id;
+
+            $card = Card::where('event_id', $eventId)
+                ->where('application_id', $application->id)
+                ->first();
+
+            if ($card && $card->status !== 'issued') {
+                // jika belum issued, aman dihapus. Kalau sudah issued, sebaiknya revoke (nanti).
+                $card->overrides()->delete();
                 $card->delete();
             }
         }

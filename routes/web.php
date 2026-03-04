@@ -11,14 +11,18 @@ use App\Http\Controllers\JobController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Event;
-use App\Http\Controllers\AccessCardController;
-use App\Http\Controllers\AccessCardVerifyController;
 use App\Http\Controllers\NewsPostController;
 use App\Models\NewsPost;
 use App\Services\SportsNewsService;
 use Illuminate\Support\Facades\Cache;
 use App\Services\SportsNewsRssService;
-
+use App\Http\Controllers\Admin\AccessCardConfigController;
+use App\Http\Controllers\Admin\Card\CardController;
+use App\Http\Controllers\Admin\Card\CardIssueController;
+use App\Http\Controllers\Admin\Card\CardAccessController;
+use App\Http\Controllers\PublicCardVerifyController;
+use App\Http\Controllers\CardVerifyController;
+use App\Http\Controllers\admin\card\CardPrintController;
 
 // Landing page route serving the React app
 Route::get('/', function () {
@@ -33,6 +37,13 @@ Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
 //  Public News Routes (accessible without login)
 Route::get('/news', [NewsPostController::class, 'publicIndex'])->name('news.index');
 Route::get('/news/{news}', [NewsPostController::class, 'publicShow'])->name('news.show');
+
+//absah
+
+Route::get('/cards/verify/{token}', [CardVerifyController::class, 'show'])
+  ->name('cards.verify.public');
+Route::post('/cards/verify/{token}', [CardVerifyController::class, 'store'])
+  ->name('cards.verify.store');
 
 // Customer Authentication Routes
 Route::get('/login', function () {
@@ -144,6 +155,8 @@ Route::middleware(['web', 'customer'])->group(function () {
     Route::post('/jobs/{job}/apply', [JobController::class, 'apply'])->name('jobs.apply');
 });
 
+
+
 // Customer Dashboard Routes (require customer login)
 Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->group(function () {
     Route::get('/', [CustomerDashboardController::class, 'index'])->name('dashboard');
@@ -163,8 +176,6 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
     Route::delete('/jobs/{job}/unsave', [CustomerDashboardController::class, 'unsaveJob'])->name('jobs.unsave');
     Route::get('/saved-jobs', [CustomerDashboardController::class, 'savedJobs'])->name('saved-jobs');
 
-    Route::get('/applications/{application}/card', [AccessCardController::class, 'customerPrint'])
-        ->name('applications.card');
 
     Route::post('/profile/upload-certificates', [CustomerDashboardController::class, 'uploadCertificates'])
         ->name('profile.upload-certificates');
@@ -174,6 +185,9 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
 
     Route::delete('/profile/certificates/{certificate}', [CustomerDashboardController::class, 'certificateDelete'])
         ->name('profile.certificate.delete');
+
+    Route::get('/cards/{card}/pdf-a5', [CardPrintController::class, 'pdfA5Customer'])
+        ->name('cards.pdfA5');
 });
 
 // Admin Authentication Routes
@@ -302,6 +316,8 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_ad
     Route::get('/profile', [\App\Http\Controllers\SuperAdminDashboardController::class, 'profile'])->name('profile');
     Route::post('/profile', [\App\Http\Controllers\SuperAdminDashboardController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/password', [\App\Http\Controllers\SuperAdminDashboardController::class, 'updatePassword'])->name('profile.password');
+    Route::resource('job-categories', \App\Http\Controllers\JobCategoryController::class)
+        ->names('job-categories');
 });
 
 // Prevent customer users from accessing super admin routes directly
@@ -332,7 +348,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     Route::resource('workers', WorkerController::class);
 
     // Job Categories CRUD - Protected
-    Route::resource('categories', JobCategoryController::class);
+    //Route::resource('categories', JobCategoryController::class);
 
     // Sports CRUD - Protected
     Route::resource('sports', SportController::class);
@@ -363,8 +379,8 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
         );
     })->name('events.access-codes');
 
-    Route::get('/access-cards/{accessCard}/print', [AccessCardController::class, 'adminPrint'])
-        ->name('access-cards.print');
+    Route::get('/cards/{card}/pdf-a5', [CardPrintController::class, 'pdfA5'])
+    ->name('cards.pdfA5');
 
 
     // Master Data Routes (otomatis pakai event_id dari session admin)
@@ -377,7 +393,79 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
         Route::resource('transportation-codes', \App\Http\Controllers\TransportationCodeController::class)->except(['show']);
         Route::resource('zone-access-codes', \App\Http\Controllers\ZoneAccessCodeController::class)->except(['show']);
         Route::resource('venue-accesses', \App\Http\Controllers\VenueAccessController::class)->except(['show']);
+        // Access Card Configs (based on Accreditation Mapping)
+        Route::get('/access-card-configs', [\App\Http\Controllers\Admin\AccessCardConfigController::class, 'index'])
+            ->name('access-card-configs.index');
+
+        Route::get('/access-card-configs/create', [\App\Http\Controllers\Admin\AccessCardConfigController::class, 'create'])
+            ->name('access-card-configs.create');
+
+        Route::post('/access-card-configs', [\App\Http\Controllers\Admin\AccessCardConfigController::class, 'store'])
+            ->name('access-card-configs.store');
+
+        Route::get('/access-card-configs/{config}/edit', [\App\Http\Controllers\Admin\AccessCardConfigController::class, 'edit'])
+            ->name('access-card-configs.edit');
+
+        Route::put('/access-card-configs/{config}', [\App\Http\Controllers\Admin\AccessCardConfigController::class, 'update'])
+            ->name('access-card-configs.update');
+
+        Route::delete('/access-card-configs/{config}', [\App\Http\Controllers\Admin\AccessCardConfigController::class, 'destroy'])
+            ->name('access-card-configs.destroy');
     });
+
+    Route::get('/accreditation-mapping', [\App\Http\Controllers\Admin\AccreditationMappingController::class, 'index'])
+        ->name('accreditation-mapping.index');
+
+    Route::get('/accreditation-mapping/create', [\App\Http\Controllers\Admin\AccreditationMappingController::class, 'create'])
+        ->name('accreditation-mapping.create');
+
+    Route::post('/accreditation-mapping', [\App\Http\Controllers\Admin\AccreditationMappingController::class, 'store'])
+        ->name('accreditation-mapping.store');
+
+    // lanjut step berikutnya (edit mapping job categories)
+    Route::get('/accreditation-mapping/{mapping}/edit', [\App\Http\Controllers\Admin\AccreditationMappingController::class, 'edit'])
+        ->name('accreditation-mapping.edit');
+
+    Route::put('/accreditation-mapping/{mapping}', [\App\Http\Controllers\Admin\AccreditationMappingController::class, 'update'])
+        ->name('accreditation-mapping.update');
+
+    Route::resource('card-configs', AccessCardConfigController::class)
+    ->parameters(['card-configs' => 'config'])
+    ->except(['show']);
+
+    //Ini yang berhubungan sama card yeah
+    Route::get('/cards/{card}/access', [CardAccessController::class, 'edit'])->name('cards.access.edit');
+    Route::post('/cards/{card}/access', [CardAccessController::class, 'update'])->name('cards.access.update');
+    Route::get('/cards', [CardController::class, 'index'])->name('cards.index');
+    Route::post('/cards/issue-batch', [CardIssueController::class, 'issueBatch'])->name('cards.issueBatch');
+    Route::post('/cards/{card}/issue', [CardIssueController::class, 'issue'])->name('cards.issue');
+
+    //PrintCard Disini Yeahhhh
+    Route::get('/cards/{card}/preview', [CardPrintController::class, 'preview'])->name('cards.preview');
+    Route::get('/cards/preview-all', [CardPrintController::class, 'previewAll'])->name('cards.previewAll');
+
+    //print html card cenah
+        Route::post('/cards/print-html/batch', [CardPrintController::class, 'printHtmlBatch'])
+        ->name('cards.print.html.batch');
+
+        Route::get('/cards/{card}/print-html', [CardPrintController::class, 'printHtmlSingle'])
+        ->name('cards.print.html.single');
+
+    Route::get('/icon-svg-inline/{key}', function (string $key) {
+        $svg = icon_svg_inline($key);
+        abort_if(!$svg, 404);
+
+        // Pastikan ada xmlns biar browser ga rewel
+        if (!str_contains($svg, 'xmlns=')) {
+            $svg = preg_replace('/<svg\b/', '<svg xmlns="http://www.w3.org/2000/svg"', $svg, 1);
+        }
+
+        // Paksa ukuran biar rapi di preview
+        $svg = preg_replace('/<svg\b/', '<svg width="16" height="16"', $svg, 1);
+
+        // balikin HTML (inline svg)
+        return response($svg)->header('Content-Type', 'text/html; charset=UTF-8');
+    })->name('icon-svg-inline');
 });
 
 // Prevent customer users from accessing admin routes directly
@@ -419,5 +507,3 @@ Route::middleware(['web'])->group(function () {
     })->name('store.intended.url');
 });
 
-Route::get('/verify/{token}', [AccessCardVerifyController::class, 'show'])
-    ->name('access-cards.verify');

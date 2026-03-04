@@ -13,6 +13,9 @@ class AccommodationCode extends Model
         'event_id',
         'kode',
         'keterangan',
+        'icon_key',
+        'show_icon',
+        'show_code',
     ];
 
     public function event()

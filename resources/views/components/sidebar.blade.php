@@ -52,6 +52,13 @@
                 </a>
             </li>
 
+            <li class="menu-item {{ Request::is('super-admin/job-categories*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('super-admin.job-categories.index') }}">
+                    <i class="fas fa-tags mr-3"></i>
+                    <span>Job Categories</span>
+                </a>
+            </li>
+
             {{-- Content Section --}}
             <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Content</li>
 
@@ -129,12 +136,12 @@
                 </a>
             </li>
 
-            <li class="menu-item {{ Request::is('admin/master-data/accreditations*') ? 'active' : '' }}">
+            <!-- <li class="menu-item {{ Request::is('admin/master-data/accreditations*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.master-data.accreditations.index') }}">
                     <i class="fas fa-certificate mr-3"></i>
                     <span>Akreditasi</span>
                 </a>
-            </li>
+            </li> -->
 
             <li class="menu-item {{ Request::is('admin/master-data/accommodation-codes*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.master-data.accommodation-codes.index') }}">
@@ -163,6 +170,20 @@
                     <span>Venue Access</span>
                 </a>
             </li>
+
+            <li class="menu-item {{ Request::is('admin/accreditation-mapping*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.accreditation-mapping.index') }}">
+                    <i class="fas fa-random mr-3"></i>
+                    <span>Accreditation Mapping</span>
+                </a>
+            </li>
+
+            <li class="menu-item {{ Request::is('admin/master-data/access-card-configs*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.master-data.access-card-configs.index') }}">
+                    <i class="fas fa-id-card-alt mr-3"></i>
+                    <span>Access Card Configs</span>
+                </a>
+            </li>
             @endif
 
             {{-- Recruitment Section --}}
@@ -182,12 +203,13 @@
                 </a>
             </li>
 
-            <li class="menu-item {{ Request::is('admin/categories*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.categories.index') }}">
-                    <i class="fas fa-tags mr-3"></i>
-                    <span>Job Categories</span>
+            <li class="menu-item {{ Request::is('admin/cards*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.cards.index') }}">
+                    <i class="fas fa-id-card mr-3"></i>
+                    <span>Cards</span>
                 </a>
             </li>
+
 
             {{-- Account Section --}}
             <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
