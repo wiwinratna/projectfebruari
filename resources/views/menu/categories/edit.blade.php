@@ -8,13 +8,13 @@
 @section('content')
 <div class="space-y-6">
     <div class="bg-white p-6 rounded-lg shadow">
-        <form method="POST" action="{{ route('admin.categories.update', $category) }}" class="space-y-6">
+        <form method="POST" action="{{ route('super-admin.job-categories.update', $category) }}" class="space-y-6">
             @csrf
             @method('PUT')
             @include('menu.categories.partials.form-fields')
 
             <div class="flex items-center justify-between">
-                <a href="{{ route('admin.categories.index') }}"
+                <a href="{{ route('super-admin.job-categories.index') }}"
                    class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
                     Back to Categories
                 </a>

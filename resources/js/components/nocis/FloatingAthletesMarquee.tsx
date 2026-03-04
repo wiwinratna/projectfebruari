@@ -9,39 +9,51 @@ interface Item {
   initial: string;
 }
 
-function MarqueeCard({ item, badgeColor }: { item: Item; badgeColor: string }) {
+function MarqueeCard({ item, badgeColor, badgeTextColor }: { item: Item; badgeColor: string; badgeTextColor: string }) {
   const inner = (
     <motion.div
-      whileHover={{ scale: 1.08, zIndex: 10 }}
-      className="relative shrink-0 w-52 h-52 rounded-2xl overflow-hidden group cursor-pointer bg-white/10 backdrop-blur-sm border border-white/20 flex flex-col items-center justify-center gap-3 px-4"
+      whileHover={{ scale: 1.1, zIndex: 10 }}
+      className="relative flex-shrink-0 w-80 h-96 rounded-2xl overflow-hidden group cursor-pointer"
     >
+      {/* Background */}
       {item.logo_url ? (
-        <img
-          src={item.logo_url}
-          alt={item.name}
-          className="w-20 h-20 object-contain rounded-xl bg-white p-2"
-        />
+        <div
+          className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110"
+          style={{ backgroundImage: `url('${item.logo_url}')` }}
+        >
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+        </div>
       ) : (
-        <div className={`w-20 h-20 rounded-xl flex items-center justify-center text-2xl font-black ${badgeColor}`}>
-          {item.initial}
+        <div className={`absolute inset-0 flex items-center justify-center ${badgeColor}`}>
+          <span className={`text-7xl font-black ${badgeTextColor}`}>{item.initial}</span>
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
         </div>
       )}
-      <p className="text-white text-sm font-semibold text-center leading-tight line-clamp-2">
-        {item.name}
-      </p>
+
+      {/* Badge */}
+      <div className="absolute top-4 right-4">
+        <motion.div
+          animate={{ rotate: [0, 5, -5, 0] }}
+          transition={{ duration: 2, repeat: Infinity }}
+          className={`px-4 py-2 ${badgeColor} ${badgeTextColor} font-bold rounded-full text-sm`}
+        >
+          {item.name}
+        </motion.div>
+      </div>
+
       {/* Hover Overlay */}
-      <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300 rounded-2xl" />
+      <div className="absolute inset-0 bg-red-600/0 group-hover:bg-red-600/20 transition-colors duration-300" />
     </motion.div>
   );
 
   if (item.website) {
     return (
-      <a href={item.website} target="_blank" rel="noopener noreferrer" className="shrink-0">
+      <a href={item.website} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
         {inner}
       </a>
     );
   }
-  return <div className="shrink-0">{inner}</div>;
+  return <div className="flex-shrink-0">{inner}</div>;
 }
 
 export function FloatingAthletesMarquee() {
@@ -91,12 +103,12 @@ export function FloatingAthletesMarquee() {
       <div className="relative mb-16 overflow-hidden min-h-[100px] flex items-center justify-center">
         {duplicatedPartners.length > 0 ? (
           <motion.div
-            animate={{ x: [0, -(duplicatedPartners.length / 2) * (208 + 24)] }}
+            animate={{ x: [0, -(duplicatedPartners.length / 2) * (320 + 24)] }}
             transition={{ duration: duplicatedPartners.length * 3, repeat: Infinity, ease: 'linear' }}
             className="flex gap-6"
           >
             {duplicatedPartners.map((item, index) => (
-              <MarqueeCard key={`p-${item.id}-${index}`} item={item} badgeColor="bg-purple-600 text-white" />
+              <MarqueeCard key={`p-${item.id}-${index}`} item={item} badgeColor="bg-[#C5D82F]" badgeTextColor="text-black" />
             ))}
           </motion.div>
         ) : (
@@ -122,12 +134,12 @@ export function FloatingAthletesMarquee() {
       <div className="relative overflow-hidden min-h-[100px] flex items-center justify-center">
         {duplicatedClients.length > 0 ? (
           <motion.div
-            animate={{ x: [-(duplicatedClients.length / 2) * (208 + 24), 0] }}
+            animate={{ x: [-(duplicatedClients.length / 2) * (320 + 24), 0] }}
             transition={{ duration: duplicatedClients.length * 3, repeat: Infinity, ease: 'linear' }}
             className="flex gap-6"
           >
             {duplicatedClients.map((item, index) => (
-              <MarqueeCard key={`c-${item.id}-${index}`} item={item} badgeColor="bg-blue-600 text-white" />
+              <MarqueeCard key={`c-${item.id}-${index}`} item={item} badgeColor="bg-white" badgeTextColor="text-black" />
             ))}
           </motion.div>
         ) : (
