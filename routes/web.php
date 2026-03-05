@@ -2,6 +2,8 @@
 
 use Illuminate\Support\Facades\File;
 use App\Http\Controllers\CustomerDashboardController;
+use App\Http\Controllers\ClientController;
+use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\JobCategoryController;
@@ -323,6 +325,12 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_ad
     Route::post('/profile/password', [\App\Http\Controllers\SuperAdminDashboardController::class, 'updatePassword'])->name('profile.password');
     Route::resource('job-categories', \App\Http\Controllers\JobCategoryController::class)
         ->names('job-categories');
+
+    // Our Clients Management (Landing Page)
+    Route::resource('clients', ClientController::class)->names('clients');
+
+    // Our Partners Management (Landing Page)
+    Route::resource('partners', PartnerController::class)->names('partners');
 });
 
 // Prevent customer users from accessing super admin routes directly

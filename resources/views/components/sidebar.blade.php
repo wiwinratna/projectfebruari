@@ -69,6 +69,20 @@
                 </a>
             </li>
 
+            <li class="menu-item {{ Request::is('super-admin/clients*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('super-admin.clients.index') }}">
+                    <i class="fas fa-building mr-3"></i>
+                    <span>Our Clients</span>
+                </a>
+            </li>
+
+            <li class="menu-item {{ Request::is('super-admin/partners*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('super-admin.partners.index') }}">
+                    <i class="fas fa-handshake mr-3"></i>
+                    <span>Our Partners</span>
+                </a>
+            </li>
+
             {{-- Account Section --}}
             <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
 
