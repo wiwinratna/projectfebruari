@@ -11,6 +11,7 @@ use App\Models\ZoneAccessCode;
 use App\Services\Card\CardAccessResolver;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CardPrintController extends Controller
 {
@@ -19,24 +20,27 @@ class CardPrintController extends Controller
         $eventId = session('admin_event_id');
         abort_unless($card->event_id == $eventId, 403);
 
-        $card->load('application.user.profile');
+        $card->load('application.user.profile', 'event', 'cardLayout');
 
         $final = $resolver->getFinalAccess($card);
 
-        $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : null);
+        $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : "ARISE-CARD-{$card->id}");
 
         $qrByCardId = [
             $card->id => $this->qrBase64($qrText),
         ];
 
         $photoByCardId = [
-            $card->id => $this->photoBase64FromProfile($card->application?->user?->profile?->profile_photo),
+            $card->id => $this->photoBase64FromProfile($this->resolvePhotoPath($card)),
         ];
 
         $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
         $accomById     = AccommodationCode::where('event_id', $eventId)->get()->keyBy('id');
 
         [$venueMap, $zoneMap] = $this->buildAccessMaps($eventId);
+
+        // Get layout from card or event
+        $layout = $card->cardLayout ?? $card->event->activeCardLayout;
 
         return view('menu.admin.card.print.sheet-a5', [
             'cards' => collect([$card]),
@@ -48,6 +52,7 @@ class CardPrintController extends Controller
             'venueMap' => $venueMap,
             'zoneMap'  => $zoneMap,
             'mode' => 'preview',
+            'layout' => $layout,
         ]);
     }
 
@@ -60,24 +65,27 @@ class CardPrintController extends Controller
             return back()->with('error', 'Card harus ISSUED dulu sebelum print.');
         }
 
-        $card->load('application.user.profile');
+        $card->load('application.user.profile', 'event', 'cardLayout');
 
         $final = $resolver->getFinalAccess($card);
 
-        $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : null);
+        $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : "ARISE-CARD-{$card->id}");
 
         $qrByCardId = [
             $card->id => $this->qrBase64($qrText),
         ];
 
         $photoByCardId = [
-            $card->id => $this->photoBase64FromProfile($card->application?->user?->profile?->profile_photo),
+            $card->id => $this->photoBase64FromProfile($this->resolvePhotoPath($card)),
         ];
 
         $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
         $accomById     = AccommodationCode::where('event_id', $eventId)->get()->keyBy('id');
 
         [$venueMap, $zoneMap] = $this->buildAccessMaps($eventId);
+
+        // Get layout from card or event
+        $layout = $card->cardLayout ?? $card->event->activeCardLayout;
 
         $pdf = Pdf::loadView('menu.admin.card.print.sheet-a5', [
             'cards' => collect([$card]),
@@ -89,6 +97,7 @@ class CardPrintController extends Controller
             'venueMap' => $venueMap,
             'zoneMap'  => $zoneMap,
             'mode' => 'pdf',
+            'layout' => $layout,
         ])->setPaper('a5', 'portrait');
 
         return $pdf->download("card-{$card->card_number}.pdf");
@@ -113,7 +122,7 @@ class CardPrintController extends Controller
             return back()->with('error', 'Tidak ada card ISSUED yang dipilih.');
         }
 
-        $cards->load('application.user.profile');
+        $cards->load('application.user.profile', 'event', 'cardLayout');
 
         $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
         $accomById     = AccommodationCode::where('event_id', $eventId)->get()->keyBy('id');
@@ -127,11 +136,14 @@ class CardPrintController extends Controller
         foreach ($cards as $c) {
             $finalAccessByCardId[$c->id] = $resolver->getFinalAccess($c);
 
-            $qrText = $c->qr_payload ?: ($c->qr_token ? url("/cards/verify/{$c->qr_token}") : null);
+            $qrText = $c->qr_payload ?: ($c->qr_token ? url("/cards/verify/{$c->qr_token}") : "ARISE-CARD-{$c->id}");
             $qrByCardId[$c->id] = $this->qrBase64($qrText);
 
-            $photoByCardId[$c->id] = $this->photoBase64FromProfile($c->application?->user?->profile?->profile_photo);
+            $photoByCardId[$c->id] = $this->photoBase64FromProfile($this->resolvePhotoPath($c));
         }
+
+        // Get layout from first card or event
+        $layout = $cards[0]->cardLayout ?? $cards[0]->event->activeCardLayout;
 
         $pdf = Pdf::loadView('menu.admin.card.print.sheet-a5', [
             'cards' => $cards,
@@ -143,6 +155,7 @@ class CardPrintController extends Controller
             'venueMap' => $venueMap,
             'zoneMap'  => $zoneMap,
             'mode' => 'pdf',
+            'layout' => $layout,
         ])->setPaper('a5', 'portrait');
 
         return $pdf->download("cards-issued-event{$eventId}.pdf");
@@ -189,10 +202,27 @@ class CardPrintController extends Controller
     {
         if (!$profilePhoto) return null;
 
-        $full = storage_path('app/public/' . ltrim($profilePhoto, '/'));
-        if (!file_exists($full)) return null;
+        // Already a data URI (base64 stored directly)
+        if (str_starts_with($profilePhoto, 'data:image/')) {
+            return $profilePhoto;
+        }
 
-        return base64_encode(file_get_contents($full));
+        $normalized = ltrim($profilePhoto, '/');
+        $normalized = str_starts_with($normalized, 'storage/')
+            ? substr($normalized, strlen('storage/'))
+            : $normalized;
+        $normalized = str_starts_with($normalized, 'public/')
+            ? substr($normalized, strlen('public/'))
+            : $normalized;
+
+        if (!Storage::disk('public')->exists($normalized)) {
+            return null;
+        }
+
+        $bytes = Storage::disk('public')->get($normalized);
+        $mime = Storage::disk('public')->mimeType($normalized) ?: 'image/jpeg';
+
+        return 'data:' . $mime . ';base64,' . base64_encode($bytes);
     }
 
  public function printHtmlSingle(Card $card, CardAccessResolver $resolver)
@@ -204,18 +234,21 @@ class CardPrintController extends Controller
         return back()->with('error', 'Card harus ISSUED dulu sebelum print.');
     }
 
-    $card->load('application.user.profile');
+    $card->load('application.user.profile', 'event', 'cardLayout');
     $final = $resolver->getFinalAccess($card);
 
-    $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : null);
+    $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : "ARISE-CARD-{$card->id}");
 
     $qrByCardId = [$card->id => $this->qrBase64($qrText)];
-    $photoByCardId = [$card->id => $this->photoBase64FromProfile($card->application?->user?->profile?->profile_photo)];
+    $photoByCardId = [$card->id => $this->photoBase64FromProfile($this->resolvePhotoPath($card))];
 
     $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
     $accomById     = AccommodationCode::where('event_id', $eventId)->get()->keyBy('id');
 
     [$venueMap, $zoneMap] = $this->buildAccessMaps($eventId);
+
+    // Get layout from card or event
+    $layout = $card->cardLayout ?? $card->event->activeCardLayout;
 
     return view('menu.admin.card.print.sheet-a5', [
         'cards' => collect([$card]),
@@ -228,6 +261,7 @@ class CardPrintController extends Controller
         'zoneMap'  => $zoneMap,
         'mode' => 'print',
         'autoPrint' => true,
+        'layout' => $layout,
     ]);
 }
 
@@ -250,7 +284,7 @@ public function printHtmlBatch(Request $request, CardAccessResolver $resolver)
         return back()->with('error', 'Tidak ada card ISSUED yang dipilih.');
     }
 
-    $cards->load('application.user.profile');
+    $cards->load('application.user.profile', 'event', 'cardLayout');
 
     $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
     $accomById     = AccommodationCode::where('event_id', $eventId)->get()->keyBy('id');
@@ -264,11 +298,14 @@ public function printHtmlBatch(Request $request, CardAccessResolver $resolver)
     foreach ($cards as $c) {
         $finalAccessByCardId[$c->id] = $resolver->getFinalAccess($c);
 
-        $qrText = $c->qr_payload ?: ($c->qr_token ? url("/cards/verify/{$c->qr_token}") : null);
+        $qrText = $c->qr_payload ?: ($c->qr_token ? url("/cards/verify/{$c->qr_token}") : "ARISE-CARD-{$c->id}");
         $qrByCardId[$c->id] = $this->qrBase64($qrText);
 
-        $photoByCardId[$c->id] = $this->photoBase64FromProfile($c->application?->user?->profile?->profile_photo);
+        $photoByCardId[$c->id] = $this->photoBase64FromProfile($this->resolvePhotoPath($c));
     }
+
+    // Get layout from first card or event
+    $layout = $cards[0]->cardLayout ?? $cards[0]->event->activeCardLayout;
 
     return view('menu.admin.card.print.sheet-a5', [
         'cards' => $cards,
@@ -281,6 +318,7 @@ public function printHtmlBatch(Request $request, CardAccessResolver $resolver)
         'zoneMap'  => $zoneMap,
         'mode' => 'print',
         'autoPrint' => true,
+        'layout' => $layout,
     ]);
 }
 
@@ -306,7 +344,7 @@ public function previewAll(Request $request, CardAccessResolver $resolver)
     }
 
     $cards = $cardsQuery->limit(50)->get();
-    $cards->load('application.user.profile');
+    $cards->load('application.user.profile', 'event', 'cardLayout');
 
     $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
     $accomById     = AccommodationCode::where('event_id', $eventId)->get()->keyBy('id');
@@ -320,13 +358,14 @@ public function previewAll(Request $request, CardAccessResolver $resolver)
     foreach ($cards as $c) {
         $finalAccessByCardId[$c->id] = $resolver->getFinalAccess($c);
 
-        $qrText = $c->qr_payload ?: ($c->qr_token ? url("/cards/verify/{$c->qr_token}") : null);
+        $qrText = $c->qr_payload ?: ($c->qr_token ? url("/cards/verify/{$c->qr_token}") : "ARISE-CARD-{$c->id}");
         $qrByCardId[$c->id] = $this->qrBase64($qrText);
 
-        $photoByCardId[$c->id] = $this->photoBase64FromProfile(
-            $c->application?->user?->profile?->profile_photo
-        );
+        $photoByCardId[$c->id] = $this->photoBase64FromProfile($this->resolvePhotoPath($c));
     }
+
+    // Get layout from first card or event
+    $layout = $cards->isNotEmpty() ? ($cards[0]->cardLayout ?? $cards[0]->event->activeCardLayout) : null;
 
     return view('menu.admin.card.print.sheet-a5', [
         'cards' => $cards,
@@ -339,6 +378,22 @@ public function previewAll(Request $request, CardAccessResolver $resolver)
         'zoneMap'  => $zoneMap,
         'mode' => 'preview',     // ✅ cuma preview
         'autoPrint' => false,    // ✅ jangan auto print
+        'layout' => $layout,
     ]);
 }
+    private function resolvePhotoPath(Card $card): ?string
+    {
+        $profilePhoto = $card->application?->user?->profile?->profile_photo;
+        if ($profilePhoto) {
+            return $profilePhoto;
+        }
+
+        $snapshot = is_array($card->snapshot) ? $card->snapshot : json_decode((string) $card->snapshot, true);
+        if (is_array($snapshot) && !empty($snapshot['applicant_photo'])) {
+            return (string) $snapshot['applicant_photo'];
+        }
+
+        return null;
+    }
 }
+

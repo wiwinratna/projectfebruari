@@ -21,6 +21,9 @@ class Event extends Model
         'penyelenggara',
         'instagram',
         'email',
+        'logo_path',
+        'card_template_path',
+        'card_template_updated_at',
     ];
 
     protected function casts(): array
@@ -28,6 +31,7 @@ class Event extends Model
         return [
             'start_at' => 'datetime',
             'end_at' => 'datetime',
+            'card_template_updated_at' => 'datetime',
         ];
     }
 
@@ -185,4 +189,16 @@ class Event extends Model
     {
         return $this->hasMany(User::class, 'event_id')
             ->where('role', 'admin');
-    }}
+    }
+
+    public function cardLayouts()
+    {
+        return $this->hasMany(CardLayout::class);
+    }
+
+    public function activeCardLayout()
+    {
+        return $this->hasOne(CardLayout::class)
+            ->where('is_active', true);
+    }
+ }

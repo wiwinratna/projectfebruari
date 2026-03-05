@@ -19,6 +19,9 @@ return new class extends Migration {
             // config default akses yang dipakai (dari access_card_configs)
             $table->unsignedBigInteger('access_card_config_id')->nullable();
 
+            // snapshot layout yang dipakai saat card di-issued
+            $table->unsignedBigInteger('layout_id')->nullable();
+
             $table->enum('status', ['draft', 'issued', 'revoked'])->default('draft');
 
             // issuance fields

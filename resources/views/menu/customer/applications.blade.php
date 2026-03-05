@@ -107,21 +107,37 @@
         
                                 <!-- Right: Actions -->
 
-                            <div class="flex lg:flex-col justify-end gap-2 border-t lg:border-t-0 lg:border-l border-gray-100 pt-4 lg:pt-0 lg:pl-6 min-w-[140px]">
-                                 @if($application->status === 'approved')
-                                <a
-                                    href="{{ route('customer.applications.card', $application) }}"
-                                    target="_blank"
-                                    class="w-full text-center px-4 py-2 rounded-xl
-                                        bg-gradient-to-r from-red-600 to-rose-600
-                                        text-white font-extrabold text-sm
-                                        shadow-md shadow-red-500/20
-                                        hover:shadow-lg hover:shadow-red-500/30
-                                        hover:from-red-700 hover:to-rose-700
-                                        hover:-translate-y-0.5 transition-all duration-300"
-                                >
-                                    <i class="fas fa-id-card mr-2"></i> View Card
-                                </a>
+                            <div class="flex lg:flex-col justify-end gap-2 border-t lg:border-t-0 lg:border-l border-gray-100 pt-4 lg:pt-0 lg:pl-6 min-w-[170px]">
+                                @php
+                                    $card = $application->card;
+                                    $cardIssued = $card && $card->status === 'issued';
+                                @endphp
+                                @if($application->status === 'approved' && $cardIssued)
+                                    <a
+                                        href="{{ route('customer.applications.card', $application) }}"
+                                        target="_blank"
+                                        class="w-full text-center px-4 py-2 rounded-xl
+                                            bg-gradient-to-r from-red-600 to-rose-600
+                                            text-white font-extrabold text-sm
+                                            shadow-md shadow-red-500/20
+                                            hover:shadow-lg hover:shadow-red-500/30
+                                            hover:from-red-700 hover:to-rose-700
+                                            hover:-translate-y-0.5 transition-all duration-300"
+                                    >
+                                        <i class="fas fa-id-card mr-2"></i> View Card
+                                    </a>
+                                @elseif($application->status === 'approved')
+                                    <button
+                                        type="button"
+                                        class="w-full text-center px-4 py-2 rounded-xl bg-gray-200 text-gray-600 font-extrabold text-sm cursor-not-allowed border border-gray-300"
+                                        title="Your card will be available after the admin issues it."
+                                        disabled
+                                    >
+                                        <i class="fas fa-hourglass-half mr-2"></i> Card Pending
+                                    </button>
+                                    <p class="text-[11px] text-gray-500 leading-snug">
+                                        Your card will be available after the admin issues it.
+                                    </p>
                                 @endif
                                 <a href="{{ route('jobs.show', $application->opening) }}" class="w-full text-center px-4 py-2 rounded-xl bg-gray-50 hover:bg-white text-gray-600 hover:text-red-600 font-bold text-sm border border-gray-200 hover:border-red-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                                     View Job

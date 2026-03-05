@@ -24,6 +24,7 @@ use App\Http\Controllers\PublicCardVerifyController;
 use App\Http\Controllers\CardVerifyController;
 use App\Http\Controllers\admin\card\CardPrintController;
 use App\Http\Controllers\Customer\CustomerCardController;
+use App\Http\Controllers\Customer\NotificationController as CustomerNotificationController;
 
 // Landing page route serving the React app
 Route::get('/', function () {
@@ -154,6 +155,9 @@ Route::post('/logout', function () {
 // Job application routes (require customer login)
 Route::middleware(['web', 'customer'])->group(function () {
     Route::post('/jobs/{job}/apply', [JobController::class, 'apply'])->name('jobs.apply');
+    Route::get('/notifications', [CustomerNotificationController::class, 'index'])->name('customer.notifications.index');
+    Route::post('/notifications/{notification}/read', [CustomerNotificationController::class, 'markRead'])->name('customer.notifications.read');
+    Route::post('/notifications/read-all', [CustomerNotificationController::class, 'markAllRead'])->name('customer.notifications.read-all');
 });
 
 
@@ -467,6 +471,35 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
         // balikin HTML (inline svg)
         return response($svg)->header('Content-Type', 'text/html; charset=UTF-8');
     })->name('icon-svg-inline');
+
+    // Event Settings (Form untuk edit event milik admin via session)
+    Route::get('/event/settings', [\App\Http\Controllers\Admin\EventSettingsController::class, 'edit'])
+        ->name('event.settings.edit');
+    
+    Route::post('/event/settings', [\App\Http\Controllers\Admin\EventSettingsController::class, 'update'])
+        ->name('event.settings.update');
+    
+    Route::post('/event/settings/logo/remove', [\App\Http\Controllers\Admin\EventSettingsController::class, 'removeLogo'])
+        ->name('event.settings.logo.remove');
+    
+    Route::post('/event/settings/template/remove', [\App\Http\Controllers\Admin\EventSettingsController::class, 'removeTemplate'])
+        ->name('event.settings.template.remove');
+
+    // Card Layout Builder (Canvas + Drag & Drop)
+    Route::get('/card-layouts/builder', [\App\Http\Controllers\Admin\CardLayoutController::class, 'builder'])
+        ->name('card-layouts.builder');
+    
+    Route::get('/card-layouts/active', [\App\Http\Controllers\Admin\CardLayoutController::class, 'getActive'])
+        ->name('card-layouts.active');
+    
+    Route::post('/card-layouts/save', [\App\Http\Controllers\Admin\CardLayoutController::class, 'save'])
+        ->name('card-layouts.save');
+    
+    Route::post('/card-layouts/reset-default', [\App\Http\Controllers\Admin\CardLayoutController::class, 'resetDefault'])
+        ->name('card-layouts.reset-default');
+    
+    Route::get('/card-layouts/preview-sample', [\App\Http\Controllers\Admin\CardLayoutController::class, 'previewSample'])
+        ->name('card-layouts.preview-sample');
 });
 
 // Prevent customer users from accessing admin routes directly
@@ -507,4 +540,3 @@ Route::middleware(['web'])->group(function () {
         return response()->json(['success' => true]);
     })->name('store.intended.url');
 });
-

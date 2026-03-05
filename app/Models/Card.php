@@ -13,6 +13,7 @@ class Card extends Model
         'application_id',
         'accreditation_mapping_id',
         'access_card_config_id',
+        'layout_id',
         'status',
         'card_number',
         'qr_token',
@@ -54,5 +55,10 @@ class Card extends Model
     public function accessConfig(): BelongsTo
     {
         return $this->belongsTo(AccessCardConfig::class, 'access_card_config_id');
+    }
+
+    public function cardLayout(): BelongsTo
+    {
+        return $this->belongsTo(CardLayout::class, 'layout_id');
     }
 }

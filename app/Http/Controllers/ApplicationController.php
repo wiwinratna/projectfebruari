@@ -10,6 +10,7 @@ use App\Models\AccessCardConfig;
 use App\Services\Card\CardAccessResolver;
 use App\Models\AccreditationMapping;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\ApplicationStatusChangedNotification;
 
 
 class ApplicationController extends Controller
@@ -53,9 +54,8 @@ public function update(Request $request, Application $application)
         'review_notes' => 'nullable|string|max:1000',
     ]);
 
-    DB::transaction(function () use ($validated, $application) {
-
-        $oldStatus = $application->status;
+    $oldStatus = $application->status;
+    DB::transaction(function () use ($validated, $application, $oldStatus) {
 
         $application->update([
             'status' => $validated['status'],
@@ -144,6 +144,16 @@ public function update(Request $request, Application $application)
             }
         }
     });
+
+    if ($oldStatus !== $validated['status'] && in_array($validated['status'], ['approved', 'rejected'], true)) {
+        $application->loadMissing(['user', 'opening.event']);
+        $application->user?->notify(new ApplicationStatusChangedNotification(
+            $application->opening->event->title ?? 'Event',
+            $application->opening->title ?? 'Opening',
+            $validated['status'],
+            route('customer.applications')
+        ));
+    }
 
     $job = $application->opening; // sudah ada, tapi biar aman ambil ulang
     return redirect()->route('admin.workers.show', $job->id)

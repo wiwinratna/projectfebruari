@@ -58,10 +58,14 @@
                         @php
                         // Robust Profile Photo Logic
                         $headerProfilePhoto = session('customer_profile_photo');
+                        $headerUser = null;
+
+                        if (session('customer_id')) {
+                        $headerUser = \App\Models\User::with('profile')->find(session('customer_id'));
+                        }
 
                         // Fallback: Check DB if session is empty but user is logged in
-                        if (empty($headerProfilePhoto) && session('customer_id')) {
-                        $headerUser = \App\Models\User::with('profile')->find(session('customer_id'));
+                        if (empty($headerProfilePhoto) && $headerUser) {
                         if ($headerUser && $headerUser->profile && $headerUser->profile->profile_photo) {
                         $headerProfilePhoto = $headerUser->profile->profile_photo;
                         // Self-heal session
@@ -93,6 +97,64 @@
                     <!-- Desktop Actions -->
                     <div class="hidden lg:flex items-center gap-3">
                         @if(session('customer_authenticated'))
+                        @php
+                        $headerUnreadNotificationsCount = 0;
+                        $headerLatestNotifications = collect();
+                        $notificationsTableReady = \Illuminate\Support\Facades\Schema::hasTable('notifications');
+                        if ($notificationsTableReady && $headerUser) {
+                        $headerUnreadNotificationsCount = $headerUser->unreadNotifications()->count();
+                        $headerLatestNotifications = $headerUser->notifications()
+                            ->orderByRaw('read_at IS NULL DESC')
+                            ->latest()
+                            ->limit(5)
+                            ->get();
+                        }
+                        @endphp
+
+                        <!-- Notification Bell -->
+                        <div class="relative group">
+                            <a href="{{ route('customer.notifications.index') }}"
+                                class="relative inline-flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 text-gray-600 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all">
+                                <i class="fas fa-bell text-sm"></i>
+                                @if($headerUnreadNotificationsCount > 0)
+                                <span class="absolute -top-1 -right-1 min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center leading-none">
+                                    {{ $headerUnreadNotificationsCount > 99 ? '99+' : $headerUnreadNotificationsCount }}
+                                </span>
+                                @endif
+                            </a>
+
+                            <div class="absolute right-0 mt-3 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-white/60 ring-1 ring-gray-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform origin-top-right z-50">
+                                <div class="px-4 py-3 border-b border-gray-100/60 flex items-center justify-between">
+                                    <p class="text-sm font-bold text-gray-900">Notifications</p>
+                                    @if($headerUnreadNotificationsCount > 0)
+                                    <span class="text-xs font-semibold text-red-600">{{ $headerUnreadNotificationsCount }} unread</span>
+                                    @endif
+                                </div>
+                                <div class="max-h-96 overflow-y-auto p-2 space-y-1">
+                                    @forelse($headerLatestNotifications as $notif)
+                                    @php
+                                    $notifData = $notif->data ?? [];
+                                    $isUnread = is_null($notif->read_at);
+                                    @endphp
+                                    <a href="{{ route('customer.notifications.index') }}"
+                                        class="block rounded-xl px-3 py-2 transition-all {{ $isUnread ? 'bg-red-50/60 border border-red-100' : 'hover:bg-gray-50' }}">
+                                        <div class="text-xs font-semibold text-gray-900">{{ $notifData['title'] ?? 'Notification' }}</div>
+                                        <div class="text-xs text-gray-600 mt-0.5 line-clamp-2">{{ $notifData['message'] ?? '' }}</div>
+                                        <div class="text-[11px] text-gray-400 mt-1">{{ $notif->created_at?->diffForHumans() }}</div>
+                                    </a>
+                                    @empty
+                                    <div class="px-3 py-4 text-center text-xs text-gray-500">No notifications yet</div>
+                                    @endforelse
+                                </div>
+                                <div class="px-3 py-2 border-t border-gray-100/60">
+                                    <a href="{{ route('customer.notifications.index') }}"
+                                        class="block w-full text-center rounded-xl bg-gray-900 text-white text-xs font-semibold py-2 hover:bg-black transition-colors">
+                                        View all
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Profile Dropdown -->
                         <div class="relative group" x-data="{ open: false }">
                             <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full border border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all">

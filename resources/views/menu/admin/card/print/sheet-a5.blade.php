@@ -242,12 +242,32 @@
       border-radius:0;
     }
     .qrBox img{ width:100%; height:100%; display:block; }
+
   </style>
 </head>
 
 @php
   $modeVal   = ($mode ?? 'preview');
   $isPreview = ($modeVal === 'preview');
+  
+  // Get layout (either passed or from card's event)
+  $eventLayout = null;
+  if (isset($layout)) {
+    // Layout passed directly
+    $eventLayout = $layout;
+  } elseif (isset($cards) && count($cards) > 0) {
+    // Get layout from first card's event
+    $firstCard = $cards[0];
+    if (isset($firstCard->cardLayout)) {
+      $eventLayout = $firstCard->cardLayout;
+    } elseif (isset($firstCard->event) && isset($firstCard->event->activeCardLayout)) {
+      $eventLayout = $firstCard->event->activeCardLayout;
+    }
+  }
+  
+  // Use layout if available, otherwise use default
+  $useLayout = $eventLayout && isset($eventLayout->layout_json);
+  $layoutJson = $useLayout ? $eventLayout->layout_json : \App\Models\CardLayout::getDefaultLayout();
 @endphp
 
 <body class="{{ $isPreview ? 'preview-bg' : '' }}">
@@ -290,83 +310,116 @@
   @endphp
 
   <div class="page">
-    <div class="content">
-      <div class="card">
+    @php
+      // Get event for template background
+      $event = $card->event;
+      $templatePath = $event?->card_template_path;
+      $templateExists = $templatePath ? Storage::disk('public')->exists($templatePath) : false;
+      $templateUrl = $templatePath ? asset('storage/' . ltrim($templatePath, '/')) : null;
+    @endphp
+    
+    @if($templateExists && $templateUrl)
+      {{-- Template Background --}}
+      <img
+        src="{{ $templateUrl }}"
+        alt="Template"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; z-index: 1;"
+      />
+    @endif
+    
+    @if($useLayout && $templateExists)
+      {{-- RENDER WITH CUSTOM LAYOUT --}}
+      @include('menu.admin.card.print.sheet-a5-layout', [
+        'card' => $card,
+        'layout' => $layoutJson,
+        'qr' => $qrByCardId[$card->id] ?? null,
+        'photo' => $photoByCardId[$card->id] ?? null,
+        'finalAccessByCardId' => $finalAccessByCardId,
+        'venueMap' => $venueMap ?? [],
+        'zoneMap' => $zoneMap ?? [],
+        'transportById' => $transportById ?? [],
+        'accomById' => $accomById ?? [],
+      ])
+    @else
+      {{-- FALLBACK TO MODE 1 DEFAULT LAYOUT --}}
+      <div class="content">
+        <div class="card">
 
-        {{-- Photo --}}
-        <div class="photo">
-          @if($photo)
-            <img src="data:image/jpeg;base64,{{ $photo }}" alt="Photo">
-          @endif
-        </div>
-
-        {{-- Accreditation (D) --}}
-        <div class="accWrap">
-          <div class="accLogoSpace"></div>
-          <div class="accBar" style="background: {{ $color }};">
-            {{ $acc }}
-          </div>
-        </div>
-
-        {{-- LEFT COLUMN (flow) --}}
-        <div class="leftCol">
-          <div class="name">{{ $snap['name'] ?? '—' }}</div>
-          <div class="meta">{{ $snap['job_category_name'] ?? '' }}</div>
-
-          <div class="privTitle">Transportation &amp; Accommodation</div>
-          <div class="chipRow">
-            @if($t && ($tHasIcon || $tShouldShowCode))
-              <span class="chip">
-                @if($tHasIcon)
-                  <x-catalog-icon :key="$tBadge['icon']" size="12pt" />
-                @endif
-                @if($tShouldShowCode)
-                  <span class="mono">{{ $tBadge['code'] }}</span>
-                @endif
-              </span>
-            @endif
-
-            @if($a && ($aHasIcon || $aShouldShowCode))
-              <span class="chip">
-                @if($aHasIcon)
-                  <x-catalog-icon :key="$aBadge['icon']" size="12pt" />
-                @endif
-                @if($aShouldShowCode)
-                  <span class="mono">{{ $aBadge['code'] }}</span>
-                @endif
-              </span>
+          {{-- Photo --}}
+          <div class="photo">
+            @if($photo)
+              <img src="{{ $photo }}" alt="Photo">
             @endif
           </div>
 
-          <div class="accessTitle">Venue &amp; Sport Access</div>
-          <div class="accessRow">
-            @foreach($venueChips as $vid)
-              @php
-                $v = ($venueMap ?? [])[$vid] ?? null;
-                $label = $v['code'] ?? ($v['name'] ?? ('V'.$vid));
-              @endphp
-              <span class="chip">{{ $label }}</span>
-            @endforeach
-
-            @foreach($zoneChips as $zid)
-              @php
-                $z = ($zoneMap ?? [])[$zid] ?? null;
-                $label = $z['code'] ?? ($z['name'] ?? ('Z'.$zid));
-              @endphp
-              <span class="chip">{{ $label }}</span>
-            @endforeach
+          {{-- Accreditation (D) --}}
+          <div class="accWrap">
+            <div class="accLogoSpace"></div>
+            <div class="accBar" style="background: {{ $color }};">
+              {{ $acc }}
+            </div>
           </div>
-        </div>
 
-        {{-- QR --}}
-        <div class="qrBox">
-          @if($qr)
-            <img src="data:image/png;base64,{{ $qr }}" alt="QR">
-          @endif
-        </div>
+          {{-- LEFT COLUMN (flow) --}}
+          <div class="leftCol">
+            <div class="name">{{ $snap['name'] ?? '—' }}</div>
+            <div class="meta">{{ $snap['job_category_name'] ?? '' }}</div>
 
+            <div class="privTitle">Transportation &amp; Accommodation</div>
+            <div class="chipRow">
+              @if($t && ($tHasIcon || $tShouldShowCode))
+                <span class="chip">
+                  @if($tHasIcon)
+                    <x-catalog-icon :key="$tBadge['icon']" size="12pt" />
+                  @endif
+                  @if($tShouldShowCode)
+                    <span class="mono">{{ $tBadge['code'] }}</span>
+                  @endif
+                </span>
+              @endif
+
+              @if($a && ($aHasIcon || $aShouldShowCode))
+                <span class="chip">
+                  @if($aHasIcon)
+                    <x-catalog-icon :key="$aBadge['icon']" size="12pt" />
+                  @endif
+                  @if($aShouldShowCode)
+                    <span class="mono">{{ $aBadge['code'] }}</span>
+                  @endif
+                </span>
+              @endif
+            </div>
+
+            <div class="accessTitle">Venue &amp; Sport Access</div>
+            <div class="accessRow">
+              @foreach($venueChips as $vid)
+                @php
+                  $v = ($venueMap ?? [])[$vid] ?? null;
+                  $label = $v['code'] ?? ($v['name'] ?? ('V'.$vid));
+                @endphp
+                <span class="chip">{{ $label }}</span>
+              @endforeach
+
+              @foreach($zoneChips as $zid)
+                @php
+                  $z = ($zoneMap ?? [])[$zid] ?? null;
+                  $label = $z['code'] ?? ($z['name'] ?? ('Z'.$zid));
+                @endphp
+                <span class="chip">{{ $label }}</span>
+              @endforeach
+            </div>
+          </div>
+
+          {{-- QR --}}
+          <div class="qrBox">
+            @if($qr)
+              <img src="data:image/png;base64,{{ $qr }}" alt="QR">
+            @endif
+          </div>
+
+        </div>
       </div>
-    </div>
+    @endif
   </div>
 @endforeach
 

@@ -421,7 +421,7 @@ class CustomerDashboardController extends Controller
     {
         $customerId = session('customer_id');
         
-        $applications = Application::with(['opening.event', 'opening.jobCategory'])
+        $applications = Application::with(['opening.event', 'opening.jobCategory', 'card'])
             ->where('user_id', $customerId)
             ->latest()
             ->paginate(10);
