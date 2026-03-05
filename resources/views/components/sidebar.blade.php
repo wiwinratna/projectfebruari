@@ -10,13 +10,13 @@
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-center">
                     @elseif(session('super_admin_authenticated'))
                     <a href="{{ route('super-admin.dashboard') }}" class="flex items-center justify-center">
-                    @else
-                    <a href="{{ route('jobs.index') }}" class="flex items-center justify-center">
-                        @endif
-                        <img src="{{ asset('images/Logo ARISE PNG.png') }}?v={{ time() }}"
-                            alt="NOA Indonesia"
-                            class="logo-img block">
-                    </a>
+                        @else
+                        <a href="{{ route('jobs.index') }}" class="flex items-center justify-center">
+                            @endif
+                            <img src="{{ asset('images/Logo ARISE PNG.png') }}?v={{ time() }}"
+                                alt="NOA Indonesia"
+                                class="logo-img block">
+                        </a>
             </div>
             <button id="sidebar-close" class="lg:hidden text-gray-500 hover:text-gray-700 absolute top-4 right-4 transition-colors duration-200">
                 <i class="fas fa-times text-xl"></i>
@@ -145,12 +145,12 @@
                 </a>
             </li>
 
-            <li class="menu-item {{ Request::is('admin/master-data/jabatan*') ? 'active' : '' }}">
+            <!-- <li class="menu-item {{ Request::is('admin/master-data/jabatan*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.master-data.jabatan.index') }}">
                     <i class="fas fa-id-badge mr-3"></i>
                     <span>Jabatan</span>
                 </a>
-            </li>
+            </li> -->
 
             <li class="menu-item {{ Request::is('admin/master-data/disciplins*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.master-data.disciplins.index') }}">
@@ -224,9 +224,9 @@
                     <i class="fas fa-edit mr-3"></i>
                     <span>Applications</span>
                     @if(($adminPendingApplicationsCount ?? 0) > 0)
-                        <span class="ml-auto inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
-                            {{ $adminPendingApplicationsCount }}
-                        </span>
+                    <span class="ml-auto inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                        {{ $adminPendingApplicationsCount }}
+                    </span>
                     @endif
                 </a>
             </li>
@@ -269,9 +269,9 @@
                     <i class="fas fa-bell mr-3"></i>
                     <span>Notifications</span>
                     @if(($customerUnreadNotificationsCount ?? 0) > 0)
-                        <span class="ml-auto inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
-                            {{ $customerUnreadNotificationsCount }}
-                        </span>
+                    <span class="ml-auto inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                        {{ $customerUnreadNotificationsCount }}
+                    </span>
                     @endif
                 </a>
             </li>
