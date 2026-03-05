@@ -11,39 +11,42 @@ use App\Models\VenueAccess;
 use App\Models\ZoneAccessCode;
 use App\Services\Card\CardAccessResolver;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class CustomerCardController extends Controller
 {
     public function show(Application $application, CardAccessResolver $resolver)
     {
-        // ✅ pastikan customer login (sesuaikan dengan sistem session kamu)
-        $customerId = session('customer_id'); // atau session('customer_user_id') sesuai punyamu
+        $customerId = session('customer_id');
         abort_unless($customerId, 403);
 
-        // ✅ pastikan application ini milik customer
-        abort_unless((int)$application->user_id === (int)$customerId, 403);
+        abort_unless((int) $application->user_id === (int) $customerId, 403);
 
-        // cari card dari application ini
-        $card = Card::where('application_id', $application->id)->firstOrFail();
+        $card = Card::where('application_id', $application->id)->first();
 
-        // hanya boleh lihat kalau sudah issued
-        abort_unless($card->status === 'issued', 403);
+        if (!$card || $card->status !== 'issued') {
+            return response()->view('menu.customer.card-pending', [
+                'application' => $application,
+            ], 200);
+        }
 
-        // eventId ambil dari card (karena customer ga punya session event)
         $eventId = (int) $card->event_id;
 
         $card->load('application.user.profile');
 
         $final = $resolver->getFinalAccess($card);
 
-        $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : null);
+        $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : "ARISE-CARD-{$card->id}");
 
         $qrByCardId = [
             $card->id => $this->qrBase64($qrText),
         ];
 
         $photoByCardId = [
-            $card->id => $this->photoBase64FromProfile($card->application?->user?->profile?->profile_photo),
+            $card->id => $this->photoBase64FromProfile(
+                $card->application?->user?->profile?->profile_photo
+                    ?? (is_array($card->snapshot) ? ($card->snapshot['applicant_photo'] ?? null) : (json_decode((string) $card->snapshot, true)['applicant_photo'] ?? null))
+            ),
         ];
 
         $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
@@ -51,7 +54,6 @@ class CustomerCardController extends Controller
 
         [$venueMap, $zoneMap] = $this->buildAccessMaps($eventId);
 
-        // ✅ mode preview (bukan auto print)
         return view('menu.admin.card.print.sheet-a5', [
             'cards' => collect([$card]),
             'finalAccessByCardId' => [$card->id => $final],
@@ -108,9 +110,25 @@ class CustomerCardController extends Controller
     {
         if (!$profilePhoto) return null;
 
-        $full = storage_path('app/public/' . ltrim($profilePhoto, '/'));
-        if (!file_exists($full)) return null;
+        if (str_starts_with($profilePhoto, 'data:image/')) {
+            return $profilePhoto;
+        }
 
-        return base64_encode(file_get_contents($full));
+        $normalized = ltrim($profilePhoto, '/');
+        $normalized = str_starts_with($normalized, 'storage/')
+            ? substr($normalized, strlen('storage/'))
+            : $normalized;
+        $normalized = str_starts_with($normalized, 'public/')
+            ? substr($normalized, strlen('public/'))
+            : $normalized;
+
+        if (!Storage::disk('public')->exists($normalized)) {
+            return null;
+        }
+
+        $bytes = Storage::disk('public')->get($normalized);
+        $mime = Storage::disk('public')->mimeType($normalized) ?: 'image/jpeg';
+
+        return 'data:' . $mime . ';base64,' . base64_encode($bytes);
     }
 }

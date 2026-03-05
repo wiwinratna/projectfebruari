@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Admin\Card;
 
 use App\Http\Controllers\Controller;
 use App\Models\Card;
+use App\Notifications\CardIssuedNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class CardIssueController extends Controller
 {
@@ -38,6 +38,11 @@ class CardIssueController extends Controller
 
             $signature = hash_hmac('sha256', $payload . '|' . $cardNumber, config('app.key'));
 
+            // Get active layout for snapshot at issue time
+            $activeLayout = \App\Models\CardLayout::where('event_id', $eventId)
+                ->where('is_active', true)
+                ->first();
+
             $card->update([
                 'status' => 'issued',
                 'card_number' => $cardNumber,
@@ -46,8 +51,20 @@ class CardIssueController extends Controller
                 'signature' => $signature,
                 'issued_at' => now(),
                 'issued_by' => session('admin_id'),
+                'layout_id' => $activeLayout?->id,  // Snapshot layout at issue time
             ]);
         });
+
+        $card->loadMissing(['application.user', 'application.opening.event']);
+        $application = $card->application;
+        if ($application && $application->user) {
+            $application->user->notify(new CardIssuedNotification(
+                $application->opening->event->title ?? 'Event',
+                $application->opening->title ?? 'Opening',
+                (string) optional($card->issued_at)->toIso8601String(),
+                route('customer.applications.card', $application)
+            ));
+        }
 
         return back()->with('success', 'Card berhasil di-ISSUE.');
     }
@@ -88,6 +105,11 @@ class CardIssueController extends Controller
                 ->lockForUpdate()
                 ->count();
 
+            // Get active layout for snapshot at issue time
+            $activeLayout = \App\Models\CardLayout::where('event_id', $eventId)
+                ->where('is_active', true)
+                ->first();
+
             $seq = $baseCount;
 
             foreach ($draftCards as $card) {
@@ -106,9 +128,24 @@ class CardIssueController extends Controller
                     'signature' => $signature,
                     'issued_at' => now(),
                     'issued_by' => session('admin_id'),
+                    'layout_id' => $activeLayout?->id,  // Snapshot layout at issue time
                 ]);
             }
         });
+
+        $draftCards->loadMissing(['application.user', 'application.opening.event']);
+        foreach ($draftCards as $card) {
+            $application = $card->application;
+            if (!$application || !$application->user) {
+                continue;
+            }
+            $application->user->notify(new CardIssuedNotification(
+                $application->opening->event->title ?? 'Event',
+                $application->opening->title ?? 'Opening',
+                (string) optional($card->issued_at)->toIso8601String(),
+                route('customer.applications.card', $application)
+            ));
+        }
 
         return back()->with('success', 'Berhasil issue card terpilih.');
     }

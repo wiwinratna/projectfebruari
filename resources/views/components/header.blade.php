@@ -30,8 +30,27 @@
         </button>
 
         <div class="relative">
-            <i class="fas fa-bell text-gray-500 cursor-pointer text-lg lg:text-xl"></i>
-            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center text-xs">3</span>
+            @if(session('customer_authenticated'))
+                <a href="{{ route('customer.notifications.index') }}" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-bell cursor-pointer text-lg lg:text-xl"></i>
+                </a>
+                @if(($customerUnreadNotificationsCount ?? 0) > 0)
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[1rem] h-4 lg:h-5 px-1 flex items-center justify-center text-xs">
+                        {{ $customerUnreadNotificationsCount > 99 ? '99+' : $customerUnreadNotificationsCount }}
+                    </span>
+                @endif
+            @elseif(session('admin_authenticated'))
+                <a href="{{ route('admin.reviews.index') }}" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-bell cursor-pointer text-lg lg:text-xl"></i>
+                </a>
+                @if(($adminPendingApplicationsCount ?? 0) > 0)
+                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full min-w-[1rem] h-4 lg:h-5 px-1 flex items-center justify-center text-xs">
+                        {{ $adminPendingApplicationsCount > 99 ? '99+' : $adminPendingApplicationsCount }}
+                    </span>
+                @endif
+            @else
+                <i class="fas fa-bell text-gray-400 cursor-default text-lg lg:text-xl"></i>
+            @endif
         </div>
 
         <!-- Profile Dropdown -->

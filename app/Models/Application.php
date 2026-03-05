@@ -56,4 +56,9 @@ class Application extends Model
         return $this->belongsTo(\App\Models\WorkerOpening::class, 'worker_opening_id');
     }
 
+    public function card()
+    {
+        return $this->hasOne(\App\Models\Card::class, 'application_id');
+    }
+
 }

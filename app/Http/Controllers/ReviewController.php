@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Str;
 use App\Models\AccessCard;
 use Illuminate\Support\Facades\DB;
+use App\Notifications\ApplicationStatusChangedNotification;
 
 class ReviewController extends Controller
 {
@@ -129,6 +130,7 @@ public function update(Request $request, Application $application)
         'review_notes' => 'nullable|string|max:1000',
     ]);
 
+    $oldStatus = $application->status;
     DB::transaction(function () use ($validated, $application) {
 
         $application->update([
@@ -169,6 +171,16 @@ public function update(Request $request, Application $application)
             $application->opening->accessCodes->pluck('id')->all()
         );
     });
+
+    if ($oldStatus !== $validated['status'] && in_array($validated['status'], ['approved', 'rejected'], true)) {
+        $application->loadMissing(['user', 'opening.event']);
+        $application->user?->notify(new ApplicationStatusChangedNotification(
+            $application->opening->event->title ?? 'Event',
+            $application->opening->title ?? 'Opening',
+            $validated['status'],
+            route('customer.applications')
+        ));
+    }
 
     return response()->json([
         'success' => true,

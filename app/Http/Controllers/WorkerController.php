@@ -6,8 +6,9 @@ use App\Models\Application;
 use App\Models\Event;
 use App\Models\JobCategory;
 use App\Models\WorkerOpening;
+use App\Models\Card;
 use Illuminate\Http\Request;
-use App\Models\AccessCard;
+use Illuminate\Support\Facades\Log;
 
 class WorkerController extends Controller
 {
@@ -258,11 +259,21 @@ class WorkerController extends Controller
         // 🔥 AUTO-SYNC AKSES KARTU (kartu yang sudah dibuat dari opening ini)
         $newAccessIds = $worker->accessCodes()->pluck('event_access_codes.id')->all();
 
-        AccessCard::where('worker_opening_id', $worker->id)
-            ->get()
-            ->each(function ($card) use ($newAccessIds) {
-                $card->accessCodes()->sync($newAccessIds);
-            });
+        // cards table is linked through applications (cards.application_id -> applications.id)
+        // Guard sync for current schema: Card model does not necessarily expose accessCodes() relation.
+        if (method_exists(Card::class, 'accessCodes')) {
+            Card::whereHas('application', function ($q) use ($worker) {
+                $q->where('worker_opening_id', $worker->id);
+            })
+                ->get()
+                ->each(function ($card) use ($newAccessIds) {
+                    $card->accessCodes()->sync($newAccessIds);
+                });
+        } else {
+            Log::info('Worker access auto-sync skipped: Card::accessCodes relation not available in current schema.', [
+                'worker_opening_id' => $worker->id,
+            ]);
+        }
 
 
         // Auto-update status based on capacity (Enforce rule: Full = Closed)

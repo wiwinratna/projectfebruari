@@ -111,6 +111,15 @@
                 </a>
             </li>
 
+            @if(session('admin_event_id'))
+            <li class="menu-item {{ Request::is('admin/event/settings*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('admin.event.settings.edit') }}">
+                    <i class="fas fa-palette mr-3"></i>
+                    <span>Event Settings</span>
+                </a>
+            </li>
+            @endif
+
             {{-- Event Management Section --}}
             <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Event Management</li>
 
@@ -214,6 +223,11 @@
                 <a class="nav-link" href="{{ route('admin.reviews.index') }}">
                     <i class="fas fa-edit mr-3"></i>
                     <span>Applications</span>
+                    @if(($adminPendingApplicationsCount ?? 0) > 0)
+                        <span class="ml-auto inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                            {{ $adminPendingApplicationsCount }}
+                        </span>
+                    @endif
                 </a>
             </li>
 
@@ -223,7 +237,6 @@
                     <span>Cards</span>
                 </a>
             </li>
-
 
             {{-- Account Section --}}
             <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
@@ -248,6 +261,18 @@
                 <a class="nav-link" href="{{ route('customer.applications') }}">
                     <i class="fas fa-file-alt mr-3"></i>
                     <span>My Applications</span>
+                </a>
+            </li>
+
+            <li class="menu-item {{ Request::is('notifications*') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('customer.notifications.index') }}">
+                    <i class="fas fa-bell mr-3"></i>
+                    <span>Notifications</span>
+                    @if(($customerUnreadNotificationsCount ?? 0) > 0)
+                        <span class="ml-auto inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                            {{ $customerUnreadNotificationsCount }}
+                        </span>
+                    @endif
                 </a>
             </li>
             @endif
