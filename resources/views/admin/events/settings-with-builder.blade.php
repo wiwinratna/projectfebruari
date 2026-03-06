@@ -178,17 +178,7 @@
             <div class="flex flex-col gap-2 w-32 shrink-0 relative z-20">
                 <button type="button" id="btnToggleGuides" onclick="toggleGuides()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-border-all mr-1"></i> Guides</button>
                 <button type="button" id="btnResetLayout" onclick="resetLayout()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-undo mr-1"></i> Reset</button>
-                <button
-                type="button"
-                id="btnPreviewSample"
-                onclick="previewSample()"
-                class="relative z-30 pointer-events-auto px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium w-full"
-                >
-                <span class="relative z-30 inline-flex items-center justify-center gap-2 text-white">
-                    <i class="fas fa-eye"></i>
-                    <span>Preview</span>
-                </span>
-                </button>
+                <button type="button" id="btnPreviewSample" onclick="previewSample()" class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium w-full" style="display:block !important; visibility:visible !important; opacity:1 !important; background-color:#4f46e5; color:#ffffff; min-height:2.5rem;"><i class="fas fa-eye mr-1"></i> Preview</button>
                 <button type="button" id="btnSaveLayout" onclick="saveLayout()" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-medium w-full"><i class="fas fa-check-circle mr-1"></i> Save</button>
             </div>
 
@@ -283,6 +273,13 @@
         font-weight: 700;
         z-index: 30;
         pointer-events: none;
+    }
+    #btnPreviewSample {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative;
+        z-index: 30;
     }
 </style>
 
