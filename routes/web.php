@@ -24,7 +24,7 @@ use App\Http\Controllers\Admin\Card\CardIssueController;
 use App\Http\Controllers\Admin\Card\CardAccessController;
 use App\Http\Controllers\PublicCardVerifyController;
 use App\Http\Controllers\CardVerifyController;
-use App\Http\Controllers\admin\card\CardPrintController;
+use App\Http\Controllers\Admin\Card\CardPrintController;
 use App\Http\Controllers\Customer\CustomerCardController;
 use App\Http\Controllers\Customer\NotificationController as CustomerNotificationController;
 

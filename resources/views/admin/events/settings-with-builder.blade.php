@@ -174,8 +174,8 @@
                 <i class="fas fa-info-circle mr-2"></i> Editing positions uses the default built-in card design without custom template background.
             </div>
         @endif
-        <div class="flex flex-col 2xl:flex-row gap-6">
-            <div class="flex flex-row 2xl:flex-col gap-2 2xl:w-32">
+        <div class="flex flex-col lg:flex-row gap-6 items-start overflow-visible">
+            <div class="flex flex-col gap-2 w-32 shrink-0 relative z-20">
                 <button type="button" id="btnToggleGuides" onclick="toggleGuides()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-border-all mr-1"></i> Guides</button>
                 <button type="button" id="btnResetLayout" onclick="resetLayout()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-undo mr-1"></i> Reset</button>
                 <button type="button" id="btnPreviewSample" onclick="previewSample()" class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium w-full"><i class="fas fa-eye mr-1"></i> Preview</button>
