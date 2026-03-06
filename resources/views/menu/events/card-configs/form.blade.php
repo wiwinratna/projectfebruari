@@ -4,6 +4,8 @@
     // biar aman kalau variabel belum di-set dari controller
     $selectedVenueAccesses   = old('venue_access_ids', $selectedVenueAccesses ?? []);
     $selectedZoneAccessCodes = old('zone_access_code_ids', $selectedZoneAccessCodes ?? []);
+    $selectedAccommodationCodeIds = old('accommodation_code_id', $selectedAccommodationCodeIds ?? ($config->accommodation_code_id ?? []));
+    $selectedAccommodationCodeIds = collect($selectedAccommodationCodeIds)->map(fn($v)=>(int)$v)->all();
 @endphp
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -70,23 +72,49 @@
         <p class="text-gray-500 text-sm">Kode transport default untuk mapping ini</p>
     </div>
 
-    {{-- Akomodasi --}}
+    {{-- Akomodasi (multi) --}}
     <div class="space-y-2">
-        <label class="block text-sm font-medium text-gray-700">Akomodasi (opsional)</label>
-        <select name="accommodation_code_id"
-                class="ts-select w-full @error('accommodation_code_id') border-red-500 @enderror">
-            <option value="" @selected(old('accommodation_code_id', $config->accommodation_code_id ?? null) == null)>
-                Example: A1 – Standard hotel
-            </option>
+        <label class="block text-sm font-medium text-gray-700">Akomodasi (opsional, bisa lebih dari satu)</label>
+
+        <div class="relative">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"></i>
+            <input id="accommodationSearch" type="text"
+                   class="w-full pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg text-sm
+                          focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                   placeholder="Search akomodasi...">
+        </div>
+
+        <div class="border border-gray-200 rounded-lg max-h-64 overflow-y-auto divide-y divide-gray-100 @error('accommodation_code_id') border-red-500 @enderror @error('accommodation_code_id.*') border-red-500 @enderror">
             @foreach($accommodationCodes as $a)
-                <option value="{{ $a->id }}"
-                    @selected(old('accommodation_code_id', $config->accommodation_code_id ?? null) == $a->id)>
-                    {{ $a->kode }} - {{ $a->keterangan }}
-                </option>
+                @php
+                    $accCode = $a->kode ?? '';
+                    $accDesc = $a->keterangan ?? '';
+                @endphp
+
+                <label class="flex items-start gap-3 px-4 py-3 hover:bg-gray-50 cursor-pointer accommodation-item"
+                       data-search="{{ strtolower($accCode.' '.$accDesc) }}">
+                    <input type="checkbox"
+                           name="accommodation_code_id[]"
+                           value="{{ $a->id }}"
+                           class="mt-1 rounded border-gray-300 text-red-500 focus:ring-red-500"
+                           @checked(in_array($a->id, $selectedAccommodationCodeIds))>
+
+                    <div class="min-w-0">
+                        <div class="text-sm font-medium text-gray-800">{{ $accCode }}</div>
+                        <div class="text-xs text-gray-500 leading-relaxed">{{ $accDesc }}</div>
+                    </div>
+                </label>
             @endforeach
-        </select>
+        </div>
+
+        <div class="flex items-center justify-between">
+            <p class="text-xs text-gray-500">Boleh pilih lebih dari satu.</p>
+            <button type="button" id="accommodationClear" class="text-xs text-red-600 hover:text-red-700 font-medium">Clear</button>
+        </div>
+
         @error('accommodation_code_id') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
-        <p class="text-gray-500 text-sm">Kode akomodasi default untuk mapping ini</p>
+        @error('accommodation_code_id.*') <p class="text-red-500 text-sm">{{ $message }}</p> @enderror
+        <p class="text-gray-500 text-sm">Boleh pilih beberapa kode akomodasi default untuk mapping ini</p>
     </div>
 
     {{-- Keterangan --}}
@@ -207,3 +235,4 @@
         <i class="fas fa-save mr-2"></i> Simpan
     </button>
 </div>
+

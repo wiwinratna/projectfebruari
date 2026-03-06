@@ -88,6 +88,11 @@ Konfigurasi Kartu Akses
 
                             $venueExamples = $venueCodes->take(3);
                             $zoneExamples  = $zoneCodes->take(3);
+                            $accommodationCodes = collect($cfg->accommodation_code_id ?: [])
+                                ->map(fn($id) => $accommodationCodesMap[$id]->kode ?? null);
+                            $accommodationCodes = $accommodationCodes->filter()->values();
+                            $accommodationExamples = $accommodationCodes->take(3);
+                            $accommodationCount = $accommodationCodes->count();
 
                             $venueModalId = 'venue_'.$cfg->id;
                             $zoneModalId  = 'zone_'.$cfg->id;
@@ -112,8 +117,21 @@ Konfigurasi Kartu Akses
                             </td>
 
                             {{-- Akomodasi --}}
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="text-sm text-gray-700">{{ $cfg->accommodationCode->kode ?? '-' }}</span>
+                            <td class="px-6 py-4">
+                                @if($accommodationCount === 0)
+                                    <span class="text-sm text-gray-400">-</span>
+                                @else
+                                    <div class="text-sm text-gray-800">
+                                        <span class="font-semibold">{{ $accommodationCount }} kode</span>
+                                        <span class="text-gray-300 mx-1">•</span>
+                                        <span class="text-gray-700">
+                                            <span class="text-gray-900">{{ $accommodationExamples->implode(', ') }}</span>
+                                            @if($accommodationCount > $accommodationExamples->count())
+                                                <span class="text-gray-400">...</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                @endif
                             </td>
 
                             {{-- Akses Venue --}}

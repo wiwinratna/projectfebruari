@@ -208,8 +208,10 @@ class CardIssueController extends Controller
         }
 
         $accommodations = [];
-        $accommodationId = $final['accommodation_id'] ?? null;
-        if ($accommodationId && $accommodationMap->has($accommodationId)) {
+        foreach (($final['accommodation_ids'] ?? []) as $accommodationId) {
+            if (!$accommodationId || !$accommodationMap->has($accommodationId)) {
+                continue;
+            }
             $a = $accommodationMap->get($accommodationId);
             $ab = accommodationBadge($a);
             $accommodations[] = [

@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupFilter('venueSearch', '.venue-item', 'venueClear');
   setupFilter('zoneSearch', '.zone-item', 'zoneClear');
+  setupFilter('accommodationSearch', '.accommodation-item', 'accommodationClear');
 });
 </script>
 @endpush

@@ -7,7 +7,6 @@ use App\Models\AccreditationMapping; // ✅ tambahin ini
 use App\Models\VenueAccess;
 use App\Models\ZoneAccessCode;
 use App\Models\TransportationCode;
-use App\Models\AccommodationCode;
 
 class AccessCardConfig extends Model
 {
@@ -17,6 +16,10 @@ class AccessCardConfig extends Model
         'transportation_code_id',
         'accommodation_code_id',
         'keterangan',
+    ];
+
+    protected $casts = [
+        'accommodation_code_id' => 'array',
     ];
 
     public function mapping()
@@ -47,11 +50,6 @@ class AccessCardConfig extends Model
     public function transportationCode()
     {
         return $this->belongsTo(TransportationCode::class, 'transportation_code_id');
-    }
-
-    public function accommodationCode()
-    {
-        return $this->belongsTo(AccommodationCode::class, 'accommodation_code_id');
     }
 
     public function venues()
