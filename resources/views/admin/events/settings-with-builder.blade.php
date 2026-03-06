@@ -175,18 +175,18 @@
                 <i class="fas fa-info-circle mr-2"></i> Editing positions uses the default built-in card design without custom template background.
             </div>
         @endif
-        <div class="flex flex-col xl:flex-row gap-6 items-start overflow-visible">
-            <div class="flex flex-col gap-2 w-32 shrink-0 relative z-20">
+        <div class="relative flex flex-col xl:flex-row gap-6 items-start overflow-visible">
+            <div class="flex flex-col gap-2 w-36 shrink-0 xl:sticky xl:top-24 relative z-20">
                 <button type="button" id="btnToggleGuides" aria-pressed="false" onclick="toggleGuides()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-border-all mr-1"></i> Guides</button>
                 <button type="button" id="btnResetLayout" onclick="resetLayout()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-undo mr-1"></i> Reset</button>
                 <button type="button" id="btnPreviewSample" onclick="previewSample()" class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium w-full" style="display:block !important; visibility:visible !important; opacity:1 !important; background-color:#4f46e5; color:#ffffff; min-height:2.5rem;"><i class="fas fa-eye mr-1"></i> Preview</button>
                 <button type="button" id="btnSaveLayout" onclick="saveLayout()" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-medium w-full"><i class="fas fa-check-circle mr-1"></i> Save</button>
             </div>
 
-            <div class="flex-1 flex flex-col xl:flex-row gap-6 items-start min-w-0">
-                <div class="flex-1 min-w-0 flex items-center justify-center">
-                    <div class="bg-gray-50 rounded-lg overflow-auto p-4 border border-gray-200 w-full" style="max-height: 860px;">
-                        <div id="cardCanvas" class="relative bg-white shadow-md" style="width: 148mm; height: 210mm;">
+            <div class="flex-1 min-w-0 relative z-10">
+                <div class="bg-gray-50 rounded-lg overflow-auto p-4 border border-gray-200 w-full" style="max-height: 860px;">
+                    <div class="flex items-center justify-center min-w-0">
+                        <div id="cardCanvas" class="relative bg-white shadow-md shrink-0" style="width: 148mm; height: 210mm;">
                             @if($templateExists && $templatePublicUrl)
                                 <img src="{{ $templatePublicUrl }}" alt="Template Background" class="absolute inset-0 w-full h-full object-cover rounded pointer-events-none" style="z-index: 1;">
                             @endif
@@ -199,15 +199,15 @@
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="w-full xl:w-80 xl:shrink-0">
-                    <div class="bg-gray-50 rounded-lg p-4 space-y-4 border border-gray-200 xl:sticky xl:top-4" style="max-height: 860px; overflow-y: auto;">
-                        <h3 class="font-semibold text-gray-900">Elements</h3>
-                        <div id="elementsList" class="space-y-2"></div>
-                        <div id="elementProperties" class="border-t border-gray-200 pt-3">
-                            <h4 class="font-semibold text-gray-900 text-sm mb-2">Properties</h4>
-                            <div id="propertiesContent" class="text-xs text-gray-500">Select an element to edit properties</div>
-                        </div>
+            <div class="w-full xl:w-[20rem] shrink-0 relative z-10">
+                <div class="bg-gray-50 rounded-lg p-4 space-y-4 border border-gray-200 xl:sticky xl:top-24" style="max-height: 860px; overflow-y: auto;">
+                    <h3 class="font-semibold text-gray-900">Elements</h3>
+                    <div id="elementsList" class="space-y-2"></div>
+                    <div id="elementProperties" class="border-t border-gray-200 pt-3">
+                        <h4 class="font-semibold text-gray-900 text-sm mb-2">Properties</h4>
+                        <div id="propertiesContent" class="text-xs text-gray-500">Select an element to edit properties</div>
                     </div>
                 </div>
             </div>
