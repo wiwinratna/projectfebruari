@@ -32,7 +32,7 @@ class CustomerCardController extends Controller
 
         $eventId = (int) $card->event_id;
 
-        $card->load('application.user.profile');
+        $card->load('application.user.profile', 'event.activeCardLayout');
 
         $final = $resolver->getFinalAccess($card);
 
@@ -65,6 +65,7 @@ class CustomerCardController extends Controller
             'zoneMap'  => $zoneMap,
             'mode' => 'preview',
             'autoPrint' => false,
+            'layout' => $card->event->activeCardLayout,
         ]);
     }
 

@@ -20,7 +20,7 @@ class CardPrintController extends Controller
         $eventId = session('admin_event_id');
         abort_unless($card->event_id == $eventId, 403);
 
-        $card->load('application.user.profile', 'event', 'cardLayout');
+        $card->load('application.user.profile', 'event.activeCardLayout');
 
         $final = $resolver->getFinalAccess($card);
 
@@ -39,8 +39,8 @@ class CardPrintController extends Controller
 
         [$venueMap, $zoneMap] = $this->buildAccessMaps($eventId);
 
-        // Get layout from card or event
-        $layout = $card->cardLayout ?? $card->event->activeCardLayout;
+        // Mode 2 rule: always use latest active event layout (data lock is separate)
+        $layout = $card->event->activeCardLayout;
 
         return view('menu.admin.card.print.sheet-a5', [
             'cards' => collect([$card]),
@@ -65,7 +65,7 @@ class CardPrintController extends Controller
             return back()->with('error', 'Card harus ISSUED dulu sebelum print.');
         }
 
-        $card->load('application.user.profile', 'event', 'cardLayout');
+        $card->load('application.user.profile', 'event.activeCardLayout');
 
         $final = $resolver->getFinalAccess($card);
 
@@ -84,8 +84,8 @@ class CardPrintController extends Controller
 
         [$venueMap, $zoneMap] = $this->buildAccessMaps($eventId);
 
-        // Get layout from card or event
-        $layout = $card->cardLayout ?? $card->event->activeCardLayout;
+        // Mode 2 rule: always use latest active event layout (data lock is separate)
+        $layout = $card->event->activeCardLayout;
 
         $pdf = Pdf::loadView('menu.admin.card.print.sheet-a5', [
             'cards' => collect([$card]),
@@ -122,7 +122,7 @@ class CardPrintController extends Controller
             return back()->with('error', 'Tidak ada card ISSUED yang dipilih.');
         }
 
-        $cards->load('application.user.profile', 'event', 'cardLayout');
+        $cards->load('application.user.profile', 'event.activeCardLayout');
 
         $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
         $accomById     = AccommodationCode::where('event_id', $eventId)->get()->keyBy('id');
@@ -142,8 +142,8 @@ class CardPrintController extends Controller
             $photoByCardId[$c->id] = $this->photoBase64FromProfile($this->resolvePhotoPath($c));
         }
 
-        // Get layout from first card or event
-        $layout = $cards[0]->cardLayout ?? $cards[0]->event->activeCardLayout;
+        // Mode 2 rule: always use latest active event layout
+        $layout = $cards[0]->event->activeCardLayout;
 
         $pdf = Pdf::loadView('menu.admin.card.print.sheet-a5', [
             'cards' => $cards,
@@ -234,7 +234,7 @@ class CardPrintController extends Controller
         return back()->with('error', 'Card harus ISSUED dulu sebelum print.');
     }
 
-    $card->load('application.user.profile', 'event', 'cardLayout');
+    $card->load('application.user.profile', 'event.activeCardLayout');
     $final = $resolver->getFinalAccess($card);
 
     $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : "ARISE-CARD-{$card->id}");
@@ -247,8 +247,8 @@ class CardPrintController extends Controller
 
     [$venueMap, $zoneMap] = $this->buildAccessMaps($eventId);
 
-    // Get layout from card or event
-    $layout = $card->cardLayout ?? $card->event->activeCardLayout;
+    // Mode 2 rule: always use latest active event layout (data lock is separate)
+    $layout = $card->event->activeCardLayout;
 
     return view('menu.admin.card.print.sheet-a5', [
         'cards' => collect([$card]),
@@ -284,7 +284,7 @@ public function printHtmlBatch(Request $request, CardAccessResolver $resolver)
         return back()->with('error', 'Tidak ada card ISSUED yang dipilih.');
     }
 
-    $cards->load('application.user.profile', 'event', 'cardLayout');
+    $cards->load('application.user.profile', 'event.activeCardLayout');
 
     $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
     $accomById     = AccommodationCode::where('event_id', $eventId)->get()->keyBy('id');
@@ -304,8 +304,8 @@ public function printHtmlBatch(Request $request, CardAccessResolver $resolver)
         $photoByCardId[$c->id] = $this->photoBase64FromProfile($this->resolvePhotoPath($c));
     }
 
-    // Get layout from first card or event
-    $layout = $cards[0]->cardLayout ?? $cards[0]->event->activeCardLayout;
+    // Mode 2 rule: always use latest active event layout
+    $layout = $cards[0]->event->activeCardLayout;
 
     return view('menu.admin.card.print.sheet-a5', [
         'cards' => $cards,
@@ -344,7 +344,7 @@ public function previewAll(Request $request, CardAccessResolver $resolver)
     }
 
     $cards = $cardsQuery->limit(50)->get();
-    $cards->load('application.user.profile', 'event', 'cardLayout');
+    $cards->load('application.user.profile', 'event.activeCardLayout');
 
     $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
     $accomById     = AccommodationCode::where('event_id', $eventId)->get()->keyBy('id');
@@ -364,8 +364,8 @@ public function previewAll(Request $request, CardAccessResolver $resolver)
         $photoByCardId[$c->id] = $this->photoBase64FromProfile($this->resolvePhotoPath($c));
     }
 
-    // Get layout from first card or event
-    $layout = $cards->isNotEmpty() ? ($cards[0]->cardLayout ?? $cards[0]->event->activeCardLayout) : null;
+    // Mode 2 rule: always use latest active event layout
+    $layout = $cards->isNotEmpty() ? $cards[0]->event->activeCardLayout : null;
 
     return view('menu.admin.card.print.sheet-a5', [
         'cards' => $cards,
