@@ -1,0 +1,76 @@
+[1mdiff --git a/resources/views/admin/events/settings-with-builder.blade.php b/resources/views/admin/events/settings-with-builder.blade.php[m
+[1mindex a381b9c..a3c9819 100644[m
+[1m--- a/resources/views/admin/events/settings-with-builder.blade.php[m
+[1m+++ b/resources/views/admin/events/settings-with-builder.blade.php[m
+[36m@@ -175,15 +175,15 @@[m [mclass="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outli[m
+                 <i class="fas fa-info-circle mr-2"></i> Editing positions uses the default built-in card design without custom template background.[m
+             </div>[m
+         @endif[m
+[31m-        <div class="relative flex flex-col lg:grid lg:grid-cols-[8.5rem_minmax(0,1fr)_20rem] gap-6 items-start overflow-visible">[m
+[31m-            <div class="w-full lg:w-auto flex flex-col gap-2 lg:sticky lg:top-24 relative z-20">[m
+[32m+[m[32m        <div class="editor-layout relative gap-6 items-start overflow-visible">[m
+[32m+[m[32m            <div class="editor-toolbar w-36 flex flex-col gap-2 relative z-20">[m
+                 <button type="button" id="btnToggleGuides" aria-pressed="false" onclick="toggleGuides()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-border-all mr-1"></i> Guides</button>[m
+                 <button type="button" id="btnResetLayout" onclick="resetLayout()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-undo mr-1"></i> Reset</button>[m
+                 <button type="button" id="btnPreviewSample" onclick="previewSample()" class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium w-full" style="display:block !important; visibility:visible !important; opacity:1 !important; background-color:#4f46e5; color:#ffffff; min-height:2.5rem;"><i class="fas fa-eye mr-1"></i> Preview</button>[m
+                 <button type="button" id="btnSaveLayout" onclick="saveLayout()" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-medium w-full"><i class="fas fa-check-circle mr-1"></i> Save</button>[m
+             </div>[m
+ [m
+[31m-            <div class="min-w-0 w-full relative z-10">[m
+[32m+[m[32m            <div class="editor-canvas-col min-w-0 w-full relative z-10">[m
+                 <div class="bg-gray-50 rounded-lg overflow-auto p-4 border border-gray-200 w-full" style="max-height: 860px;">[m
+                     <div class="flex items-center justify-center min-w-0">[m
+                         <div id="cardCanvas" class="relative bg-white shadow-md shrink-0" style="width: 148mm; height: 210mm;">[m
+[36m@@ -201,8 +201,8 @@[m [mclass="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outli[m
+                 </div>[m
+             </div>[m
+ [m
+[31m-            <aside class="w-full lg:w-80 shrink-0 max-w-full relative z-10" style="flex:0 0 20rem;">[m
+[31m-                <div class="bg-gray-50 rounded-lg p-4 space-y-4 border border-gray-200 lg:sticky lg:top-24" style="max-height: 860px; overflow-y: auto;">[m
+[32m+[m[32m            <aside class="editor-sidebar w-full max-w-full relative z-10">[m
+[32m+[m[32m                <div class="bg-gray-50 rounded-lg p-4 space-y-4 border border-gray-200 editor-sidebar-inner" style="max-height: 860px; overflow-y: auto;">[m
+                     <h3 class="font-semibold text-gray-900">Elements</h3>[m
+                     <div id="elementsList" class="space-y-2"></div>[m
+                     <div id="elementProperties" class="border-t border-gray-200 pt-3">[m
+[36m@@ -327,6 +327,41 @@[m [mclass="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outli[m
+         flex: 0 0 auto;[m
+         color: #4b5563;[m
+     }[m
+[32m+[m[32m    .editor-layout {[m
+[32m+[m[32m        display: flex;[m
+[32m+[m[32m        flex-direction: column;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    .editor-toolbar {[m
+[32m+[m[32m        align-self: flex-start;[m
+[32m+[m[32m    }[m
+[32m+[m[32m    @media (min-width: 900px) {[m
+[32m+[m[32m        .editor-layout {[m
+[32m+[m[32m            display: grid;[m
+[32m+[m[32m            grid-template-columns: 8.5rem minmax(0, 1fr);[m
+[32m+[m[32m            align-items: start;[m
+[32m+[m[32m        }[m
+[32m+[m[32m        .editor-toolbar {[m
+[32m+[m[32m            position: sticky;[m
+[32m+[m[32m            top: 6rem;[m
+[32m+[m[32m        }[m
+[32m+[m[32m        .editor-sidebar {[m
+[32m+[m[32m            grid-column: 1 / -1;[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+[32m+[m[32m    @media (min-width: 1400px) {[m
+[32m+[m[32m        .editor-layout {[m
+[32m+[m[32m            grid-template-columns: 8.5rem minmax(0, 1fr) 20rem;[m
+[32m+[m[32m        }[m
+[32m+[m[32m        .editor-sidebar {[m
+[32m+[m[32m            grid-column: auto;[m
+[32m+[m[32m            width: 20rem;[m
+[32m+[m[32m            min-width: 20rem;[m
+[32m+[m[32m        }[m
+[32m+[m[32m        .editor-sidebar-inner {[m
+[32m+[m[32m            position: sticky;[m
+[32m+[m[32m            top: 6rem;[m
+[32m+[m[32m        }[m
+[32m+[m[32m    }[m
+     #cardGuides {[m
+         opacity: 1;[m
+     }[m
