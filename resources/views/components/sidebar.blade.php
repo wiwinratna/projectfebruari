@@ -1,10 +1,23 @@
 <!-- Mobile Overlay -->
 <div id="sidebar-overlay" class="lg:hidden"></div>
 
-<div class="main-sidebar sidebar-style-2 bg-white text-gray-700 shadow-lg" id="sidebar">
-    <aside id="sidebar-wrapper">
+@php
+    $sidebarEvent = null;
+    $sidebarEventLogoUrl = null;
+    if (session('admin_authenticated') && session('admin_event_id')) {
+        $sidebarEvent = \App\Models\Event::query()
+            ->select(['id', 'title', 'logo_path'])
+            ->find(session('admin_event_id'));
+        if ($sidebarEvent && filled($sidebarEvent->logo_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($sidebarEvent->logo_path)) {
+            $sidebarEventLogoUrl = asset('storage/' . ltrim($sidebarEvent->logo_path, '/'));
+        }
+    }
+@endphp
 
-        <div class="sidebar-brand p-4 border-b border-gray-200 relative">
+<div class="main-sidebar sidebar-style-2 bg-white text-gray-700 shadow-lg" id="sidebar">
+    <aside id="sidebar-wrapper" class="h-screen flex flex-col overflow-hidden">
+
+        <div class="sidebar-brand sticky top-0 z-20 bg-white p-4 border-b border-gray-200 relative">
             <div class="flex items-center justify-center">
                 @if(session('admin_authenticated'))
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-center">
@@ -15,13 +28,23 @@
                             @endif
                             <img src="{{ asset('images/Logo ARISE PNG.png') }}?v={{ time() }}"
                                 alt="NOA Indonesia"
-                                class="logo-img block">
+                                class="logo-img block h-8 w-auto object-contain">
                         </a>
+                        @if($sidebarEventLogoUrl)
+                            <span class="text-gray-300 font-semibold px-2 select-none">|</span>
+                            <div class="flex items-center justify-center">
+                                <img src="{{ $sidebarEventLogoUrl }}"
+                                    alt="{{ $sidebarEvent?->title ?? 'Event Logo' }}"
+                                    title="{{ $sidebarEvent?->title ?? 'Event' }}"
+                                    class="h-16 max-w-[120px] object-contain">
+                            </div>
+                        @endif
             </div>
             <button id="sidebar-close" class="lg:hidden text-gray-500 hover:text-gray-700 absolute top-4 right-4 transition-colors duration-200">
                 <i class="fas fa-times text-xl"></i>
             </button>
         </div>
+        <div class="flex-1 overflow-y-auto">
         <ul class="sidebar-menu mt-8">
 
             @if(session('super_admin_authenticated'))
@@ -279,6 +302,7 @@
             @endif
 
         </ul>
+        </div>
 
         <div class="sidebar-footer p-4 mt-auto">
             <div class="flex justify-around">

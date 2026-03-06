@@ -250,17 +250,15 @@
   $modeVal   = ($mode ?? 'preview');
   $isPreview = ($modeVal === 'preview');
   
-  // Get layout (either passed or from card's event)
+  // Mode 2 rule: layout is global by event (never fallback to per-card snapshot layout_id)
   $eventLayout = null;
   if (isset($layout)) {
     // Layout passed directly
     $eventLayout = $layout;
   } elseif (isset($cards) && count($cards) > 0) {
-    // Get layout from first card's event
+    // Get layout only from first card's event active layout
     $firstCard = $cards[0];
-    if (isset($firstCard->cardLayout)) {
-      $eventLayout = $firstCard->cardLayout;
-    } elseif (isset($firstCard->event) && isset($firstCard->event->activeCardLayout)) {
+    if (isset($firstCard->event) && isset($firstCard->event->activeCardLayout)) {
       $eventLayout = $firstCard->event->activeCardLayout;
     }
   }
@@ -327,7 +325,7 @@
       />
     @endif
     
-    @if($useLayout && $templateExists)
+    @if($useLayout)
       {{-- RENDER WITH CUSTOM LAYOUT --}}
       @include('menu.admin.card.print.sheet-a5-layout', [
         'card' => $card,
@@ -369,8 +367,8 @@
             <div class="chipRow">
               @if($t && ($tHasIcon || $tShouldShowCode))
                 <span class="chip">
-                  @if($tHasIcon)
-                    <x-catalog-icon :key="$tBadge['icon']" size="12pt" />
+                  @if($tHasIcon && filled($tBadge['icon'] ?? null))
+                    <x-card.icon-svg :icon-key="$tBadge['icon']" type="transport" size="12pt" />
                   @endif
                   @if($tShouldShowCode)
                     <span class="mono">{{ $tBadge['code'] }}</span>
@@ -380,8 +378,8 @@
 
               @if($a && ($aHasIcon || $aShouldShowCode))
                 <span class="chip">
-                  @if($aHasIcon)
-                    <x-catalog-icon :key="$aBadge['icon']" size="12pt" />
+                  @if($aHasIcon && filled($aBadge['icon'] ?? null))
+                    <x-card.icon-svg :icon-key="$aBadge['icon']" type="accommodation" size="12pt" />
                   @endif
                   @if($aShouldShowCode)
                     <span class="mono">{{ $aBadge['code'] }}</span>

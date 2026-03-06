@@ -5,7 +5,7 @@
     $templatePath = $event->card_template_path;
     $templateExists = $templatePath ? Storage::disk('public')->exists($templatePath) : false;
     $templateUrl = $templatePath ? asset('storage/' . $templatePath) : null;
-    $effectiveLayout = $templateExists ? $layout : \App\Models\CardLayout::getDefaultLayout();
+    $effectiveLayout = $layout ?: \App\Models\CardLayout::getDefaultLayout();
 @endphp
 
 <div style="width: 148mm; height: 210mm; position: relative; background: white; overflow: hidden;">
@@ -28,6 +28,9 @@
             $hMm = $rect['hMm'] ?? (isset($rect['h']) ? round($rect['h'] / $pxPerMm, 3) : 0);
         @endphp
         @if (!empty($element['visible']))
+            @php
+                $style = is_array($element['style'] ?? null) ? $element['style'] : [];
+            @endphp
             <div style="position: absolute; left: {{ $xMm }}mm; top: {{ $yMm }}mm; width: {{ $wMm }}mm; height: {{ $hMm }}mm; overflow: hidden; z-index: 10;">
                 @if ($element['type'] === 'photo')
                     {{-- Photo Element --}}
@@ -91,69 +94,92 @@
                     @php
                         $accreditationText = $snapshot['mapping_name'] ?? 'VIP';
                         $accreditationColor = $snapshot['mapping_color'] ?? '#6b7280';
-                        $accreditationFontSize = max(10, min(28, $hMm * 2.2));
-                        $accreditationRadius = min(8, $hMm * 0.8);
                     @endphp
-                    <div style="display: block; width: 100%; height: 100%; overflow: hidden;">
-                        <span style="display: flex; width: 100%; height: 100%; align-items: center; justify-content: center; background-color: {{ $accreditationColor }}; color: white; padding: 0 6px; border-radius: {{ $accreditationRadius }}px; font-size: {{ $accreditationFontSize }}px; font-weight: bold; line-height: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                            {{ $accreditationText }}
-                        </span>
-                    </div>
+                    <x-card.accreditation-label :text="$accreditationText" :color="$accreditationColor" :style="$style" />
 
                 @elseif ($element['type'] === 'group-badges')
                     {{-- Transport & Accommodation Group --}}
-                    <div style="width: 100%; height: 100%; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; align-items: flex-start; overflow: hidden; font-size: 8pt;">
-                        @php
-                            $transports = $snapshot['transports'] ?? [];
-                            $accommodations = $snapshot['accommodations'] ?? [];
-                            $badges = array_merge(
-                                array_map(fn($t) => ['label' => $t['code'] ?? '', 'color' => $t['color_hex'] ?? '#6366f1'], $transports),
-                                array_map(fn($a) => ['label' => $a['code'] ?? '', 'color' => $a['color_hex'] ?? '#8b5cf6'], $accommodations)
-                            );
-                            if (empty($badges)) {
-                                $badges = [
-                                    ['label' => 'Transport', 'color' => '#9ca3af'],
-                                    ['label' => 'Hotel', 'color' => '#9ca3af'],
-                                    ['label' => 'Shuttle', 'color' => '#9ca3af'],
+                    @php
+                        $transports = collect($snapshot['transports'] ?? [])->map(function ($item) {
+                            if (is_array($item)) {
+                                return [
+                                    'code' => trim((string)($item['code'] ?? '')),
+                                    'show_code' => (bool)($item['show_code'] ?? true),
                                 ];
                             }
-                        @endphp
-                        @foreach ($badges as $badge)
-                            <span style="background-color: {{ $badge['color'] }}; color: white; padding: 3px 6px; border-radius: 3px; font-weight: bold; font-size: 7pt; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;">
-                                {{ Str::upper($badge['label']) }}
-                            </span>
-                        @endforeach
-                    </div>
+                            return [
+                                'code' => trim((string)$item),
+                                'show_code' => true,
+                            ];
+                        })->filter(fn($item) => $item['code'] !== '')->values()->all();
+                        $accommodations = collect($snapshot['accommodations'] ?? [])->map(function ($item) {
+                            if (is_array($item)) {
+                                return [
+                                    'code' => trim((string)($item['code'] ?? '')),
+                                    'show_code' => (bool)($item['show_code'] ?? true),
+                                ];
+                            }
+                            return [
+                                'code' => trim((string)$item),
+                                'show_code' => true,
+                            ];
+                        })->filter(fn($item) => $item['code'] !== '')->values()->all();
+                        $badgeItems = array_merge(
+                            array_map(fn($t) => [
+                                'code' => $t['code'],
+                                'kind' => 'transport',
+                                'icon_key' => null,
+                                'show_icon' => false,
+                                'show_code' => (bool)($t['show_code'] ?? true),
+                            ], $transports),
+                            array_map(fn($a) => [
+                                'code' => $a['code'],
+                                'kind' => 'hotel',
+                                'icon_key' => null,
+                                'show_icon' => false,
+                                'show_code' => (bool)($a['show_code'] ?? true),
+                            ], $accommodations)
+                        );
+                        if (empty($badgeItems)) {
+                            $badgeItems = collect(['TRANSPORT', 'HOTEL', 'SHUTTLE'])
+                                ->map(fn($code) => [
+                                    'code' => $code,
+                                    'kind' => 'transport',
+                                    'icon_key' => null,
+                                    'show_icon' => false,
+                                    'show_code' => true,
+                                ])->all();
+                        }
+                    @endphp
+                    <x-card.chips-badges :items="$badgeItems" :style="$style" />
 
                 @elseif ($element['type'] === 'group-chips')
                     {{-- Venue & Zone Chips --}}
-                    <div style="width: 100%; height: 100%; padding: 4px; display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; align-items: flex-start; font-size: 8pt; overflow: hidden;">
-                        @php
-                            $venueChips = $snapshot['venue_chips'] ?? [];
-                            $zoneChips = $snapshot['zone_chips'] ?? [];
-                            $maxVenue = $element['style']['maxVenueChips'] ?? 4;
-                            $maxZone = $element['style']['maxZoneChips'] ?? 4;
-                            $previewVenue = array_slice($venueChips, 0, $maxVenue);
-                            $previewZone = array_slice($zoneChips, 0, $maxZone);
-                            if (empty($previewVenue) && empty($previewZone)) {
-                                $previewZone = [
-                                    ['code' => 'PTN1'],
-                                    ['code' => 'PTN2'],
-                                    ['code' => 'ALL'],
-                                ];
+                    @php
+                        $venueChips = collect($snapshot['venue_chips'] ?? [])->map(function ($item) {
+                            if (is_array($item)) {
+                                return ['code' => trim((string)($item['code'] ?? ''))];
                             }
-                        @endphp
-                        @foreach ($previewVenue as $venue)
-                            <span style="background-color: #059669; color: white; padding: 3px 6px; border-radius: 12px; font-size: 7pt; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;">
-                                {{ Str::limit($venue['code'] ?? '', 12) }}
-                            </span>
-                        @endforeach
-                        @foreach ($previewZone as $zone)
-                            <span style="background-color: #2563eb; color: white; padding: 3px 6px; border-radius: 12px; font-size: 7pt; white-space: nowrap; max-width: 100%; overflow: hidden; text-overflow: ellipsis;">
-                                {{ Str::limit($zone['code'] ?? '', 12) }}
-                            </span>
-                        @endforeach
-                    </div>
+                            return ['code' => trim((string)$item)];
+                        })->filter(fn($item) => $item['code'] !== '')->values()->all();
+                        $zoneChips = collect($snapshot['zone_chips'] ?? [])->map(function ($item) {
+                            if (is_array($item)) {
+                                return ['code' => trim((string)($item['code'] ?? ''))];
+                            }
+                            return ['code' => trim((string)$item)];
+                        })->filter(fn($item) => $item['code'] !== '')->values()->all();
+                        $maxVenue = $element['style']['maxVenueChips'] ?? 4;
+                        $maxZone = $element['style']['maxZoneChips'] ?? 4;
+                        $previewVenue = array_slice($venueChips, 0, $maxVenue);
+                        $previewZone = array_slice($zoneChips, 0, $maxZone);
+                        $zoneItems = array_slice(array_merge($previewVenue, $previewZone), 0, 3);
+                        if (empty($zoneItems)) {
+                            $zoneItems = collect(['PTN1', 'PTN2', 'ALL'])
+                                ->map(fn($code) => ['code' => $code])
+                                ->all();
+                        }
+                    @endphp
+                    <x-card.chips-zones :items="$zoneItems" :style="$style" max-items="3" />
 
                 @endif
             </div>

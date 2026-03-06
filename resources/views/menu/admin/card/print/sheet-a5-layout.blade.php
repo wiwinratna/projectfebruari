@@ -1,4 +1,5 @@
 @php
+  use App\Support\CardLayoutRenderStyle;
   $snap  = is_array($card->snapshot) ? $card->snapshot : json_decode($card->snapshot, true);
 
   $acc   = $snap['mapping_name'] ?? ('M'.$card->accreditation_mapping_id);
@@ -31,11 +32,52 @@
 
   $tShouldShowCode = filled($tBadge['code'] ?? null) && $tShowCode;
   $aShouldShowCode = filled($aBadge['code'] ?? null) && $aShowCode;
+
+  $snapshotTransports = collect($snap['transports'] ?? [])->filter(fn($item) => is_array($item))->values();
+  $snapshotAccommodations = collect($snap['accommodations'] ?? [])->filter(fn($item) => is_array($item))->values();
+  $snapshotVenueChips = collect($snap['venue_chips'] ?? [])->filter(fn($item) => is_array($item))->values();
+  $snapshotZoneChips = collect($snap['zone_chips'] ?? [])->filter(fn($item) => is_array($item))->values();
+
+  if ($snapshotTransports->isEmpty() && $t) {
+    $snapshotTransports = collect([[
+      'code' => $tBadge['code'] ?? $t->kode,
+      'icon_key' => $tBadge['icon'] ?? null,
+      'show_icon' => (bool)($t->show_icon ?? false),
+      'show_code' => (bool)($tBadge['show_code'] ?? true),
+    ]]);
+  }
+
+  if ($snapshotAccommodations->isEmpty() && $a) {
+    $snapshotAccommodations = collect([[
+      'code' => $aBadge['code'] ?? $a->kode,
+      'icon_key' => $aBadge['icon'] ?? null,
+      'show_icon' => (bool)($a->show_icon ?? false),
+      'show_code' => (bool)($aBadge['show_code'] ?? true),
+    ]]);
+  }
+
+  if ($snapshotVenueChips->isEmpty()) {
+    $snapshotVenueChips = collect($venueChips)->map(function ($vid) use ($venueMap) {
+      $v = ($venueMap ?? [])[$vid] ?? null;
+      return ['code' => $v['code'] ?? ($v['name'] ?? ('V'.$vid))];
+    })->values();
+  }
+
+  if ($snapshotZoneChips->isEmpty()) {
+    $snapshotZoneChips = collect($zoneChips)->map(function ($zid) use ($zoneMap) {
+      $z = ($zoneMap ?? [])[$zid] ?? null;
+      return ['code' => $z['code'] ?? ($z['name'] ?? ('Z'.$zid))];
+    })->values();
+  }
 @endphp
 
 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;">
   @foreach ($layout['elements'] ?? [] as $element)
     @if ($element['visible'])
+      @php
+        $style = is_array($element['style'] ?? null) ? $element['style'] : [];
+        $radiusCss = CardLayoutRenderStyle::borderRadiusCss($style, 4);
+      @endphp
       <div style="position: absolute; left: {{ $element['rect']['xMm'] }}mm; top: {{ $element['rect']['yMm'] }}mm; width: {{ $element['rect']['wMm'] }}mm; height: {{ $element['rect']['hMm'] }}mm; overflow: hidden;">
         @if ($element['type'] === 'photo')
           {{-- Photo Element --}}
@@ -75,62 +117,26 @@
 
         @elseif ($element['type'] === 'text-accreditation')
           {{-- Accreditation Badge --}}
-          <div style="width: 100%; height: 100%; padding: 2mm 4mm; font-size: {{ ($element['style']['fontSizePt'] ?? 10) }}pt; font-weight: {{ ($element['style']['fontWeight'] ?? 'bold') }}; color: white; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; border-radius: 4px; display: flex; align-items: center; justify-content: {{ ($element['style']['align'] === 'right' ? 'flex-end' : ($element['style']['align'] === 'center' ? 'center' : 'flex-start')) }}; background-color: {{ $color }};">
-            {{ $acc }}
-          </div>
+          <x-card.accreditation-label :text="$acc" :color="$color" :style="$style" />
 
         @elseif ($element['type'] === 'group-badges')
           {{-- Transport & Accommodation Group --}}
-          <div style="width: 100%; height: 100%; padding: 2mm; display: flex; flex-wrap: wrap; gap: 3mm; align-content: flex-start; align-items: flex-start; font-size: 8pt; overflow: hidden;">
-            @if($t && ($tHasIcon || $tShouldShowCode))
-              <span style="background: var(--chip-bg); border: 1px solid var(--chip-border); border-radius: 3px; padding: 2mm 4mm; display: inline-flex; align-items: center; gap: 2mm; white-space: nowrap; flex-shrink: 1; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis;">
-                @if($tHasIcon)
-                  <x-catalog-icon :key="$tBadge['icon']" size="12pt" />
-                @endif
-                @if($tShouldShowCode)
-                  <span style="font-family: monospace; font-weight: 600;">{{ $tBadge['code'] }}</span>
-                @endif
-              </span>
-            @endif
-
-            @if($a && ($aHasIcon || $aShouldShowCode))
-              <span style="background: var(--chip-bg); border: 1px solid var(--chip-border); border-radius: 3px; padding: 2mm 4mm; display: inline-flex; align-items: center; gap: 2mm; white-space: nowrap; flex-shrink: 1; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis;">
-                @if($aHasIcon)
-                  <x-catalog-icon :key="$aBadge['icon']" size="12pt" />
-                @endif
-                @if($aShouldShowCode)
-                  <span style="font-family: monospace; font-weight: 600;">{{ $aBadge['code'] }}</span>
-                @endif
-              </span>
-            @endif
-          </div>
+          @php
+            $badgeItems = $snapshotTransports
+              ->map(fn($it) => array_merge($it, ['kind' => 'transport']))
+              ->concat($snapshotAccommodations->map(fn($it) => array_merge($it, ['kind' => 'hotel'])))
+              ->values();
+          @endphp
+          <x-card.chips-badges :items="$badgeItems" :style="$style" />
 
         @elseif ($element['type'] === 'group-chips')
           {{-- Venue & Zone Chips --}}
-          <div style="width: 100%; height: 100%; padding: 2mm; display: flex; flex-wrap: wrap; gap: 3mm; align-content: flex-start; align-items: flex-start; font-size: 8pt; overflow: hidden;">
-            @php
-              $maxVenue = $element['style']['maxVenueChips'] ?? 4;
-              $maxZone = $element['style']['maxZoneChips'] ?? 4;
-            @endphp
-            @foreach (array_slice($venueChips, 0, $maxVenue) as $vid)
-              @php
-                $v = ($venueMap ?? [])[$vid] ?? null;
-                $label = $v['code'] ?? ($v['name'] ?? ('V'.$vid));
-              @endphp
-              <span style="background: var(--chip-bg); border: 1px solid var(--chip-border); border-radius: 3px; padding: 2mm 4mm; display: inline-block; white-space: nowrap; flex-shrink: 1; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis;">
-                {{ Str::limit($label, 12) }}
-              </span>
-            @endforeach
-            @foreach (array_slice($zoneChips, 0, $maxZone) as $zid)
-              @php
-                $z = ($zoneMap ?? [])[$zid] ?? null;
-                $label = $z['code'] ?? ($z['name'] ?? ('Z'.$zid));
-              @endphp
-              <span style="background: var(--chip-bg); border: 1px solid var(--chip-border); border-radius: 3px; padding: 2mm 4mm; display: inline-block; white-space: nowrap; flex-shrink: 1; min-width: 0; max-width: 100%; overflow: hidden; text-overflow: ellipsis;">
-                {{ Str::limit($label, 12) }}
-              </span>
-            @endforeach
-          </div>
+          @php
+            $maxVenue = $element['style']['maxVenueChips'] ?? 4;
+            $maxZone = $element['style']['maxZoneChips'] ?? 4;
+            $zoneItems = $snapshotVenueChips->take($maxVenue)->concat($snapshotZoneChips->take($maxZone))->values();
+          @endphp
+          <x-card.chips-zones :items="$zoneItems" :style="$style" />
 
         @endif
       </div>

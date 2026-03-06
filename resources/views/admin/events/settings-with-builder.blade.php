@@ -13,6 +13,7 @@
     $templateFilename = $templatePathRaw ? basename($templatePathRaw) : '';
     $templateExists = $templatePathRaw ? Storage::disk('public')->exists($templatePathRaw) : false;
     $templatePublicUrl = $templatePathRaw ? asset('storage/' . $templatePathRaw) : null;
+    $renderStyleConfig = \App\Support\CardLayoutRenderStyle::editorConfig();
 @endphp
 
 <div class="container mx-auto max-w-screen-xl px-4 lg:px-6 py-6 space-y-6">
@@ -174,31 +175,33 @@
                 <i class="fas fa-info-circle mr-2"></i> Editing positions uses the default built-in card design without custom template background.
             </div>
         @endif
-        <div class="flex flex-col lg:flex-row gap-6 items-start overflow-visible">
+        <div class="flex flex-col xl:flex-row gap-6 items-start overflow-visible">
             <div class="flex flex-col gap-2 w-32 shrink-0 relative z-20">
-                <button type="button" id="btnToggleGuides" onclick="toggleGuides()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-border-all mr-1"></i> Guides</button>
+                <button type="button" id="btnToggleGuides" aria-pressed="false" onclick="toggleGuides()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-border-all mr-1"></i> Guides</button>
                 <button type="button" id="btnResetLayout" onclick="resetLayout()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-undo mr-1"></i> Reset</button>
                 <button type="button" id="btnPreviewSample" onclick="previewSample()" class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium w-full" style="display:block !important; visibility:visible !important; opacity:1 !important; background-color:#4f46e5; color:#ffffff; min-height:2.5rem;"><i class="fas fa-eye mr-1"></i> Preview</button>
                 <button type="button" id="btnSaveLayout" onclick="saveLayout()" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-medium w-full"><i class="fas fa-check-circle mr-1"></i> Save</button>
             </div>
 
-            <div class="flex-1 grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_20rem] gap-6 items-start">
-                <div class="flex items-center justify-center">
+            <div class="flex-1 flex flex-col xl:flex-row gap-6 items-start min-w-0">
+                <div class="flex-1 min-w-0 flex items-center justify-center">
                     <div class="bg-gray-50 rounded-lg overflow-auto p-4 border border-gray-200 w-full" style="max-height: 860px;">
                         <div id="cardCanvas" class="relative bg-white shadow-md" style="width: 148mm; height: 210mm;">
                             @if($templateExists && $templatePublicUrl)
                                 <img src="{{ $templatePublicUrl }}" alt="Template Background" class="absolute inset-0 w-full h-full object-cover rounded pointer-events-none" style="z-index: 1;">
                             @endif
-                            <div id="cardGuides" class="absolute inset-0 pointer-events-none" style="z-index: 2; display: none;">
-                                <div class="w-full h-full border border-dashed border-gray-300" style="opacity: 0.3;"></div>
+                            <div id="cardGuides" class="absolute inset-0 pointer-events-none" style="z-index: 5; display: none;">
+                                <div class="guides-grid-layer"></div>
+                                <div class="guides-safe-margin"></div>
+                                <div class="guides-border-layer"></div>
                             </div>
                             <div id="elementsContainer" class="absolute inset-0" style="z-index: 10;"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="w-full">
-                    <div class="bg-gray-50 rounded-lg p-4 space-y-4 border border-gray-200" style="max-height: 860px; overflow-y: auto;">
+                <div class="w-full xl:w-80 xl:shrink-0">
+                    <div class="bg-gray-50 rounded-lg p-4 space-y-4 border border-gray-200 xl:sticky xl:top-4" style="max-height: 860px; overflow-y: auto;">
                         <h3 class="font-semibold text-gray-900">Elements</h3>
                         <div id="elementsList" class="space-y-2"></div>
                         <div id="elementProperties" class="border-t border-gray-200 pt-3">
@@ -274,6 +277,79 @@
         z-index: 30;
         pointer-events: none;
     }
+    .group-guide {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+    .group-guide-grid {
+        position: absolute;
+        inset: 4px;
+        pointer-events: none;
+        display: grid;
+        gap: 4px;
+        opacity: 0.5;
+    }
+    .group-guide-cell {
+        border: 1px dashed rgba(59, 130, 246, 0.28);
+        background: rgba(59, 130, 246, 0.03);
+        border-radius: 4px;
+    }
+    .group-guide-items {
+        position: absolute;
+        inset: 4px;
+        padding: 4px;
+        display: flex;
+        flex-wrap: wrap;
+        align-content: flex-start;
+        gap: 4px;
+        overflow: hidden;
+    }
+    .group-guide-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #f3f4f6;
+        border: 1px solid #d1d5db;
+        color: #1f2937;
+        border-radius: 3px;
+        padding: 2px 6px;
+        font-size: 9px;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 0 0 auto;
+        gap: 4px;
+    }
+    .group-guide-pill svg {
+        flex: 0 0 auto;
+        color: #4b5563;
+    }
+    #cardGuides {
+        opacity: 1;
+    }
+    #cardGuides .guides-grid-layer {
+        position: absolute;
+        inset: 0;
+        background-image:
+            linear-gradient(to right, rgba(59, 130, 246, 0.16) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(59, 130, 246, 0.16) 1px, transparent 1px);
+        background-size: 5mm 5mm;
+    }
+    #cardGuides .guides-safe-margin {
+        position: absolute;
+        inset: 6mm;
+        border: 1px dashed rgba(59, 130, 246, 0.6);
+        background: rgba(59, 130, 246, 0.04);
+    }
+    #cardGuides .guides-border-layer {
+        position: absolute;
+        inset: 0;
+        border: 1px dashed rgba(59, 130, 246, 0.8);
+        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.18);
+    }
     #btnPreviewSample {
         display: block !important;
         visibility: visible !important;
@@ -284,9 +360,12 @@
 </style>
 
 <script>
+    const renderStyleConfig = @json($renderStyleConfig);
     let currentLayout = null;
     let selectedElement = null;
-    const px2mm = 0.264583;
+    const mm2px = Number(renderStyleConfig.mmToPx || 3.77953);
+    const px2mm = 1 / mm2px;
+    const pt2px = Number(renderStyleConfig.ptToPx || (96/72));
     const editorEnabled = true;
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -371,9 +450,9 @@
                 { id: "qr", type: "qr", visible: true, rect: { xMm: 75, yMm: 20, wMm: 40, hMm: 40 }, style: {} },
                 { id: "text-name", type: "text-name", visible: true, rect: { xMm: 20, yMm: 75, wMm: 95, hMm: 10 }, style: { fontSizePt: 16, fontWeight: "bold", align: "left" } },
                 { id: "text-job", type: "text-job", visible: true, rect: { xMm: 20, yMm: 87, wMm: 95, hMm: 8 }, style: { fontSizePt: 12, fontWeight: "normal", align: "left" } },
-                { id: "text-accreditation", type: "text-accreditation", visible: true, rect: { xMm: 20, yMm: 97, wMm: 95, hMm: 6 }, style: { fontSizePt: 10, fontWeight: "normal", align: "left" } },
-                { id: "group-badges", type: "group-badges", visible: true, rect: { xMm: 20, yMm: 105, wMm: 95, hMm: 30 }, style: { lineClamp: 3 } },
-                { id: "group-chips", type: "group-chips", visible: true, rect: { xMm: 20, yMm: 137, wMm: 95, hMm: 60 }, style: { lineClamp: 5 } }
+                { id: "text-accreditation", type: "text-accreditation", visible: true, rect: { xMm: 20, yMm: 97, wMm: 95, hMm: 6 }, style: { fontSizePt: 10, fontWeight: "normal", align: "left", borderRadius: { tl: 4, tr: 4, br: 4, bl: 4 } } },
+                { id: "group-badges", type: "group-badges", visible: true, rect: { xMm: 20, yMm: 105, wMm: 95, hMm: 30 }, style: { lineClamp: 3, chipSize: "medium", fontSizePt: 7.5, borderRadius: { tl: 3, tr: 3, br: 3, bl: 3 } } },
+                { id: "group-chips", type: "group-chips", visible: true, rect: { xMm: 20, yMm: 137, wMm: 95, hMm: 60 }, style: { lineClamp: 5, chipSize: "medium", fontSizePt: 7.5, borderRadius: { tl: 3, tr: 3, br: 3, bl: 3 } } }
             ]
         };
     }
@@ -414,19 +493,30 @@
                 content = '<i class="fas fa-qrcode text-green-400 text-2xl"></i>';
                 break;
             case 'text-name':
-                content = `<span class="trunc-check text-xs text-gray-600" style="font-size:${data.style.fontSizePt||16}px;font-weight:${data.style.fontWeight||'bold'};text-align:${data.style.align||'left'};width:100%;display:-webkit-box;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2;">Sample Very Long Participant Name For Overflow Check</span>`;
+                content = `<span class="trunc-check text-xs text-gray-600" style="font-size:${(data.style.fontSizePt||16)*pt2px}px;font-weight:${data.style.fontWeight||'bold'};text-align:${data.style.align||'left'};width:100%;display:-webkit-box;overflow:hidden;text-overflow:ellipsis;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.2;">Sample Very Long Participant Name For Overflow Check</span>`;
                 break;
             case 'text-job':
-                content = `<span class="trunc-check text-xs text-gray-600" style="font-size:${data.style.fontSizePt||12}px;font-weight:${data.style.fontWeight||'normal'};text-align:${data.style.align||'left'};width:100%;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;">Very Long Job Title For Overflow Check</span>`;
+                content = `<span class="trunc-check text-xs text-gray-600" style="font-size:${(data.style.fontSizePt||12)*pt2px}px;font-weight:${data.style.fontWeight||'normal'};text-align:${data.style.align||'left'};width:100%;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;">Very Long Job Title For Overflow Check</span>`;
                 break;
             case 'text-accreditation':
-                content = `<span class="trunc-check text-xs text-gray-600" style="font-size:${data.style.fontSizePt||10}px;font-weight:${data.style.fontWeight||'normal'};text-align:${data.style.align||'left'};width:100%;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;">Accreditation Label Preview</span>`;
+                {
+                    const r = getBorderRadiusObj(data.style, 4);
+                    content = `<span class="trunc-check text-xs text-white" style="font-size:${(data.style.fontSizePt||10)*pt2px}px;font-weight:${data.style.fontWeight||'bold'};text-align:${data.style.align||'left'};width:100%;height:100%;display:flex;align-items:center;justify-content:${(data.style.align||'left') === 'right' ? 'flex-end' : ((data.style.align||'left') === 'center' ? 'center' : 'flex-start')};padding:2px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2;background:#dc2626;border-radius:${r.tl}px ${r.tr}px ${r.br}px ${r.bl}px;">VIP</span>`;
+                }
                 break;
             case 'group-badges':
-                content = `<div class='clipped-content' style='overflow:hidden;max-height:100%;width:100%;height:100%;'><span class="text-xs text-gray-600">Badges</span></div>`;
+                content = `
+                    <div class="group-guide-host w-full h-full">
+                        ${buildGroupGuideContent(data)}
+                    </div>
+                `;
                 break;
             case 'group-chips':
-                content = `<div class='clipped-content' style='overflow:hidden;max-height:100%;width:100%;height:100%;'><span class="text-xs text-gray-600">Chips/Zones</span></div>`;
+                content = `
+                    <div class="group-guide-host w-full h-full">
+                        ${buildGroupGuideContent(data)}
+                    </div>
+                `;
                 break;
         }
 
@@ -475,6 +565,7 @@
                             wMm: event.rect.width * px2mm,
                             hMm: event.rect.height * px2mm
                         });
+                        updateGroupGuideVisual(event.target, data, event.rect.width, event.rect.height);
                         updateTruncationWarnings();
                     }
                 },
@@ -486,6 +577,112 @@
             });
         }
         return el;
+    }
+
+    function getChipSizeConfig(sizeKey, fontPt = null) {
+        const key = (sizeKey || 'medium').toString().toLowerCase();
+        const fallback = renderStyleConfig.chipPresets?.medium || { fontPt: 12, padX: 8, padY: 3, radius: 3, gap: 4, borderWidth: 1 };
+        const preset = renderStyleConfig.chipPresets?.[key] || fallback;
+        const resolvedFontPt = Number(fontPt ?? preset.fontPt ?? fallback.fontPt);
+        const fontPx = Math.max(8, resolvedFontPt * pt2px);
+        const padX = Number(preset.padX || 8);
+        const padY = Number(preset.padY || 3);
+        const gap = Number(preset.gap || 4);
+        const borderWidth = Number(preset.borderWidth || 1);
+        const slotWidth = Math.round((fontPx * 4.5) + (padX * 2) + 14);
+        const minHeight = Math.max(16, Math.round(fontPx + (padY * 2) + (borderWidth * 2)));
+
+        return {
+            ...preset,
+            fontPt: resolvedFontPt,
+            fontPx,
+            padX,
+            padY,
+            gap,
+            borderWidth,
+            w: slotWidth,
+            h: minHeight,
+        };
+    }
+
+    function getChipRenderMetrics(style) {
+        const base = getChipSizeConfig(style.chipSize || 'medium');
+        const fontPt = Number(style.fontSizePt || base.fontPt);
+        const cfg = getChipSizeConfig(style.chipSize || 'medium', fontPt);
+        const lineClamp = Math.max(1, parseInt(style.lineClamp || style.linesMax || 3, 10));
+        const rowHeightPx = Math.round(cfg.fontPx + (cfg.padY * 2) + (cfg.borderWidth * 2) + cfg.gap);
+        const maxHeightPx = rowHeightPx * lineClamp;
+
+        return {
+            ...cfg,
+            lineClamp,
+            rowHeightPx,
+            maxHeightPx,
+            iconSizePx: Math.max(10, Math.round(cfg.fontPx * 0.9)),
+        };
+    }
+
+    function getBorderRadiusObj(style, fallback = 4) {
+        const src = (style && typeof style.borderRadius === 'object' && style.borderRadius !== null) ? style.borderRadius : {};
+        return {
+            tl: Number(src.tl ?? style?.borderRadiusTl ?? fallback),
+            tr: Number(src.tr ?? style?.borderRadiusTr ?? fallback),
+            br: Number(src.br ?? style?.borderRadiusBr ?? fallback),
+            bl: Number(src.bl ?? style?.borderRadiusBl ?? fallback),
+        };
+    }
+
+    function buildGroupGuideContent(element, boxWidthPx = null, boxHeightPx = null) {
+        const isBadges = element.type === 'group-badges';
+        const samples = isBadges
+            ? ['TRANSPORT', 'HOTEL', 'SHUTTLE']
+            : ['PTN1', 'PTN2', 'ALL'];
+
+        const style = element.style || {};
+        const metrics = getChipRenderMetrics(style);
+        const lineClamp = metrics.lineClamp;
+        const chipCfg = metrics;
+        const chipFontPt = metrics.fontPt;
+        const r = getBorderRadiusObj(style, chipCfg.radius);
+        const gap = chipCfg.gap;
+        const pad = 8;
+        const widthPx = boxWidthPx ?? Math.max(32, ((element.rect?.wMm ?? 40) / px2mm));
+        const heightPx = boxHeightPx ?? Math.max(24, ((element.rect?.hMm ?? 20) / px2mm));
+        const innerWidth = Math.max(8, widthPx - pad);
+        const innerHeight = Math.max(8, heightPx - pad);
+        const cols = Math.max(1, Math.floor((innerWidth + gap) / (chipCfg.w + gap)));
+        const rows = lineClamp;
+        const maxVisible = Math.max(1, cols * rows);
+        const itemsMaxHeight = Math.max(1, Math.min(innerHeight, chipCfg.maxHeightPx));
+        const visibleItems = samples.slice(0, maxVisible);
+        const hiddenCount = Math.max(0, samples.length - visibleItems.length);
+        const cellCount = cols * rows;
+
+        const cellsHtml = Array.from({ length: cellCount })
+            .map(() => '<span class="group-guide-cell"></span>')
+            .join('');
+
+        const pillsHtml = visibleItems.map((label) => {
+            return `<span class="group-guide-pill" style="max-width:${chipCfg.w}px;min-height:${chipCfg.h}px;padding:${chipCfg.padY}px ${chipCfg.padX}px;border-radius:${r.tl}px ${r.tr}px ${r.br}px ${r.bl}px;font-size:${chipFontPt}pt;"><span>${label}</span></span>`;
+        }).join('');
+
+        const moreHtml = hiddenCount > 0
+            ? `<span class="group-guide-pill" style="max-width:${chipCfg.w}px;min-height:${chipCfg.h}px;padding:${chipCfg.padY}px ${chipCfg.padX}px;border-radius:${r.tl}px ${r.tr}px ${r.br}px ${r.bl}px;font-size:${chipFontPt}pt;background:#eef2ff;border-color:#c7d2fe;">+${hiddenCount}</span>`
+            : '';
+
+        return `
+            <div class="group-guide">
+                <div class="group-guide-grid" style="grid-template-columns:repeat(${cols}, minmax(0,1fr));grid-template-rows:repeat(${rows}, minmax(0,1fr));">${cellsHtml}</div>
+                <div class="group-guide-items" style="max-height:${itemsMaxHeight}px;">${pillsHtml}${moreHtml}</div>
+            </div>
+        `;
+    }
+
+    function updateGroupGuideVisual(targetEl, element, widthPx, heightPx) {
+        if (!element || !(element.type === 'group-badges' || element.type === 'group-chips')) return;
+        const host = targetEl.querySelector('.group-guide-host');
+        if (!host) return;
+        host.innerHTML = buildGroupGuideContent(element, widthPx, heightPx);
     }
 
     function selectElement(elementId) {
@@ -505,12 +702,28 @@
     function renderElementProperties(elementId) {
         const element = currentLayout.elements.find(e => e.id === elementId);
         if (!element) return;
+        const labelMap = {
+            'photo': 'Photo',
+            'qr': 'QR Code',
+            'text-name': 'Name',
+            'text-job': 'Role / Position',
+            'text-accreditation': 'Accreditation Badge',
+            'group-badges': 'Badges',
+            'group-chips': 'Chips / Zones',
+        };
+        const friendlyLabel = labelMap[element.type] || 'Element';
 
-        let propertiesHtml = `<div class="space-y-3"><small class="text-gray-600">ID: ${element.id}</small>`;
+        let propertiesHtml = `
+            <div class="space-y-3">
+                <div class="rounded-lg border border-gray-200 bg-white px-3 py-2">
+                    <div class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Selected Element</div>
+                    <div class="text-sm font-semibold text-gray-900 mt-0.5">${friendlyLabel}</div>
+                </div>
+        `;
 
         if (element.type.startsWith('text-') || element.type.startsWith('group-')) {
             propertiesHtml += `
-                <div>
+                <div class="rounded-lg border border-gray-200 bg-white px-3 py-2 space-y-1">
                     <label class="text-xs font-bold text-gray-700">Font Size (pt)</label>
                     <input type="number" min="6" max="48" value="${element.style.fontSizePt || 12}"
                         onchange="updateElementStyle('${elementId}', 'fontSizePt', this.value)"
@@ -521,7 +734,7 @@
 
         if (element.type.startsWith('text-')) {
             propertiesHtml += `
-                <div>
+                <div class="rounded-lg border border-gray-200 bg-white px-3 py-2 space-y-1">
                     <label class="text-xs font-bold text-gray-700">Font Weight</label>
                     <select onchange="updateElementStyle('${elementId}', 'fontWeight', this.value)"
                         class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
@@ -534,7 +747,7 @@
 
         if (element.type.startsWith('text-')) {
             propertiesHtml += `
-                <div>
+                <div class="rounded-lg border border-gray-200 bg-white px-3 py-2 space-y-1">
                     <label class="text-xs font-bold text-gray-700">Align</label>
                     <div class="flex gap-1">
                         <button class="flex-1 px-2 py-1 text-xs border rounded ${element.style.align === 'left' ? 'bg-blue-100 border-blue-500' : 'border-gray-300'}"
@@ -550,11 +763,35 @@
 
         if (element.type.startsWith('group-')) {
             propertiesHtml += `
-                <div>
+                <div class="rounded-lg border border-gray-200 bg-white px-3 py-2 space-y-1">
                     <label class="text-xs font-bold text-gray-700">Lines Max</label>
                     <input type="number" min="1" max="10" value="${element.style.lineClamp || 3}"
                         onchange="updateElementStyle('${elementId}', 'lineClamp', this.value)"
                         class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                </div>
+                <div class="rounded-lg border border-gray-200 bg-white px-3 py-2 space-y-1">
+                    <label class="text-xs font-bold text-gray-700">Chip Size</label>
+                    <select onchange="updateElementStyle('${elementId}', 'chipSize', this.value)"
+                        class="w-full px-2 py-1 text-xs border border-gray-300 rounded">
+                        <option value="small" ${(element.style.chipSize || 'medium') === 'small' ? 'selected' : ''}>Small</option>
+                        <option value="medium" ${(element.style.chipSize || 'medium') === 'medium' ? 'selected' : ''}>Medium</option>
+                        <option value="large" ${(element.style.chipSize || 'medium') === 'large' ? 'selected' : ''}>Large</option>
+                    </select>
+                </div>
+            `;
+        }
+
+        if (element.type === 'text-accreditation' || element.type === 'group-badges' || element.type === 'group-chips') {
+            const r = getBorderRadiusObj(element.style || {}, element.type === 'text-accreditation' ? 4 : 3);
+            propertiesHtml += `
+                <div class="rounded-lg border border-gray-200 bg-white px-3 py-2 space-y-1">
+                    <label class="text-xs font-bold text-gray-700">Corner Radius (px)</label>
+                    <div class="grid grid-cols-2 gap-2 mt-1">
+                        <input type="number" min="0" max="48" value="${r.tl}" onchange="updateElementBorderRadius('${elementId}','tl',this.value)" class="w-full px-2 py-1 text-xs border border-gray-300 rounded" placeholder="TL">
+                        <input type="number" min="0" max="48" value="${r.tr}" onchange="updateElementBorderRadius('${elementId}','tr',this.value)" class="w-full px-2 py-1 text-xs border border-gray-300 rounded" placeholder="TR">
+                        <input type="number" min="0" max="48" value="${r.br}" onchange="updateElementBorderRadius('${elementId}','br',this.value)" class="w-full px-2 py-1 text-xs border border-gray-300 rounded" placeholder="BR">
+                        <input type="number" min="0" max="48" value="${r.bl}" onchange="updateElementBorderRadius('${elementId}','bl',this.value)" class="w-full px-2 py-1 text-xs border border-gray-300 rounded" placeholder="BL">
+                    </div>
                 </div>
             `;
         }
@@ -567,11 +804,34 @@
     function updateElementStyle(elementId, key, value) {
         const element = currentLayout.elements.find(e => e.id === elementId);
         if (element) {
-            element.style[key] = isNaN(value) ? value : parseFloat(value);
+            let normalizedValue = value;
+            if (typeof value === 'string') {
+                if (value === 'true' || value === 'false') {
+                    normalizedValue = value === 'true';
+                } else if (value !== '' && !isNaN(value)) {
+                    normalizedValue = parseFloat(value);
+                }
+            }
+            element.style[key] = normalizedValue;
             renderCanvas();
             renderElementProperties(elementId);
             updateTruncationWarnings();
         }
+    }
+
+    function updateElementBorderRadius(elementId, corner, value) {
+        const element = currentLayout.elements.find(e => e.id === elementId);
+        if (!element) return;
+        if (!element.style || typeof element.style !== 'object') element.style = {};
+        if (!element.style.borderRadius || typeof element.style.borderRadius !== 'object') {
+            const current = getBorderRadiusObj(element.style, element.type === 'text-accreditation' ? 4 : 3);
+            element.style.borderRadius = { tl: current.tl, tr: current.tr, br: current.br, bl: current.bl };
+        }
+        const v = Math.max(0, parseFloat(value || 0));
+        element.style.borderRadius[corner] = Number.isFinite(v) ? v : 0;
+        renderCanvas();
+        renderElementProperties(elementId);
+        updateTruncationWarnings();
     }
 
     function updateTruncationWarnings() {
@@ -605,11 +865,15 @@
     function toggleGuides() {
         if (!editorEnabled) return;
         const guides = document.getElementById('cardGuides');
-        guides.style.display = guides.style.display === 'none' ? 'block' : 'none';
-        document.getElementById('btnToggleGuides').classList.toggle('bg-blue-600');
-        document.getElementById('btnToggleGuides').classList.toggle('text-white');
-        document.getElementById('btnToggleGuides').classList.toggle('bg-gray-200');
-        document.getElementById('btnToggleGuides').classList.toggle('text-gray-800');
+        const button = document.getElementById('btnToggleGuides');
+        const shouldShow = guides.dataset.visible !== 'true';
+        guides.style.display = shouldShow ? 'block' : 'none';
+        guides.dataset.visible = shouldShow ? 'true' : 'false';
+        button.setAttribute('aria-pressed', shouldShow ? 'true' : 'false');
+        button.classList.toggle('bg-blue-600', shouldShow);
+        button.classList.toggle('text-white', shouldShow);
+        button.classList.toggle('bg-gray-200', !shouldShow);
+        button.classList.toggle('text-gray-800', !shouldShow);
     }
 
     function resetLayout() {
