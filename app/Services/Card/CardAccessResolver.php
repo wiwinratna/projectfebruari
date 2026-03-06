@@ -22,15 +22,23 @@ class CardAccessResolver
                 'zones' => [],
                 'transportation_id' => null,
                 'accommodation_id' => null,
+                'accommodation_ids' => [],
                 'config_id' => null,
             ];
         }
+
+        $accommodationIds = collect($config->accommodation_code_id ?: [])
+            ->map(fn($v) => (int)$v)
+            ->filter()
+            ->unique()
+            ->values();
 
         return [
             'venues' => $config->venues()->pluck('venue_accesses.id')->all(),
             'zones'  => $config->zones()->pluck('zone_access_codes.id')->all(),
             'transportation_id' => $config->transportation_code_id,
-            'accommodation_id'  => $config->accommodation_code_id,
+            'accommodation_ids' => $accommodationIds->all(),
+            'accommodation_id'  => $accommodationIds->first(),
             'config_id' => $config->id,
         ];
     }
@@ -62,8 +70,8 @@ class CardAccessResolver
             $overrides->where('type', 'transportation')
         );
 
-        $finalAccommodationId = $this->resolveSingleFinal(
-            $default['accommodation_id'],
+        $finalAccommodationIds = $this->applySetOps(
+            $default['accommodation_ids'] ?? [],
             $overrides->where('type', 'accommodation')
         );
 
@@ -71,7 +79,8 @@ class CardAccessResolver
             'venues' => $finalVenues,
             'zones' => $finalZones,
             'transportation_id' => $finalTransportationId,
-            'accommodation_id' => $finalAccommodationId,
+            'accommodation_ids' => $finalAccommodationIds,
+            'accommodation_id' => collect($finalAccommodationIds)->first(),
         ];
     }
 
@@ -100,8 +109,8 @@ class CardAccessResolver
         if (!empty($default['transportation_id'])) {
             $rows[] = $this->row($card->id, 'transportation', (int)$default['transportation_id'], 'add', 'default');
         }
-        if (!empty($default['accommodation_id'])) {
-            $rows[] = $this->row($card->id, 'accommodation', (int)$default['accommodation_id'], 'add', 'default');
+        foreach (($default['accommodation_ids'] ?? []) as $id) {
+            $rows[] = $this->row($card->id, 'accommodation', (int)$id, 'add', 'default');
         }
 
         if (!$rows) return;
@@ -140,8 +149,8 @@ class CardAccessResolver
             $id = (int)$default['transportation_id'];
             $history['transportation'][$id] = ['state' => 'owned', 'source' => 'default'];
         }
-        if ($default['accommodation_id']) {
-            $id = (int)$default['accommodation_id'];
+        foreach (($default['accommodation_ids'] ?? []) as $id) {
+            $id = (int)$id;
             $history['accommodation'][$id] = ['state' => 'owned', 'source' => 'default'];
         }
 

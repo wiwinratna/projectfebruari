@@ -36,13 +36,16 @@ class AccessCardConfigController extends Controller
                 'venueAccesses:id,nama_vanue',
                 'zoneAccessCodes:id,kode_zona',
                 'transportationCode:id,kode',
-                'accommodationCode:id,kode',
             ])
             ->where('event_id', $eventId)
             ->orderByDesc('id')
             ->get();
 
-        return view('menu.events.card-configs.index', compact('configs'));
+        $accommodationCodesMap = AccommodationCode::where('event_id', $eventId)
+            ->get(['id', 'kode'])
+            ->keyBy('id');
+
+        return view('menu.events.card-configs.index', compact('configs', 'accommodationCodesMap'));
     }
 
     public function create()
@@ -83,6 +86,7 @@ class AccessCardConfigController extends Controller
             'config' => null,
             'selectedVenueAccesses' => [],
             'selectedZoneAccessCodes' => [],
+            'selectedAccommodationCodeIds' => [],
         ]);
     }
 
@@ -99,7 +103,8 @@ class AccessCardConfigController extends Controller
                 Rule::unique('access_card_configs', 'accreditation_mapping_id')->where(fn($q) => $q->where('event_id', $eventId)),
             ],
             'transportation_code_id' => ['nullable','integer', Rule::exists('transportation_codes','id')->where('event_id',$eventId)],
-            'accommodation_code_id'  => ['nullable','integer', Rule::exists('accommodation_codes','id')->where('event_id',$eventId)],
+            'accommodation_code_id' => ['nullable','array'],
+            'accommodation_code_id.*' => ['integer', Rule::exists('accommodation_codes','id')->where('event_id',$eventId)],
             'keterangan' => ['nullable','string','max:1000'],
 
             'venue_access_ids' => ['nullable','array'],
@@ -111,11 +116,18 @@ class AccessCardConfigController extends Controller
             'accreditation_mapping_id.unique' => 'Konfigurasi untuk mapping ini sudah ada.',
         ]);
 
+        $accommodationIds = collect($data['accommodation_code_id'] ?? [])
+            ->map(fn($v) => (int)$v)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
         $config = AccessCardConfig::create([
             'event_id' => $eventId,
             'accreditation_mapping_id' => $data['accreditation_mapping_id'],
             'transportation_code_id' => $data['transportation_code_id'] ?? null,
-            'accommodation_code_id' => $data['accommodation_code_id'] ?? null,
+            'accommodation_code_id' => $accommodationIds,
             'keterangan' => $data['keterangan'] ?? null,
         ]);
 
@@ -158,6 +170,11 @@ class AccessCardConfigController extends Controller
 
         $selectedVenueAccesses = $config->venueAccesses()->pluck('venue_accesses.id')->map(fn($v)=>(int)$v)->toArray();
         $selectedZoneAccessCodes = $config->zoneAccessCodes()->pluck('zone_access_codes.id')->map(fn($v)=>(int)$v)->toArray();
+        $selectedAccommodationCodeIds = collect($config->accommodation_code_id ?: [])
+            ->map(fn($v) => (int)$v)
+            ->filter()
+            ->values()
+            ->all();
 
         return view('menu.events.card-configs.edit', compact(
             'config',
@@ -167,7 +184,8 @@ class AccessCardConfigController extends Controller
             'venueAccesses',
             'zoneAccessCodes',
             'selectedVenueAccesses',
-            'selectedZoneAccessCodes'
+            'selectedZoneAccessCodes',
+            'selectedAccommodationCodeIds'
         ));
     }
 
@@ -187,7 +205,8 @@ class AccessCardConfigController extends Controller
                     ->ignore($config->id),
             ],
             'transportation_code_id' => ['nullable','integer', Rule::exists('transportation_codes','id')->where('event_id',$eventId)],
-            'accommodation_code_id'  => ['nullable','integer', Rule::exists('accommodation_codes','id')->where('event_id',$eventId)],
+            'accommodation_code_id' => ['nullable','array'],
+            'accommodation_code_id.*' => ['integer', Rule::exists('accommodation_codes','id')->where('event_id',$eventId)],
             'keterangan' => ['nullable','string','max:1000'],
 
             'venue_access_ids' => ['nullable','array'],
@@ -199,10 +218,17 @@ class AccessCardConfigController extends Controller
             'accreditation_mapping_id.unique' => 'Konfigurasi untuk mapping ini sudah ada.',
         ]);
 
+        $accommodationIds = collect($data['accommodation_code_id'] ?? [])
+            ->map(fn($v) => (int)$v)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
         $config->update([
             'accreditation_mapping_id' => $data['accreditation_mapping_id'],
             'transportation_code_id' => $data['transportation_code_id'] ?? null,
-            'accommodation_code_id' => $data['accommodation_code_id'] ?? null,
+            'accommodation_code_id' => $accommodationIds,
             'keterangan' => $data['keterangan'] ?? null,
         ]);
 

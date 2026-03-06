@@ -289,10 +289,17 @@
     $photo = $photoByCardId[$card->id] ?? null;
 
     $tId = $final['transportation_id'] ?? null;
-    $aId = $final['accommodation_id'] ?? null;
+    $aIds = collect($final['accommodation_ids'] ?? [])
+      ->map(fn($v) => (int)$v)
+      ->filter()
+      ->unique()
+      ->values();
+    if ($aIds->isEmpty() && !empty($final['accommodation_id'])) {
+      $aIds = collect([(int)$final['accommodation_id']]);
+    }
 
     $t = $tId ? ($transportById[$tId] ?? null) : null;
-    $a = $aId ? ($accomById[$aId] ?? null) : null;
+    $a = !$aIds->isEmpty() ? ($accomById[$aIds->first()] ?? null) : null;
 
     $tBadge = $t ? transportBadge($t) : ['type'=>'none','icon'=>null,'code'=>null,'show_code'=>true];
     $aBadge = $a ? accommodationBadge($a) : ['type'=>'none','icon'=>null,'code'=>null,'show_code'=>true];
@@ -305,6 +312,19 @@
 
     $tShouldShowCode = filled($tBadge['code'] ?? null) && $tShowCode;
     $aShouldShowCode = filled($aBadge['code'] ?? null) && $aShowCode;
+    $accommodationBadges = $aIds->map(function ($aid) use ($accomById) {
+      $code = $accomById[$aid] ?? null;
+      if (!$code) {
+        return null;
+      }
+      $ab = accommodationBadge($code);
+      return [
+        'hasIcon' => filled($ab['icon'] ?? null),
+        'icon' => $ab['icon'] ?? null,
+        'showCode' => (bool)($ab['show_code'] ?? true),
+        'code' => $ab['code'] ?? $code->kode,
+      ];
+    })->filter()->values();
   @endphp
 
   <div class="page">
@@ -376,16 +396,18 @@
                 </span>
               @endif
 
-              @if($a && ($aHasIcon || $aShouldShowCode))
-                <span class="chip">
-                  @if($aHasIcon && filled($aBadge['icon'] ?? null))
-                    <x-card.icon-svg :icon-key="$aBadge['icon']" type="accommodation" size="12pt" />
-                  @endif
-                  @if($aShouldShowCode)
-                    <span class="mono">{{ $aBadge['code'] }}</span>
-                  @endif
-                </span>
-              @endif
+              @foreach($accommodationBadges as $ab)
+                @if(($ab['hasIcon'] ?? false) || (($ab['showCode'] ?? true) && filled($ab['code'] ?? null)))
+                  <span class="chip">
+                    @if(($ab['hasIcon'] ?? false) && filled($ab['icon'] ?? null))
+                      <x-card.icon-svg :icon-key="$ab['icon']" type="accommodation" size="12pt" />
+                    @endif
+                    @if(($ab['showCode'] ?? true) && filled($ab['code'] ?? null))
+                      <span class="mono">{{ $ab['code'] }}</span>
+                    @endif
+                  </span>
+                @endif
+              @endforeach
             </div>
 
             <div class="accessTitle">Venue &amp; Sport Access</div>

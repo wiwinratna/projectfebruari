@@ -16,10 +16,17 @@
   $photo = $photo;
 
   $tId = $final['transportation_id'] ?? null;
-  $aId = $final['accommodation_id'] ?? null;
+  $aIds = collect($final['accommodation_ids'] ?? [])
+    ->map(fn($v) => (int)$v)
+    ->filter()
+    ->unique()
+    ->values();
+  if ($aIds->isEmpty() && !empty($final['accommodation_id'])) {
+    $aIds = collect([(int)$final['accommodation_id']]);
+  }
 
   $t = $tId ? ($transportById[$tId] ?? null) : null;
-  $a = $aId ? ($accomById[$aId] ?? null) : null;
+  $a = (!$aIds->isEmpty()) ? ($accomById[$aIds->first()] ?? null) : null;
 
   $tBadge = $t ? transportBadge($t) : ['type'=>'none','icon'=>null,'code'=>null,'show_code'=>true];
   $aBadge = $a ? accommodationBadge($a) : ['type'=>'none','icon'=>null,'code'=>null,'show_code'=>true];
@@ -34,7 +41,20 @@
   $aShouldShowCode = filled($aBadge['code'] ?? null) && $aShowCode;
 
   $snapshotTransports = collect($snap['transports'] ?? [])->filter(fn($item) => is_array($item))->values();
-  $snapshotAccommodations = collect($snap['accommodations'] ?? [])->filter(fn($item) => is_array($item))->values();
+  $snapshotAccommodations = collect($aIds)->map(function ($aid) use ($accomById) {
+    $code = $accomById[$aid] ?? null;
+    if (!$code) {
+      return null;
+    }
+    $ab = accommodationBadge($code);
+    return [
+      'code' => $ab['code'] ?? $code->kode,
+      'icon_key' => $ab['icon'] ?? null,
+      'show_icon' => (bool)($code->show_icon ?? false),
+      'show_code' => (bool)($ab['show_code'] ?? true),
+      'kind' => 'hotel',
+    ];
+  })->filter()->values();
   $snapshotVenueChips = collect($snap['venue_chips'] ?? [])->filter(fn($item) => is_array($item))->values();
   $snapshotZoneChips = collect($snap['zone_chips'] ?? [])->filter(fn($item) => is_array($item))->values();
 
@@ -45,6 +65,10 @@
       'show_icon' => (bool)($t->show_icon ?? false),
       'show_code' => (bool)($tBadge['show_code'] ?? true),
     ]]);
+  }
+
+  if ($snapshotAccommodations->isEmpty()) {
+    $snapshotAccommodations = collect($snap['accommodations'] ?? [])->filter(fn($item) => is_array($item))->values();
   }
 
   if ($snapshotAccommodations->isEmpty() && $a) {

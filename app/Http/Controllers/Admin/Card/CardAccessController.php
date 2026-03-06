@@ -48,21 +48,22 @@ class CardAccessController extends Controller
             'zones' => ['array'],
             'zones.*' => ['integer'],
             'transportation_id' => ['nullable', 'integer'],
-            'accommodation_id' => ['nullable', 'integer'],
+            'accommodation_ids' => ['array'],
+            'accommodation_ids.*' => ['integer'],
         ]);
 
         $desiredVenues = collect($data['venues'] ?? [])->map(fn($v)=>(int)$v)->unique()->values();
         $desiredZones  = collect($data['zones'] ?? [])->map(fn($v)=>(int)$v)->unique()->values();
         $desiredTransportation = isset($data['transportation_id']) && $data['transportation_id'] !== '' ? (int)$data['transportation_id'] : null;
-        $desiredAccommodation  = isset($data['accommodation_id'])  && $data['accommodation_id'] !== '' ? (int)$data['accommodation_id'] : null;
+        $desiredAccommodationIds = collect($data['accommodation_ids'] ?? [])->map(fn($v)=>(int)$v)->unique()->values();
 
         $default = $resolver->getDefaultFromConfig($card);
 
         $this->syncSetOverrides($card, 'venue', $default['venues'], $desiredVenues->all());
         $this->syncSetOverrides($card, 'zone',  $default['zones'],  $desiredZones->all());
+        $this->syncSetOverrides($card, 'accommodation', $default['accommodation_ids'] ?? ($default['accommodation_id'] ? [(int)$default['accommodation_id']] : []), $desiredAccommodationIds->all());
 
         $this->syncSingleOverride($card, 'transportation', $default['transportation_id'], $desiredTransportation);
-        $this->syncSingleOverride($card, 'accommodation',  $default['accommodation_id'],  $desiredAccommodation);
 
         return back()->with('success', 'Akses kartu berhasil disimpan.');
     }
