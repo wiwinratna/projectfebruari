@@ -309,7 +309,7 @@ class SuperAdminDashboardController extends Controller
     public function eventDelete(Event $event)
     {
         $event->delete();
-        return back()->with('success', 'Event deleted successfully!');
+        return redirect()->route('super-admin.events.index')->with('success', 'Event deleted successfully!');
     }
 
     private function validateEventData(Request $request, ?Event $event = null): array
