@@ -23,15 +23,12 @@
             @include('menu.events.partials.form-fields')
 
             <div class="flex items-center justify-between pt-4 border-t border-gray-200">
-                <form action="{{ route('super-admin.events.delete', $event) }}" method="POST" style="display:inline;"
-                      onsubmit="return confirm('Are you sure you want to delete this event? This action cannot be undone.')">
-                    @csrf
-                    @method('DELETE')
-                    <button type="submit"
-                            class="px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 font-semibold flex items-center">
-                        <i class="fas fa-trash mr-2"></i> Delete Event
-                    </button>
-                </form>
+                {{-- Delete button triggers the separate delete form below --}}
+                <button type="button"
+                        onclick="if(confirm('Are you sure you want to delete this event? This action cannot be undone.')) { document.getElementById('delete-event-form').submit(); }"
+                        class="px-4 py-2 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 border border-red-200 font-semibold flex items-center">
+                    <i class="fas fa-trash mr-2"></i> Delete Event
+                </button>
 
                 <div class="flex items-center gap-3">
                     <a href="{{ route('super-admin.events.index') }}"
@@ -44,6 +41,12 @@
                     </button>
                 </div>
             </div>
+        </form>
+
+        {{-- Separate delete form — must NOT be nested inside the update form --}}
+        <form id="delete-event-form" method="POST" action="{{ route('super-admin.events.delete', $event) }}" class="hidden">
+            @csrf
+            @method('DELETE')
         </form>
     </div>
 </div>
