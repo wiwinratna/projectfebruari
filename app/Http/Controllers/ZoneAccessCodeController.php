@@ -19,6 +19,7 @@ class ZoneAccessCodeController extends Controller
     {
         $event = $this->getEvent();
         $zoneAccessCodes = $event->zoneAccessCodes()
+            ->withCount('accessCardConfigs')
             ->orderBy('kode_zona')
             ->get();
 
@@ -90,11 +91,21 @@ class ZoneAccessCodeController extends Controller
         $event = $this->getEvent();
         abort_unless($zoneAccessCode->event_id === $event->id, 403);
 
-        $zoneAccessCode->delete();
+        try {
+            $zoneAccessCode->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Kode zona akses berhasil dihapus.',
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Kode zona akses berhasil dihapus.',
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode zona akses ini tidak bisa dihapus karena sedang digunakan (in use).',
+                ]);
+            }
+            throw $e;
+        }
     }
 }

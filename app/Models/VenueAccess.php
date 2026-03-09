@@ -19,4 +19,14 @@ class VenueAccess extends Model
     {
         return $this->belongsTo(Event::class);
     }
+
+    public function accessCardConfigs()
+    {
+        return $this->belongsToMany(
+            AccessCardConfig::class,
+            'access_card_config_venues',
+            'venue_access_id',
+            'access_card_config_id'
+        );
+    }
 }

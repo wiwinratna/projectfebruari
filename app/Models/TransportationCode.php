@@ -22,4 +22,9 @@ class TransportationCode extends Model
     {
         return $this->belongsTo(Event::class);
     }
+
+    public function accessCardConfigs()
+    {
+        return $this->hasMany(AccessCardConfig::class, 'transportation_code_id');
+    }
 }

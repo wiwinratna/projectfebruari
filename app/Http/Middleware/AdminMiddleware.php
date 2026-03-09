@@ -16,6 +16,12 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next)
     {
         if (!session('admin_authenticated')) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Sesi telah berakhir. Silakan login kembali.',
+                ], 401);
+            }
             return redirect('/admin/login')->with('error', 'Please login to access admin dashboard');
         }
 

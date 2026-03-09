@@ -19,6 +19,7 @@ class VenueAccessController extends Controller
     {
         $event = $this->getEvent();
         $venueAccesses = $event->venueAccesses()
+            ->withCount('accessCardConfigs')
             ->orderBy('nama_vanue')
             ->get();
 
@@ -77,11 +78,21 @@ class VenueAccessController extends Controller
         $event = $this->getEvent();
         abort_unless($venueAccess->event_id === $event->id, 403);
 
-        $venueAccess->delete();
+        try {
+            $venueAccess->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Venue access berhasil dihapus.',
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Venue access berhasil dihapus.',
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Venue access ini tidak bisa dihapus karena sedang digunakan (in use).',
+                ]);
+            }
+            throw $e;
+        }
     }
 }

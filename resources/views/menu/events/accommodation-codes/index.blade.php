@@ -36,34 +36,34 @@ Kode Akomodasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($accommodationCodes as $code)
                     <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        @php
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            @php
                             // kalau kamu sudah bikin helper accommodationBadge()
                             $ab = function_exists('accommodationBadge')
-                                ? accommodationBadge($code)
-                                : [
-                                    'type' => (!empty($code->icon_key) && $code->show_icon) ? 'icon' : 'code',
-                                    'icon' => (!empty($code->icon_key) && $code->show_icon) ? $code->icon_key : null,
-                                    'code' => ($code->show_code ? $code->kode : null),
-                                ];
-                        @endphp
+                            ? accommodationBadge($code)
+                            : [
+                            'type' => (!empty($code->icon_key) && $code->show_icon) ? 'icon' : 'code',
+                            'icon' => (!empty($code->icon_key) && $code->show_icon) ? $code->icon_key : null,
+                            'code' => ($code->show_code ? $code->kode : null),
+                            ];
+                            @endphp
 
-                        <div class="flex items-center gap-2">
-                            {{-- Icon --}}
-                            @if($ab['type'] === 'icon' && !empty($ab['icon']))
+                            <div class="flex items-center gap-2">
+                                {{-- Icon --}}
+                                @if($ab['type'] === 'icon' && !empty($ab['icon']))
                                 <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 text-gray-700">
                                     <x-catalog-icon :key="$ab['icon']" size="16px" />
                                 </span>
-                            @endif
+                                @endif
 
-                            {{-- Code --}}
-                            @if(!empty($ab['code']))
+                                {{-- Code --}}
+                                @if(!empty($ab['code']))
                                 <div class="text-sm font-medium text-gray-900">{{ $ab['code'] }}</div>
-                            @else
+                                @else
                                 <div class="text-sm text-gray-400">—</div>
-                            @endif
-                        </div>
-                    </td>
+                                @endif
+                            </div>
+                        </td>
                         <td class="px-6 py-4">
                             <div class="text-sm text-gray-700">{{ $code->keterangan ?? '-' }}</div>
                         </td>
@@ -71,9 +71,15 @@ Kode Akomodasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full
                             <a href="{{ route('admin.master-data.accommodation-codes.edit', $code) }}" class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
+                            @if($code->access_card_configs_count > 0)
+                            <span class="inline-flex items-center gap-1 text-gray-400 cursor-default" title="Data ini sedang digunakan">
+                                <i class="fas fa-lock text-xs"></i> In Use
+                            </span>
+                            @else
                             <button onclick="deleteItem({{ $code->id }}, '{{ addslashes($code->kode) }}')" class="text-red-600 hover:text-red-900">
                                 <i class="fas fa-trash mr-1"></i> Delete
                             </button>
+                            @endif
                         </td>
                     </tr>
                     @empty
@@ -138,5 +144,4 @@ Kode Akomodasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full
         if (e.key === 'Escape') hideConfirmModal();
     });
 </script>
-@include('components.confirm-modal')
 @endsection

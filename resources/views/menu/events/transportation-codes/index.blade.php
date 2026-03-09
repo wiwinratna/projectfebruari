@@ -41,16 +41,16 @@ Kode Transportasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-f
                             <div class="flex items-center gap-2">
                                 {{-- Icon (jika ada dan diizinkan) --}}
                                 @if($tb['type'] === 'icon' && !empty($tb['icon']))
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 text-gray-700">
-                                        <x-catalog-icon :key="$tb['icon']" size="16px" />
-                                    </span>
+                                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-gray-50 border border-gray-200 text-gray-700">
+                                    <x-catalog-icon :key="$tb['icon']" size="16px" />
+                                </span>
                                 @endif
 
                                 {{-- Code (fallback / atau ditampilkan bersama icon) --}}
                                 @if(!empty($tb['code']))
-                                    <div class="text-sm font-medium text-gray-900">{{ $tb['code'] }}</div>
+                                <div class="text-sm font-medium text-gray-900">{{ $tb['code'] }}</div>
                                 @else
-                                    <div class="text-sm text-gray-400">—</div>
+                                <div class="text-sm text-gray-400">—</div>
                                 @endif
                             </div>
                         </td>
@@ -61,9 +61,15 @@ Kode Transportasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-f
                             <a href="{{ route('admin.master-data.transportation-codes.edit', $code) }}" class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
+                            @if($code->access_card_configs_count > 0)
+                            <span class="inline-flex items-center gap-1 text-gray-400 cursor-default" title="Data ini sedang digunakan">
+                                <i class="fas fa-lock text-xs"></i> In Use
+                            </span>
+                            @else
                             <button onclick="deleteItem({{ $code->id }}, '{{ addslashes($code->kode) }}')" class="text-red-600 hover:text-red-900">
                                 <i class="fas fa-trash mr-1"></i> Delete
                             </button>
+                            @endif
                         </td>
                     </tr>
                     @empty
@@ -102,17 +108,23 @@ Kode Transportasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-f
                     'Accept': 'application/json'
                 }
             })
-            .then(r => {
+            .then(r => r.json().then(data => ({
+                status: r.status,
+                ok: r.ok,
+                data
+            })))
+            .then(({
+                ok,
+                status,
+                data
+            }) => {
                 hideLoading();
-                if (!r.ok) throw new Error(`HTTP ${r.status}`);
-                return r.json();
-            })
-            .then(data => {
-                if (data.success) {
+                if (ok && data.success) {
                     showFlashMessage('Code deleted successfully!', 'status');
                     setTimeout(() => window.location.reload(), 500);
                 } else {
-                    showFlashMessage(data.message || 'Failed', 'error');
+                    const msg = data.message || `Gagal menghapus (HTTP ${status})`;
+                    showFlashMessage(msg, 'error');
                 }
             })
             .catch(e => {
@@ -128,5 +140,4 @@ Kode Transportasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-f
         if (e.key === 'Escape') hideConfirmModal();
     });
 </script>
-@include('components.confirm-modal')
 @endsection

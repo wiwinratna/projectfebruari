@@ -2,16 +2,16 @@
 <div id="sidebar-overlay" class="lg:hidden"></div>
 
 @php
-    $sidebarEvent = null;
-    $sidebarEventLogoUrl = null;
-    if (session('admin_authenticated') && session('admin_event_id')) {
-        $sidebarEvent = \App\Models\Event::query()
-            ->select(['id', 'title', 'logo_path'])
-            ->find(session('admin_event_id'));
-        if ($sidebarEvent && filled($sidebarEvent->logo_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($sidebarEvent->logo_path)) {
-            $sidebarEventLogoUrl = asset('storage/' . ltrim($sidebarEvent->logo_path, '/'));
-        }
-    }
+$sidebarEvent = null;
+$sidebarEventLogoUrl = null;
+if (session('admin_authenticated') && session('admin_event_id')) {
+$sidebarEvent = \App\Models\Event::query()
+->select(['id', 'title', 'logo_path'])
+->find(session('admin_event_id'));
+if ($sidebarEvent && filled($sidebarEvent->logo_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($sidebarEvent->logo_path)) {
+$sidebarEventLogoUrl = asset('storage/' . ltrim($sidebarEvent->logo_path, '/'));
+}
+}
 @endphp
 
 <div class="main-sidebar sidebar-style-2 bg-white text-gray-700 shadow-lg" id="sidebar">
@@ -31,13 +31,13 @@
                                 class="logo-img block h-8 w-auto object-contain">
                         </a>
                         @if($sidebarEventLogoUrl)
-                            <span class="text-gray-300 font-semibold px-2 select-none">|</span>
-                            <div class="flex items-center justify-center">
-                                <img src="{{ $sidebarEventLogoUrl }}"
-                                    alt="{{ $sidebarEvent?->title ?? 'Event Logo' }}"
-                                    title="{{ $sidebarEvent?->title ?? 'Event' }}"
-                                    class="h-16 max-w-[120px] object-contain">
-                            </div>
+                        <span class="text-gray-300 font-semibold px-2 select-none">|</span>
+                        <div class="flex items-center justify-center">
+                            <img src="{{ $sidebarEventLogoUrl }}"
+                                alt="{{ $sidebarEvent?->title ?? 'Event Logo' }}"
+                                title="{{ $sidebarEvent?->title ?? 'Event' }}"
+                                class="h-16 max-w-[120px] object-contain">
+                        </div>
                         @endif
             </div>
             <button id="sidebar-close" class="lg:hidden text-gray-500 hover:text-gray-700 absolute top-4 right-4 transition-colors duration-200">
@@ -45,263 +45,263 @@
             </button>
         </div>
         <div class="flex-1 overflow-y-auto">
-        <ul class="sidebar-menu mt-8">
+            <ul class="sidebar-menu mt-8">
 
-            @if(session('super_admin_authenticated'))
-            {{-- Dashboard Section --}}
-            <li class="px-6 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
+                @if(session('super_admin_authenticated'))
+                {{-- Dashboard Section --}}
+                <li class="px-6 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
 
-            <li class="menu-item {{ Request::is('super-admin/dashboard') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('super-admin.dashboard') }}">
-                    <i class="fas fa-home mr-3"></i>
-                    <span>Super Admin Dashboard</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('super-admin/dashboard') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.dashboard') }}">
+                        <i class="fas fa-home mr-3"></i>
+                        <span>Super Admin Dashboard</span>
+                    </a>
+                </li>
 
-            {{-- System Management Section --}}
-            <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">System Management</li>
+                {{-- System Management Section --}}
+                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">System Management</li>
 
-            <li class="menu-item {{ Request::is('super-admin/admins*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('super-admin.admins.index') }}">
-                    <i class="fas fa-user-tie mr-3"></i>
-                    <span>Manage Admins</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('super-admin/admins*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.admins.index') }}">
+                        <i class="fas fa-user-tie mr-3"></i>
+                        <span>Manage Admins</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('super-admin/events*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('super-admin.events.index') }}">
-                    <i class="fas fa-calendar-alt mr-3"></i>
-                    <span>All Events</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('super-admin/events*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.events.index') }}">
+                        <i class="fas fa-calendar-alt mr-3"></i>
+                        <span>All Events</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('super-admin/job-categories*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('super-admin.job-categories.index') }}">
-                    <i class="fas fa-tags mr-3"></i>
-                    <span>Job Categories</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('super-admin/job-categories*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.job-categories.index') }}">
+                        <i class="fas fa-tags mr-3"></i>
+                        <span>Job Categories</span>
+                    </a>
+                </li>
 
-            {{-- Content Section --}}
-            <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Content</li>
+                {{-- Content Section --}}
+                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Content</li>
 
-            <li class="menu-item {{ Request::is('super-admin/news*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('super-admin.news.index') }}">
-                    <i class="fas fa-newspaper mr-3"></i>
-                    <span>Manage News</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('super-admin/news*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.news.index') }}">
+                        <i class="fas fa-newspaper mr-3"></i>
+                        <span>Manage News</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('super-admin/clients*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('super-admin.clients.index') }}">
-                    <i class="fas fa-building mr-3"></i>
-                    <span>Our Clients</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('super-admin/clients*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.clients.index') }}">
+                        <i class="fas fa-building mr-3"></i>
+                        <span>Our Clients</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('super-admin/partners*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('super-admin.partners.index') }}">
-                    <i class="fas fa-handshake mr-3"></i>
-                    <span>Our Partners</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('super-admin/partners*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.partners.index') }}">
+                        <i class="fas fa-handshake mr-3"></i>
+                        <span>Our Partners</span>
+                    </a>
+                </li>
 
-            {{-- Account Section --}}
-            <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
+                {{-- Account Section --}}
+                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
 
-            <li class="menu-item {{ Request::is('super-admin/profile*') ? 'active' : '' }}">
-                <a class="nav-link text-blue-600 font-bold hover:bg-blue-50" href="{{ route('super-admin.profile') }}">
-                    <i class="fas fa-user-cog mr-3"></i>
-                    <span>Profile & Settings</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('super-admin/profile*') ? 'active' : '' }}">
+                    <a class="nav-link text-blue-600 font-bold hover:bg-blue-50" href="{{ route('super-admin.profile') }}">
+                        <i class="fas fa-user-cog mr-3"></i>
+                        <span>Profile & Settings</span>
+                    </a>
+                </li>
 
-            @elseif(session('admin_authenticated'))
-            {{-- Dashboard Section --}}
-            <li class="px-6 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
+                @elseif(session('admin_authenticated'))
+                {{-- Dashboard Section --}}
+                <li class="px-6 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
 
-            <li class="menu-item {{ Request::is('admin/dashboard') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                    <i class="fas fa-home mr-3"></i>
-                    <span>Admin Dashboard</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/dashboard') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                        <i class="fas fa-home mr-3"></i>
+                        <span>Admin Dashboard</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('admin/analytics') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.analytics') }}">
-                    <i class="fas fa-chart-line mr-3"></i>
-                    <span>Analytics Dashboard</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/analytics') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.analytics') }}">
+                        <i class="fas fa-chart-line mr-3"></i>
+                        <span>Analytics Dashboard</span>
+                    </a>
+                </li>
 
-            @if(session('admin_event_id'))
-            <li class="menu-item {{ Request::is('admin/event/settings*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.event.settings.edit') }}">
-                    <i class="fas fa-palette mr-3"></i>
-                    <span>Event Settings</span>
-                </a>
-            </li>
-            @endif
+                @if(session('admin_event_id'))
+                <li class="menu-item {{ Request::is('admin/event/settings*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.event.settings.edit') }}">
+                        <i class="fas fa-id-card mr-3"></i>
+                        <span>Card Design</span>
+                    </a>
+                </li>
+                @endif
 
-            {{-- Event Management Section --}}
-            <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Event Management</li>
+                {{-- Event Management Section --}}
+                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Event Management</li>
 
-            <li class="menu-item {{ Request::is('admin/events*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.events.index') }}">
-                    <i class="fas fa-calendar-alt mr-3"></i>
-                    <span>Events</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/events*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.events.index') }}">
+                        <i class="fas fa-calendar-alt mr-3"></i>
+                        <span>Events</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('admin/sports*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.sports.index') }}">
-                    <i class="fas fa-running mr-3"></i>
-                    <span>Sports Master</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/sports*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.sports.index') }}">
+                        <i class="fas fa-running mr-3"></i>
+                        <span>Sports Master</span>
+                    </a>
+                </li>
 
-            @if(session('admin_event_id'))
-            <li class="menu-item {{ Request::is('admin/master-data/venue-locations*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.master-data.venue-locations.index') }}">
-                    <i class="fas fa-map-marker-alt mr-3"></i>
-                    <span>Venue Locations</span>
-                </a>
-            </li>
+                @if(session('admin_event_id'))
+                <li class="menu-item {{ Request::is('admin/master-data/venue-locations*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.master-data.venue-locations.index') }}">
+                        <i class="fas fa-map-marker-alt mr-3"></i>
+                        <span>Venue Locations</span>
+                    </a>
+                </li>
 
-            <!-- <li class="menu-item {{ Request::is('admin/master-data/jabatan*') ? 'active' : '' }}">
+                <!-- <li class="menu-item {{ Request::is('admin/master-data/jabatan*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.master-data.jabatan.index') }}">
                     <i class="fas fa-id-badge mr-3"></i>
                     <span>Jabatan</span>
                 </a>
             </li> -->
 
-            <li class="menu-item {{ Request::is('admin/master-data/disciplins*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.master-data.disciplins.index') }}">
-                    <i class="fas fa-trophy mr-3"></i>
-                    <span>Disiplin</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/master-data/disciplins*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.master-data.disciplins.index') }}">
+                        <i class="fas fa-trophy mr-3"></i>
+                        <span>Disiplin</span>
+                    </a>
+                </li>
 
-            <!-- <li class="menu-item {{ Request::is('admin/master-data/accreditations*') ? 'active' : '' }}">
+                <!-- <li class="menu-item {{ Request::is('admin/master-data/accreditations*') ? 'active' : '' }}">
                 <a class="nav-link" href="{{ route('admin.master-data.accreditations.index') }}">
                     <i class="fas fa-certificate mr-3"></i>
                     <span>Akreditasi</span>
                 </a>
             </li> -->
 
-            <li class="menu-item {{ Request::is('admin/master-data/accommodation-codes*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.master-data.accommodation-codes.index') }}">
-                    <i class="fas fa-hotel mr-3"></i>
-                    <span>Kode Akomodasi</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/master-data/accommodation-codes*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.master-data.accommodation-codes.index') }}">
+                        <i class="fas fa-hotel mr-3"></i>
+                        <span>Kode Akomodasi</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('admin/master-data/transportation-codes*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.master-data.transportation-codes.index') }}">
-                    <i class="fas fa-bus mr-3"></i>
-                    <span>Kode Transportasi</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/master-data/transportation-codes*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.master-data.transportation-codes.index') }}">
+                        <i class="fas fa-bus mr-3"></i>
+                        <span>Kode Transportasi</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('admin/master-data/zone-access-codes*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.master-data.zone-access-codes.index') }}">
-                    <i class="fas fa-shield-alt mr-3"></i>
-                    <span>Kode Zona Akses</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/master-data/zone-access-codes*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.master-data.zone-access-codes.index') }}">
+                        <i class="fas fa-shield-alt mr-3"></i>
+                        <span>Kode Zona Akses</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('admin/master-data/venue-accesses*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.master-data.venue-accesses.index') }}">
-                    <i class="fas fa-door-open mr-3"></i>
-                    <span>Venue Access</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/master-data/venue-accesses*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.master-data.venue-accesses.index') }}">
+                        <i class="fas fa-door-open mr-3"></i>
+                        <span>Venue Access</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('admin/accreditation-mapping*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.accreditation-mapping.index') }}">
-                    <i class="fas fa-random mr-3"></i>
-                    <span>Accreditation Mapping</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/accreditation-mapping*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.accreditation-mapping.index') }}">
+                        <i class="fas fa-random mr-3"></i>
+                        <span>Accreditation Mapping</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('admin/master-data/access-card-configs*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.master-data.access-card-configs.index') }}">
-                    <i class="fas fa-id-card-alt mr-3"></i>
-                    <span>Access Card Configs</span>
-                </a>
-            </li>
-            @endif
+                <li class="menu-item {{ Request::is('admin/master-data/access-card-configs*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.master-data.access-card-configs.index') }}">
+                        <i class="fas fa-id-card-alt mr-3"></i>
+                        <span>Access Card Configs</span>
+                    </a>
+                </li>
+                @endif
 
-            {{-- Recruitment Section --}}
-            <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Recruitment</li>
+                {{-- Recruitment Section --}}
+                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Recruitment</li>
 
-            <li class="menu-item {{ Request::is('admin/workers*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.workers.index') }}">
-                    <i class="fas fa-users mr-3"></i>
-                    <span>Job Openings</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/workers*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.workers.index') }}">
+                        <i class="fas fa-users mr-3"></i>
+                        <span>Job Openings</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('admin/reviews*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.reviews.index') }}">
-                    <i class="fas fa-edit mr-3"></i>
-                    <span>Applications</span>
-                    @if(($adminPendingApplicationsCount ?? 0) > 0)
-                    <span class="ml-auto inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
-                        {{ $adminPendingApplicationsCount }}
-                    </span>
-                    @endif
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/reviews*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.reviews.index') }}">
+                        <i class="fas fa-edit mr-3"></i>
+                        <span>Applications</span>
+                        @if(($adminPendingApplicationsCount ?? 0) > 0)
+                        <span class="ml-auto inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-red-500 px-2 py-0.5 text-xs font-bold text-white">
+                            {{ $adminPendingApplicationsCount }}
+                        </span>
+                        @endif
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('admin/cards*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.cards.index') }}">
-                    <i class="fas fa-id-card mr-3"></i>
-                    <span>Cards</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/cards*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.cards.index') }}">
+                        <i class="fas fa-id-card mr-3"></i>
+                        <span>Cards</span>
+                    </a>
+                </li>
 
-            {{-- Account Section --}}
-            <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
+                {{-- Account Section --}}
+                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
 
-            <li class="menu-item {{ Request::is('admin/profile*') ? 'active' : '' }}">
-                <a class="nav-link text-red-600 font-bold hover:bg-red-50" href="{{ route('admin.profile') }}">
-                    <i class="fas fa-user-cog mr-3"></i>
-                    <span>Profile & Settings</span>
-                </a>
-            </li>
-            @else
-            {{-- Guest/Customer Menu Items (same for both) --}}
-            <li class="menu-item {{ Request::is('jobs*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('jobs.index') }}">
-                    <i class="fas fa-briefcase mr-3"></i>
-                    <span>Browse Jobs</span>
-                </a>
-            </li>
+                <li class="menu-item {{ Request::is('admin/profile*') ? 'active' : '' }}">
+                    <a class="nav-link text-red-600 font-bold hover:bg-red-50" href="{{ route('admin.profile') }}">
+                        <i class="fas fa-user-cog mr-3"></i>
+                        <span>Profile & Settings</span>
+                    </a>
+                </li>
+                @else
+                {{-- Guest/Customer Menu Items (same for both) --}}
+                <li class="menu-item {{ Request::is('jobs*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('jobs.index') }}">
+                        <i class="fas fa-briefcase mr-3"></i>
+                        <span>Browse Jobs</span>
+                    </a>
+                </li>
 
-            @if(session('customer_authenticated'))
-            <li class="menu-item">
-                <a class="nav-link" href="{{ route('customer.applications') }}">
-                    <i class="fas fa-file-alt mr-3"></i>
-                    <span>My Applications</span>
-                </a>
-            </li>
+                @if(session('customer_authenticated'))
+                <li class="menu-item">
+                    <a class="nav-link" href="{{ route('customer.applications') }}">
+                        <i class="fas fa-file-alt mr-3"></i>
+                        <span>My Applications</span>
+                    </a>
+                </li>
 
-            <li class="menu-item {{ Request::is('notifications*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('customer.notifications.index') }}">
-                    <i class="fas fa-bell mr-3"></i>
-                    <span>Notifications</span>
-                    @if(($customerUnreadNotificationsCount ?? 0) > 0)
-                    <span class="ml-auto inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
-                        {{ $customerUnreadNotificationsCount }}
-                    </span>
-                    @endif
-                </a>
-            </li>
-            @endif
-            @endif
+                <li class="menu-item {{ Request::is('notifications*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('customer.notifications.index') }}">
+                        <i class="fas fa-bell mr-3"></i>
+                        <span>Notifications</span>
+                        @if(($customerUnreadNotificationsCount ?? 0) > 0)
+                        <span class="ml-auto inline-flex min-w-[1.5rem] items-center justify-center rounded-full bg-blue-600 px-2 py-0.5 text-xs font-bold text-white">
+                            {{ $customerUnreadNotificationsCount }}
+                        </span>
+                        @endif
+                    </a>
+                </li>
+                @endif
+                @endif
 
-        </ul>
+            </ul>
         </div>
 
         <div class="sidebar-footer p-4 mt-auto">

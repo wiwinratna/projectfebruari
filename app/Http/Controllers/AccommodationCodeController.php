@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Event;
 use App\Models\AccommodationCode;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AccommodationCodeController extends Controller
 {
@@ -22,6 +23,20 @@ class AccommodationCodeController extends Controller
             ->orderBy('kode')
             ->get();
 
+        // Mark each code as in_use if referenced in access_card_configs (JSON column)
+        $usedIds = DB::table('access_card_configs')
+            ->where('event_id', $event->id)
+            ->whereNotNull('accommodation_code_id')
+            ->pluck('accommodation_code_id')
+            ->flatMap(fn($v) => (array) json_decode($v, true))
+            ->unique()
+            ->values()
+            ->all();
+
+        $accommodationCodes->each(function ($code) use ($usedIds) {
+            $code->access_card_configs_count = in_array($code->id, $usedIds) ? 1 : 0;
+        });
+
         return view('menu.events.accommodation-codes.index', compact('event', 'accommodationCodes'));
     }
 
@@ -36,9 +51,9 @@ class AccommodationCodeController extends Controller
         $event = $this->getEvent();
 
         $validated = $request->validate([
-            'kode'       => ['required','string','max:50'],
-            'keterangan' => ['nullable','string','max:1000'],
-            'icon_key'   => ['nullable','string','max:50'],
+            'kode'       => ['required', 'string', 'max:50'],
+            'keterangan' => ['nullable', 'string', 'max:1000'],
+            'icon_key'   => ['nullable', 'string', 'max:50'],
             'show_icon'  => ['nullable'],
             'show_code'  => ['nullable'],
         ]);
@@ -77,9 +92,9 @@ class AccommodationCodeController extends Controller
         abort_unless($accommodationCode->event_id === $event->id, 403);
 
         $validated = $request->validate([
-            'kode'       => ['required','string','max:50'],
-            'keterangan' => ['nullable','string','max:1000'],
-            'icon_key'   => ['nullable','string','max:50'],
+            'kode'       => ['required', 'string', 'max:50'],
+            'keterangan' => ['nullable', 'string', 'max:1000'],
+            'icon_key'   => ['nullable', 'string', 'max:50'],
             'show_icon'  => ['nullable'],
             'show_code'  => ['nullable'],
         ]);
@@ -113,11 +128,21 @@ class AccommodationCodeController extends Controller
         $event = $this->getEvent();
         abort_unless($accommodationCode->event_id === $event->id, 403);
 
-        $accommodationCode->delete();
+        try {
+            $accommodationCode->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Kode akomodasi berhasil dihapus.',
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Kode akomodasi berhasil dihapus.',
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode akomodasi ini tidak bisa dihapus karena sedang digunakan (in use).',
+                ]);
+            }
+            throw $e;
+        }
     }
 }

@@ -46,9 +46,15 @@ Venue Access <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full m
                             <a href="{{ route('admin.master-data.venue-accesses.edit', $access) }}" class="text-blue-600 hover:text-blue-900 mr-3">
                                 <i class="fas fa-edit mr-1"></i> Edit
                             </a>
+                            @if($access->access_card_configs_count > 0)
+                            <span class="inline-flex items-center gap-1 text-gray-400 cursor-default" title="Data ini sedang digunakan">
+                                <i class="fas fa-lock text-xs"></i> In Use
+                            </span>
+                            @else
                             <button onclick="deleteItem({{ $access->id }}, '{{ addslashes($access->nama_vanue) }}')" class="text-red-600 hover:text-red-900">
                                 <i class="fas fa-trash mr-1"></i> Delete
                             </button>
+                            @endif
                         </td>
                     </tr>
                     @empty
@@ -113,5 +119,4 @@ Venue Access <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full m
         if (e.key === 'Escape') hideConfirmModal();
     });
 </script>
-@include('components.confirm-modal')
 @endsection

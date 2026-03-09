@@ -110,17 +110,23 @@ Disiplin <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2"
                     'Accept': 'application/json'
                 }
             })
-            .then(response => {
+            .then(r => r.json().then(data => ({
+                status: r.status,
+                ok: r.ok,
+                data
+            })))
+            .then(({
+                ok,
+                status,
+                data
+            }) => {
                 hideLoading();
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
+                if (ok && data.success) {
                     showFlashMessage('Disiplin deleted successfully!', 'status');
                     setTimeout(() => window.location.reload(), 500);
                 } else {
-                    showFlashMessage(data.message || 'Failed to delete disciplin', 'error');
+                    const msg = data.message || `Gagal menghapus (HTTP ${status})`;
+                    showFlashMessage(msg, 'error');
                 }
             })
             .catch(error => {
@@ -138,7 +144,5 @@ Disiplin <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2"
         if (e.key === 'Escape') hideConfirmModal();
     });
 </script>
-
-@include('components.confirm-modal')
 
 @endsection
