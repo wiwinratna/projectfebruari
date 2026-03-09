@@ -110,11 +110,21 @@ class DisciplinController extends Controller
         $event = $this->getEvent();
         abort_unless($disciplin->event_id === $event->id, 403);
 
-        $disciplin->delete();
+        try {
+            $disciplin->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Disiplin berhasil dihapus.',
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Disiplin berhasil dihapus.',
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Data disiplin ini tidak bisa dihapus karena sedang digunakan (in use).',
+                ]);
+            }
+            throw $e;
+        }
     }
 }

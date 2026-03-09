@@ -19,6 +19,7 @@ class TransportationCodeController extends Controller
     {
         $event = $this->getEvent();
         $transportationCodes = $event->transportationCodes()
+            ->withCount('accessCardConfigs')
             ->orderBy('kode')
             ->get();
 
@@ -36,9 +37,9 @@ class TransportationCodeController extends Controller
         $event = $this->getEvent();
 
         $validated = $request->validate([
-            'kode' => ['required','string','max:255'],
-            'keterangan' => ['nullable','string','max:1000'],
-            'icon_key' => ['nullable','string','max:50'],
+            'kode' => ['required', 'string', 'max:255'],
+            'keterangan' => ['nullable', 'string', 'max:1000'],
+            'icon_key' => ['nullable', 'string', 'max:50'],
             // checkbox boleh nullable, tapi simpan pakai boolean()
             'show_icon' => ['nullable'],
             'show_code' => ['nullable'],
@@ -78,9 +79,9 @@ class TransportationCodeController extends Controller
         abort_unless($transportationCode->event_id === $event->id, 403);
 
         $validated = $request->validate([
-            'kode' => ['required','string','max:255'],
-            'keterangan' => ['nullable','string','max:1000'],
-            'icon_key' => ['nullable','string','max:50'],
+            'kode' => ['required', 'string', 'max:255'],
+            'keterangan' => ['nullable', 'string', 'max:1000'],
+            'icon_key' => ['nullable', 'string', 'max:50'],
             'show_icon' => ['nullable'],
             'show_code' => ['nullable'],
         ]);
@@ -114,11 +115,21 @@ class TransportationCodeController extends Controller
         $event = $this->getEvent();
         abort_unless($transportationCode->event_id === $event->id, 403);
 
-        $transportationCode->delete();
+        try {
+            $transportationCode->delete();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Kode transportasi berhasil dihapus.',
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => 'Kode transportasi berhasil dihapus.',
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Kode transportasi ini tidak bisa dihapus karena sedang digunakan (in use).',
+                ]);
+            }
+            throw $e;
+        }
     }
 }
