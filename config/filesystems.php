@@ -73,8 +73,7 @@ return [
     |
     */
 
-    'links' => [
-        public_path('storage') => storage_path('app/public'),
-    ],
+    // Symlink intentionally disabled. Public files are served via /storage route.
+    'links' => [],
 
 ];

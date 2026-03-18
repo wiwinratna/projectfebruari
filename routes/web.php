@@ -483,29 +483,29 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     // Event Settings (Form untuk edit event milik admin via session)
     Route::get('/event/settings', [\App\Http\Controllers\Admin\EventSettingsController::class, 'edit'])
         ->name('event.settings.edit');
-    
+
     Route::post('/event/settings', [\App\Http\Controllers\Admin\EventSettingsController::class, 'update'])
         ->name('event.settings.update');
-    
+
     Route::post('/event/settings/logo/remove', [\App\Http\Controllers\Admin\EventSettingsController::class, 'removeLogo'])
         ->name('event.settings.logo.remove');
-    
+
     Route::post('/event/settings/template/remove', [\App\Http\Controllers\Admin\EventSettingsController::class, 'removeTemplate'])
         ->name('event.settings.template.remove');
 
     // Card Layout Builder (Canvas + Drag & Drop)
     Route::get('/card-layouts/builder', [\App\Http\Controllers\Admin\CardLayoutController::class, 'builder'])
         ->name('card-layouts.builder');
-    
+
     Route::get('/card-layouts/active', [\App\Http\Controllers\Admin\CardLayoutController::class, 'getActive'])
         ->name('card-layouts.active');
-    
+
     Route::post('/card-layouts/save', [\App\Http\Controllers\Admin\CardLayoutController::class, 'save'])
         ->name('card-layouts.save');
-    
+
     Route::post('/card-layouts/reset-default', [\App\Http\Controllers\Admin\CardLayoutController::class, 'resetDefault'])
         ->name('card-layouts.reset-default');
-    
+
     Route::get('/card-layouts/preview-sample', [\App\Http\Controllers\Admin\CardLayoutController::class, 'previewSample'])
         ->name('card-layouts.preview-sample');
 });
@@ -523,21 +523,27 @@ Route::middleware(['web'])->group(function () {
     })->where('any', '.*');
 });
 
-// Storage file serving route (workaround for symlink permission issues)
+// Storage file serving route (primary public file serving without symlink)
 Route::get('/storage/{path}', function ($path) {
-    $file = storage_path('app/public/' . $path);
+    $normalizedPath = ltrim(str_replace('\\', '/', (string) $path), '/');
 
-    if (!file_exists($file)) {
+    if ($normalizedPath === '' || str_contains($normalizedPath, '../')) {
+        abort(404);
+    }
+
+    $file = storage_path('app/public/' . $normalizedPath);
+
+    if (!is_file($file)) {
         abort(404);
     }
 
     // Get file mime type
-    $mimeType = mime_content_type($file);
+    $mimeType = mime_content_type($file) ?: 'application/octet-stream';
 
     // Return file with proper headers
     return response()->file($file, [
         'Content-Type' => $mimeType,
-        'Cache-Control' => 'public, max-age=31536000',
+        'Cache-Control' => 'public, max-age=31536000, immutable',
     ]);
 })->where('path', '.*')->name('storage.serve');
 
