@@ -5,6 +5,7 @@ export function RoyalHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userName, setUserName] = useState('');
+  const [userPhotoUrl, setUserPhotoUrl] = useState<string | null>(null);
   const { scrollY } = useScroll();
   const headerOpacity = useTransform(scrollY, [0, 100], [0.95, 1]);
   const headerShadow = useTransform(
@@ -22,8 +23,10 @@ export function RoyalHeader() {
         try {
           const user = JSON.parse(decodeURIComponent(userData));
           setUserName(user.name || user.email || 'User');
+          setUserPhotoUrl(user.profile_photo_url || null);
           setIsLoggedIn(true);
         } catch (e) {
+          setUserPhotoUrl(null);
           setIsLoggedIn(false);
         }
       }
@@ -111,8 +114,17 @@ export function RoyalHeader() {
                       className="hidden md:flex items-center gap-3 px-4 py-2 bg-white/20 rounded-full"
                       whileHover={{ backgroundColor: 'rgba(255, 255, 255, 0.3)' }}
                     >
-                      <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
-                        {userName.charAt(0).toUpperCase()}
+                      <div className="w-8 h-8 rounded-full bg-blue-600 overflow-hidden flex items-center justify-center text-white text-sm font-bold">
+                        {userPhotoUrl ? (
+                          <img
+                            src={userPhotoUrl}
+                            alt="Profile"
+                            className="w-full h-full object-cover"
+                            onError={() => setUserPhotoUrl(null)}
+                          />
+                        ) : (
+                          userName.charAt(0).toUpperCase()
+                        )}
                       </div>
                       <span className="text-white font-semibold text-sm hidden lg:inline">{userName}</span>
                     </motion.a>
@@ -193,8 +205,17 @@ export function RoyalHeader() {
                         href="/dashboard/profile"
                         className="w-full flex items-center gap-3 px-4 py-3 bg-white/20 rounded-full"
                       >
-                        <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white text-sm font-bold">
-                          {userName.charAt(0).toUpperCase()}
+                        <div className="w-8 h-8 rounded-full bg-blue-600 overflow-hidden flex items-center justify-center text-white text-sm font-bold">
+                          {userPhotoUrl ? (
+                            <img
+                              src={userPhotoUrl}
+                              alt="Profile"
+                              className="w-full h-full object-cover"
+                              onError={() => setUserPhotoUrl(null)}
+                            />
+                          ) : (
+                            userName.charAt(0).toUpperCase()
+                          )}
                         </div>
                         <span className="text-white font-semibold text-sm">{userName}</span>
                       </a>

@@ -7,12 +7,30 @@
     @php
         $authUser = null;
         if (session('customer_authenticated') && session('customer_id')) {
-            $user = \App\Models\User::find(session('customer_id'));
+            $user = \App\Models\User::with('profile')->find(session('customer_id'));
             if ($user) {
+                $profilePhotoPath = optional($user->profile)->profile_photo;
+                $profilePhotoUrl = null;
+
+                if (!empty($profilePhotoPath)) {
+                    $normalizedPath = ltrim((string) $profilePhotoPath, '/');
+                    if (str_starts_with($normalizedPath, 'storage/')) {
+                        $normalizedPath = substr($normalizedPath, strlen('storage/'));
+                    }
+                    if (!str_contains($normalizedPath, '/')) {
+                        $normalizedPath = 'profile_photos/' . $normalizedPath;
+                    }
+
+                    $profilePhotoVersion = optional($user->profile?->updated_at)->timestamp;
+                    $profilePhotoUrl = asset('storage/' . $normalizedPath)
+                        . ($profilePhotoVersion ? '?v=' . $profilePhotoVersion : '');
+                }
+
                 $authUser = [
                     'id' => $user->id,
                     'name' => $user->name,
                     'email' => $user->email,
+                    'profile_photo_url' => $profilePhotoUrl,
                 ];
             }
         }
