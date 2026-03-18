@@ -5,7 +5,7 @@
 @section('content')
 <!-- Modern Settings Page -->
 <div class="relative bg-white pt-24 pb-12 overflow-hidden min-h-screen">
-    
+
     <!-- Aurora Background Effect -->
     <div class="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-red-50 via-white to-white z-0"></div>
     <div class="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] bg-red-100/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
@@ -16,10 +16,10 @@
             <h1 class="text-3xl font-bold text-gray-900 tracking-tight mb-2">Account Settings</h1>
             <p class="text-gray-500">Manage your profile information and preferences.</p>
         </div>
-        
+
         <!-- Settings Container -->
         <div class="bg-white rounded-2xl shadow-xl shadow-red-500/5 border border-gray-100 overflow-hidden">
-            
+
             <!-- Modern Pill Tabs -->
             <div class="border-b border-gray-100 p-2">
                 <nav class="flex flex-wrap gap-2" aria-label="Tabs">
@@ -37,10 +37,10 @@
 
             <!-- Tab Content Area -->
             <div class="p-6 md:p-8">
-                
+
                 <!-- Basic Information Tab -->
                 <div id="basic-tab" class="tab-content transition-opacity duration-300">
-                    
+
                     <!-- Photo Upload Section -->
                     <form action="{{ route('customer.settings.photo') }}" method="POST" enctype="multipart/form-data" class="mb-10 border-b border-gray-100 pb-10">
                         @csrf
@@ -60,7 +60,7 @@
                                 </label>
                                 <input type="file" id="profile_photo" name="profile_photo" accept="image/jpeg,image/png" class="hidden" onchange="openCropperModal(this)">
                             </div>
-                            
+
                             <div class="text-center md:text-left flex-1">
                                 <h3 class="text-lg font-bold text-gray-900 mb-1">Profile Photo</h3>
                                 <p class="text-sm text-gray-500 mb-4">Upload a professional photo (JPG/PNG, max 2MB). Click the camera icon to update.</p>
@@ -88,7 +88,7 @@
                             @enderror
                             <p class="text-xs text-gray-400 mt-2 text-right">Briefly describe your experience and skills</p>
                         </div>
-                        
+
                         <div class="mt-6 flex justify-end">
                             <button type="submit" class="bg-red-600 hover:bg-red-700 text-white px-8 py-2.5 rounded-xl font-bold shadow-lg shadow-red-500/30 transition-all hover:-translate-y-0.5">
                                 Save Changes
@@ -101,7 +101,7 @@
                 <div id="personal-tab" class="tab-content hidden transition-opacity duration-300">
                     <form action="{{ route('customer.settings.update') }}" method="POST">
                         @csrf
-                        
+
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                             <!-- Username -->
                             <div class="md:col-span-2">
@@ -248,7 +248,7 @@
                 <div id="preferences-tab" class="tab-content hidden transition-opacity duration-300">
                     <form action="{{ route('customer.settings.update') }}" method="POST">
                         @csrf
-                        
+
                         <!-- Education Section -->
                         <div class="mb-8">
                             <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -266,21 +266,21 @@
                                 </div>
                                 <div>
                                     <label for="graduation_year" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Graduation Year</label>
-                                    <input type="number" id="graduation_year" name="graduation_year" 
+                                    <input type="number" id="graduation_year" name="graduation_year"
                                            value="{{ old('graduation_year', optional($user->profile)->graduation_year ?? '') }}"
                                            placeholder="YYYY" min="1900" max="{{ date('Y') + 10 }}"
                                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                                 </div>
                                 <div>
                                     <label for="university" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">University / School</label>
-                                    <input type="text" id="university" name="university" 
+                                    <input type="text" id="university" name="university"
                                            value="{{ old('university', optional($user->profile)->university ?? '') }}"
                                            placeholder="e.g. Universitas Indonesia"
                                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                                 </div>
                                 <div>
                                     <label for="field_of_study" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Field of Study</label>
-                                    <input type="text" id="field_of_study" name="field_of_study" 
+                                    <input type="text" id="field_of_study" name="field_of_study"
                                            value="{{ old('field_of_study', optional($user->profile)->field_of_study ?? '') }}"
                                            placeholder="e.g. Psychology"
                                            class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
@@ -299,10 +299,10 @@
                                 <!-- Skills -->
                                 <div>
                                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Professional Skills</label>
-                                    
+
                                     <!-- Hidden Input for Form Submission -->
                                     <input type="hidden" id="skills_input" name="skills" value="{{ old('skills', optional($user->profile)->skills ?? '') }}">
-                                    
+
                                     <!-- Tag Container -->
                                     <div id="skills_tags" class="flex flex-wrap gap-2 mb-3">
                                         <!-- Tags will be injected here via JS -->
@@ -326,9 +326,9 @@
                                 <!-- Languages -->
                                 <div>
                                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Languages Spoken</label>
-                                    
+
                                     <input type="hidden" id="languages_input" name="languages" value="{{ old('languages', optional($user->profile)->languages ?? '') }}">
-                                    
+
                                     <div id="languages_tags" class="flex flex-wrap gap-2 mb-3">
                                         <!-- Tags injected via JS -->
                                     </div>
@@ -384,7 +384,7 @@
 
         currentValues.push(value);
         input.value = currentValues.join(',');
-        
+
         renderTag(type, value);
     }
 
@@ -392,9 +392,9 @@
         const input = document.getElementById(type + '_input');
         let currentValues = input.value ? input.value.split(',') : [];
         currentValues = currentValues.map(v => v.trim()).filter(v => v !== value);
-        
+
         input.value = currentValues.join(',');
-        
+
         // Remove element from DOM
         const tag = document.querySelector(`[data-tag-id="${type}-${value.replace(/\s+/g, '-')}"]`);
         if (tag) tag.remove();
@@ -403,7 +403,7 @@
     function renderTag(type, value) {
         const container = document.getElementById(type + '_tags');
         const tagId = `${type}-${value.replace(/\s+/g, '-')}`;
-        
+
         // Check if already rendered (just in case)
         if (document.querySelector(`[data-tag-id="${tagId}"]`)) return;
 
@@ -416,7 +416,7 @@
                 <i class="fas fa-times"></i>
             </button>
         `;
-        
+
         container.appendChild(tag);
     }
 </script>
@@ -443,12 +443,12 @@
             content.classList.remove('opacity-100');
             content.classList.add('opacity-0');
         });
-        
+
         // Remove active class from all tabs
         document.querySelectorAll('.tab-button').forEach(button => {
             button.classList.remove('active-tab');
         });
-        
+
         // Show selected tab content
         const selectedContent = document.getElementById(tabName + '-tab');
         selectedContent.classList.remove('hidden');
@@ -457,12 +457,12 @@
             selectedContent.classList.remove('opacity-0');
             selectedContent.classList.add('opacity-100');
         }, 10);
-        
-        
+
+
         // Add active class to selected tab button
         document.querySelector(`[data-tab="${tabName}"]`).classList.add('active-tab');
     }
-    
+
     // Initialize tab based on URL parameter or default to basic
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -483,7 +483,7 @@
 
     <div class="fixed inset-0 z-10 w-screen overflow-y-auto">
         <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-            
+
             <div class="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
                 <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="flex justify-between items-center mb-5">
@@ -492,7 +492,7 @@
                             <i class="fas fa-times text-xl"></i>
                         </button>
                     </div>
-                    
+
                     <div class="relative w-full h-[300px] bg-gray-100 rounded-xl overflow-hidden mb-6">
                         <img id="cropperImage" src="" alt="To Crop" class="max-w-full">
                     </div>
@@ -533,11 +533,11 @@
     function openCropperModal(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-            
+
             reader.onload = function(e) {
                 image.src = e.target.result;
                 document.getElementById('cropperModal').classList.remove('hidden');
-                
+
                 if (cropper) {
                     cropper.destroy();
                 }
@@ -568,7 +568,7 @@
                     }
                 });
             };
-            
+
             reader.readAsDataURL(input.files[0]);
         }
     }
@@ -612,18 +612,35 @@
 
             fetch('{{ route("customer.settings.photo") }}', {
                 method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                credentials: 'same-origin',
                 body: formData
             })
-            .then(response => {
-                if (response.ok) {
-                    window.location.reload(); 
-                } else {
-                    throw new Error('Upload failed');
+            .then(async (response) => {
+                const contentType = response.headers.get('content-type') || '';
+                const payload = contentType.includes('application/json')
+                    ? await response.json()
+                    : null;
+
+                if (!response.ok) {
+                    const message = payload?.message
+                        || (payload?.errors ? Object.values(payload.errors).flat().join('\n') : null)
+                        || `Upload failed (${response.status})`;
+                    throw new Error(message);
                 }
+
+                if (payload && payload.success === false) {
+                    throw new Error(payload.message || 'Upload failed');
+                }
+
+                window.location.reload();
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('Failed to upload photo. Please try again.');
+                alert(error.message || 'Failed to upload photo. Please try again.');
                 saveBtn.innerText = originalText;
                 saveBtn.disabled = false;
             });
