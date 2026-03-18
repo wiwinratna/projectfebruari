@@ -36,6 +36,8 @@
         }
     @endphp
     <meta name="auth-user" content="{{ $authUser ? json_encode($authUser) : 'null' }}">
+    <link rel="icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" type="image/x-icon">
     <title>ARISE</title>
     @vite(['resources/css/app.css', 'resources/js/main.tsx'])
 </head>
