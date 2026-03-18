@@ -5,23 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'NOCIS')</title>
-    
+    <link rel="icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2" type="image/png">
+    <link rel="shortcut icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2" type="image/png">
+    <link rel="apple-touch-icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2">
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    
+
     <link rel="stylesheet" href="{{ asset('css/custom.css') }}">
-    
+
     @stack('styles')
 </head>
 <body class="bg-gray-100">
 
     <div id="app">
-        
+
         @include('components.sidebar')
 
-        <div class="main-content min-h-screen transition-all duration-300" id="main-content"> 
-            
+        <div class="main-content min-h-screen transition-all duration-300" id="main-content">
+
             @include('components.header')
 
             @include('components.flash')
