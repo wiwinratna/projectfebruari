@@ -4,9 +4,37 @@ import { motion } from 'motion/react';
 
 export function RoyalFooter() {
   const currentYear = new Date().getFullYear();
+  const socialLinks = [
+    { icon: Facebook, color: 'hover:text-blue-400', href: 'https://facebook.com' },
+    { icon: Twitter, color: 'hover:text-sky-400', href: 'https://x.com' },
+    { icon: Instagram, color: 'hover:text-pink-400', href: 'https://www.instagram.com/arisegames' },
+    { icon: Linkedin, color: 'hover:text-blue-500', href: 'https://linkedin.com' },
+  ];
+
+  const quickLinks = [
+    { label: 'Job Openings', href: '/jobs' },
+    { label: 'About ARISE', href: '#about' },
+    { label: 'Our Partners', href: '#features' },
+    { label: 'Events', href: '#news' },
+    { label: 'Contact Us', href: '#contact' },
+  ];
+
+  const resourceLinks = [
+    { label: 'FAQ & Help', href: '#flow' },
+    { label: 'Documentation', href: '/register' },
+    { label: 'Privacy Policy', href: '/register' },
+    { label: 'Terms of Service', href: '/register' },
+    { label: 'Career Archive', href: '/jobs' },
+  ];
+
+  const legalLinks = [
+    { label: 'Privacy', href: '/register' },
+    { label: 'Terms', href: '/register' },
+    { label: 'Cookies', href: '/register' },
+  ];
 
   return (
-    <footer className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
+    <footer id="contact" className="relative bg-linear-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
           {/* Logo & Description */}
@@ -26,15 +54,12 @@ export function RoyalFooter() {
               Revolutionizing sports workforce management through innovative technology and dedicated service.
             </p>
             <div className="flex gap-3">
-              {[
-                { icon: Facebook, color: 'hover:text-blue-400' },
-                { icon: Twitter, color: 'hover:text-sky-400' },
-                { icon: Instagram, color: 'hover:text-pink-400' },
-                { icon: Linkedin, color: 'hover:text-blue-500' },
-              ].map((social, index) => (
+              {socialLinks.map((social, index) => (
                 <motion.a
                   key={index}
-                  href="#"
+                  href={social.href}
+                  target    ="_blank"
+                  rel="noopener noreferrer"
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
                   className={`p-2 bg-white/10 rounded-lg ${social.color} transition-colors`}
@@ -54,15 +79,15 @@ export function RoyalFooter() {
           >
             <h3 className="text-lg font-bold mb-4">Quick Links</h3>
             <ul className="space-y-3">
-              {['Job Openings', 'About ARISE', 'Our Partners', 'Events', 'Contact Us'].map((item) => (
-                <li key={item}>
+              {quickLinks.map((item) => (
+                <li key={item.label}>
                   <motion.a
-                    href="#"
+                    href={item.href}
                     whileHover={{ x: 5 }}
                     className="text-gray-400 hover:text-white transition-all flex items-center gap-2"
                   >
                     <span className="w-1 h-1 rounded-full bg-red-500"></span>
-                    {item}
+                    {item.label}
                   </motion.a>
                 </li>
               ))}
@@ -78,15 +103,15 @@ export function RoyalFooter() {
           >
             <h3 className="text-lg font-bold mb-4">Resources</h3>
             <ul className="space-y-3">
-              {['FAQ & Help', 'Documentation', 'Privacy Policy', 'Terms of Service', 'Career Archive'].map((item) => (
-                <li key={item}>
+              {resourceLinks.map((item) => (
+                <li key={item.label}>
                   <motion.a
-                    href="#"
+                    href={item.href}
                     whileHover={{ x: 5 }}
                     className="text-gray-400 hover:text-white transition-all flex items-center gap-2"
                   >
                     <span className="w-1 h-1 rounded-full bg-blue-500"></span>
-                    {item}
+                    {item.label}
                   </motion.a>
                 </li>
               ))}
@@ -104,15 +129,22 @@ export function RoyalFooter() {
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-gray-400">
                 <MapPin size={20} className="text-red-500 mt-1 shrink-0" />
-                <span>Jakarta, Indonesia</span>
+                <a
+                  href="https://maps.google.com/?q=Jakarta,Indonesia"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                >
+                  Jakarta, Indonesia
+                </a>
               </li>
               <li className="flex items-center gap-3 text-gray-400">
                 <Phone size={20} className="text-green-500 shrink-0" />
-                <span>+62 21 1234 5678</span>
+                <a href="tel:+622112345678" className="hover:text-white transition-colors">+62 21 1234 5678</a>
               </li>
               <li className="flex items-center gap-3 text-gray-400">
                 <Mail size={20} className="text-blue-500 shrink-0" />
-                <span>info@arise.id</span>
+                <a href="mailto:info@arise.id" className="hover:text-white transition-colors">info@arise.id</a>
               </li>
             </ul>
           </motion.div>
@@ -130,27 +162,16 @@ export function RoyalFooter() {
               © {currentYear} ARISE - National Olympic Academy of Indonesia System. All rights reserved.
             </p>
             <div className="flex gap-6 text-sm">
-              <motion.a
-                href="#"
-                whileHover={{ scale: 1.05 }}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                Privacy
-              </motion.a>
-              <motion.a
-                href="#"
-                whileHover={{ scale: 1.05 }}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                Terms
-              </motion.a>
-              <motion.a
-                href="#"
-                whileHover={{ scale: 1.05 }}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                Cookies
-              </motion.a>
+              {legalLinks.map((item) => (
+                <motion.a
+                  key={item.label}
+                  href={item.href}
+                  whileHover={{ scale: 1.05 }}
+                  className="text-gray-400 hover:text-white transition-colors"
+                >
+                  {item.label}
+                </motion.a>
+              ))}
             </div>
           </div>
         </motion.div>
