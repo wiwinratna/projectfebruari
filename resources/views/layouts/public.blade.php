@@ -57,7 +57,22 @@
                     <nav class="hidden lg:flex items-center gap-8">
                         @php
                         // Robust Profile Photo Logic
-                        $headerProfilePhoto = session('customer_profile_photo');
+                        $normalizeProfilePhotoPath = function ($path) {
+                        if (empty($path)) return null;
+
+                        $normalized = ltrim((string) $path, '/');
+                        if (str_starts_with($normalized, 'storage/')) {
+                        $normalized = substr($normalized, strlen('storage/'));
+                        }
+                        if (!str_contains($normalized, '/')) {
+                        $normalized = 'profile_photos/' . $normalized;
+                        }
+
+                        return $normalized;
+                        };
+
+                        $headerProfilePhoto = $normalizeProfilePhotoPath(session('customer_profile_photo'));
+                        $headerProfilePhotoVersion = session('customer_profile_photo_updated_at');
                         $headerUser = null;
 
                         if (session('customer_id')) {
@@ -67,11 +82,19 @@
                         // Fallback: Check DB if session is empty but user is logged in
                         if (empty($headerProfilePhoto) && $headerUser) {
                         if ($headerUser && $headerUser->profile && $headerUser->profile->profile_photo) {
-                        $headerProfilePhoto = $headerUser->profile->profile_photo;
+                        $headerProfilePhoto = $normalizeProfilePhotoPath($headerUser->profile->profile_photo);
+                        $headerProfilePhotoVersion = optional($headerUser->profile->updated_at)->timestamp;
                         // Self-heal session
-                        session(['customer_profile_photo' => $headerProfilePhoto]);
+                        session([
+                        'customer_profile_photo' => $headerProfilePhoto,
+                        'customer_profile_photo_updated_at' => $headerProfilePhotoVersion,
+                        ]);
                         }
                         }
+
+                        $headerProfilePhotoUrl = !empty($headerProfilePhoto)
+                        ? asset('storage/' . ltrim($headerProfilePhoto, '/')) . ($headerProfilePhotoVersion ? '?v=' . $headerProfilePhotoVersion : '')
+                        : null;
                         @endphp
 
                         <a href="{{ route('jobs.index') }}"
@@ -159,8 +182,8 @@
                         <div class="relative group" x-data="{ open: false }">
                             <button @click="open = !open" @click.away="open = false" class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full border border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all">
                                 <div class="w-8 h-8 rounded-full bg-gray-100 ring-2 ring-white shadow-md overflow-hidden flex items-center justify-center">
-                                    @if(!empty($headerProfilePhoto))
-                                    <img src="{{ asset('storage/' . $headerProfilePhoto) }}" alt="Profile" class="w-full h-full object-cover">
+                                    @if(!empty($headerProfilePhotoUrl))
+                                    <img src="{{ $headerProfilePhotoUrl }}" alt="Profile" class="w-full h-full object-cover">
                                     @else
                                     <div class="w-full h-full bg-gradient-to-br from-red-500 to-red-600 text-white flex items-center justify-center text-xs font-bold">
                                         {{ strtoupper(substr(session('customer_username') ?? 'U', 0, 2)) }}
@@ -231,8 +254,8 @@
                         <div class="pt-2 border-t border-gray-100">
                             <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-3">
                                 <div class="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
-                                    @if(!empty($headerProfilePhoto))
-                                    <img src="{{ asset('storage/' . $headerProfilePhoto) }}" alt="Profile" class="w-full h-full object-cover">
+                                    @if(!empty($headerProfilePhotoUrl))
+                                    <img src="{{ $headerProfilePhotoUrl }}" alt="Profile" class="w-full h-full object-cover">
                                     @else
                                     <div class="w-full h-full bg-red-500 text-white flex items-center justify-center text-sm font-bold">
                                         {{ strtoupper(substr(session('customer_username') ?? 'U', 0, 2)) }}

@@ -48,7 +48,17 @@
                             <div class="relative group">
                                 <div class="w-32 h-32 rounded-full p-1 bg-white border-4 border-gray-100 shadow-lg overflow-hidden relative">
                                     @if($user->profile && $user->profile->profile_photo)
-                                        <img src="{{ asset('storage/' . $user->profile->profile_photo) }}" alt="Profile" class="w-full h-full object-cover">
+                                        @php
+                                            $settingsProfilePhotoPath = ltrim((string) $user->profile->profile_photo, '/');
+                                            if (str_starts_with($settingsProfilePhotoPath, 'storage/')) {
+                                                $settingsProfilePhotoPath = substr($settingsProfilePhotoPath, strlen('storage/'));
+                                            }
+                                            if (!str_contains($settingsProfilePhotoPath, '/')) {
+                                                $settingsProfilePhotoPath = 'profile_photos/' . $settingsProfilePhotoPath;
+                                            }
+                                            $settingsProfilePhotoUrl = asset('storage/' . $settingsProfilePhotoPath) . '?v=' . (optional($user->profile->updated_at)->timestamp ?? time());
+                                        @endphp
+                                        <img src="{{ $settingsProfilePhotoUrl }}" alt="Profile" class="w-full h-full object-cover">
                                     @else
                                         <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold text-4xl">
                                             {{ strtoupper(substr($user->name ?? $user->username ?? 'U', 0, 2)) }}

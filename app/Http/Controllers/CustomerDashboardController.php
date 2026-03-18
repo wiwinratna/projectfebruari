@@ -14,7 +14,7 @@ class CustomerDashboardController extends Controller
     public function index()
     {
         $customerId = session('customer_id');
-        
+
         // Get customer's applications
         $applications = Application::with(['opening.event', 'opening.jobCategory'])
             ->where('user_id', $customerId)
@@ -38,11 +38,11 @@ class CustomerDashboardController extends Controller
         $rejectedApplications = Application::where('user_id', $customerId)->where('status', 'rejected')->count();
 
         return view('menu.customer.dashboard', compact(
-            'applications', 
-            'recommendedJobs', 
+            'applications',
+            'recommendedJobs',
             'totalApplications',
-            'pendingApplications', 
-            'approvedApplications', 
+            'pendingApplications',
+            'approvedApplications',
             'rejectedApplications'
         ));
     }
@@ -67,7 +67,7 @@ class CustomerDashboardController extends Controller
     {
         $customerId = session('customer_id');
         $user = \App\Models\User::find($customerId);
-        
+
         // Validate and update email only if provided (e.g. from Personal Data tab)
         if ($request->has('email') || $request->has('name')) {
             $rules = [];
@@ -78,7 +78,7 @@ class CustomerDashboardController extends Controller
             if ($request->has('name')) {
                 $rules['name'] = 'required|string|max:255';
             }
-            
+
             $request->validate($rules);
 
             // Update user fields
@@ -161,12 +161,12 @@ class CustomerDashboardController extends Controller
             $request->validate([
                 'cv_file' => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB max
             ]);
-            
+
             // Remove old CV if exists
             if ($userProfile->cv_file && \Storage::exists($userProfile->cv_file)) {
                 \Storage::delete($userProfile->cv_file);
             }
-            
+
             // Store new CV
             $cvPath = $request->file('cv_file')->store('cv_files', 'public');
             $userProfile->cv_file = $cvPath;
@@ -185,7 +185,7 @@ class CustomerDashboardController extends Controller
 
         $customerId = session('customer_id');
         $user = \App\Models\User::find($customerId);
-        
+
         // Get or create user profile
         $userProfile = $user->profile()->first();
         if (!$userProfile) {
@@ -193,24 +193,39 @@ class CustomerDashboardController extends Controller
             $userProfile->user_id = $customerId;
         }
 
-        // Delete old photo if exists
-        if ($userProfile->profile_photo && \Storage::exists('public/' . $userProfile->profile_photo)) {
-            \Storage::delete('public/' . $userProfile->profile_photo);
+        // Normalize old photo path and delete if exists
+        $oldPath = ltrim((string) $userProfile->profile_photo, '/');
+        if (str_starts_with($oldPath, 'storage/')) {
+            $oldPath = substr($oldPath, strlen('storage/'));
+        }
+        if ($oldPath !== '' && !str_contains($oldPath, '/')) {
+            $oldPath = 'profile_photos/' . $oldPath;
+        }
+
+        if ($oldPath !== '' && \Storage::disk('public')->exists($oldPath)) {
+            \Storage::disk('public')->delete($oldPath);
         }
 
         // Store new photo
         // Note: The cropper sends a blob, which Laravel treats as a file upload
         $path = $request->file('profile_photo')->store('profile_photos', 'public');
-        
+
         $userProfile->profile_photo = $path;
         $userProfile->save();
 
-        // Update session
-        session(['customer_profile_photo' => $path]);
+        // Update session (with cache-buster so UI always refreshes)
+        $photoVersion = now()->valueOf();
+
+        session([
+            'customer_profile_photo' => $path,
+            'customer_profile_photo_updated_at' => $photoVersion,
+        ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Profile photo updated successfully!'
+            'message' => 'Profile photo updated successfully!',
+            'photo_path' => $path,
+            'photo_url' => asset('storage/' . ltrim($path, '/')) . '?v=' . $photoVersion,
         ]);
     }
 
@@ -218,16 +233,16 @@ class CustomerDashboardController extends Controller
     {
         $customerId = session('customer_id');
         $user = \App\Models\User::find($customerId);
-        
+
         $userProfile = $user->profile()->first();
         if ($userProfile && $userProfile->profile_photo && \Storage::exists($userProfile->profile_photo)) {
             \Storage::delete($userProfile->profile_photo);
         }
-        
+
         if ($userProfile) {
             $userProfile->profile_photo = null;
             $userProfile->save();
-            
+
             // Update session
             session()->forget('customer_profile_photo');
         }
@@ -238,7 +253,7 @@ class CustomerDashboardController extends Controller
     public function updateProfile(Request $request)
     {
         $customerId = session('customer_id');
-        
+
         // Determine which fields to validate based on the request
         $rules = [
             'name' => 'required|string|max:255',
@@ -250,15 +265,15 @@ class CustomerDashboardController extends Controller
         if ($request->has('phone')) {
             $rules['phone'] = 'nullable|string|max:20';
         }
-        
+
         if ($request->has('date_of_birth')) {
             $rules['date_of_birth'] = 'nullable|date';
         }
-        
+
         if ($request->has('address')) {
             $rules['address'] = 'nullable|string|max:500';
         }
-        
+
         // Social media fields
         $socialFields = ['linkedin', 'instagram', 'twitter', 'github', 'website'];
         foreach ($socialFields as $field) {
@@ -270,18 +285,18 @@ class CustomerDashboardController extends Controller
         $validated = $request->validate($rules);
 
         $user = \App\Models\User::find($customerId);
-        
+
         // Handle CV file upload
         if ($request->hasFile('cv_file')) {
             $request->validate([
                 'cv_file' => 'required|file|mimes:pdf,doc,docx|max:5120', // 5MB max
             ]);
-            
+
             // Remove old CV if exists
             if ($user->cv_file && \Storage::exists($user->cv_file)) {
                 \Storage::delete($user->cv_file);
             }
-            
+
             // Store new CV
             $cvPath = $request->file('cv_file')->store('cv_files', 'private');
             $validated['cv_file'] = $cvPath;
@@ -346,13 +361,13 @@ class CustomerDashboardController extends Controller
             foreach ($socialFields as $field) {
                 $rules[$field] = 'nullable|url|max:255';
             }
-            
+
             $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
-            
+
             if ($validator->fails()) {
                 return response()->json([
-                    'success' => false, 
-                    'message' => 'Validation error', 
+                    'success' => false,
+                    'message' => 'Validation error',
                     'errors' => $validator->errors()
                 ], 422);
             }
@@ -372,7 +387,7 @@ class CustomerDashboardController extends Controller
                     if ($value === null || $value === '') {
                         $value = null;
                     }
-                    
+
                     $userProfile->{$field} = $value;
                     $updatedCount++;
                 }
@@ -404,11 +419,11 @@ class CustomerDashboardController extends Controller
     {
         $customerId = session('customer_id');
         $user = \App\Models\User::find($customerId);
-        
+
         if ($user->cv_file && \Storage::exists($user->cv_file)) {
             \Storage::delete($user->cv_file);
         }
-        
+
         $user->update([
             'cv_file' => null,
             'cv_updated_at' => null
@@ -420,7 +435,7 @@ class CustomerDashboardController extends Controller
     public function applications()
     {
         $customerId = session('customer_id');
-        
+
         $applications = Application::with(['opening.event', 'opening.jobCategory', 'card'])
             ->where('user_id', $customerId)
             ->latest()

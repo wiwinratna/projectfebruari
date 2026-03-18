@@ -5,7 +5,7 @@
 @section('content')
 <!-- Modern Profile Page -->
 <div class="min-h-screen bg-white">
-    
+
     <!-- 1. Notification Banner (Top) -->
     @php
         $percentage = $user->profile_completion;
@@ -15,14 +15,14 @@
 
     <!-- 2. Profile Header with Aurora Gradient -->
     <div class="relative bg-white pt-24 pb-12 overflow-hidden">
-        
+
         <!-- Aurora Background Effect -->
         <div class="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-red-50 via-white to-white z-0"></div>
         <div class="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] bg-red-100/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
         <div class="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-50/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
 
         <div class="container mx-auto px-4 relative z-10 max-w-7xl">
-            
+
             <!-- Notification Banner (Bar Style) -->
             @if($percentage < 50)
             <div class="w-full bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in-down">
@@ -39,13 +39,23 @@
             @endif
 
             <div class="flex flex-col lg:flex-row items-start gap-8 lg:gap-10">
-                
+
                 <!-- Avatar Section -->
                 <div class="relative group flex-shrink-0 mx-auto lg:mx-0">
                     <div class="w-32 h-32 lg:w-40 lg:h-40 rounded-full p-1 bg-white ring-4 ring-gray-50 shadow-lg relative z-10">
                         <div class="w-full h-full rounded-full overflow-hidden relative group-hover:ring-4 ring-red-100 transition-all">
                             @if($user->profile && $user->profile->profile_photo)
-                                <img src="{{ asset('storage/' . $user->profile->profile_photo) }}" alt="Profile" class="w-full h-full object-cover">
+                                @php
+                                    $profilePhotoPath = ltrim((string) $user->profile->profile_photo, '/');
+                                    if (str_starts_with($profilePhotoPath, 'storage/')) {
+                                        $profilePhotoPath = substr($profilePhotoPath, strlen('storage/'));
+                                    }
+                                    if (!str_contains($profilePhotoPath, '/')) {
+                                        $profilePhotoPath = 'profile_photos/' . $profilePhotoPath;
+                                    }
+                                    $profilePhotoUrl = asset('storage/' . $profilePhotoPath) . '?v=' . (optional($user->profile->updated_at)->timestamp ?? time());
+                                @endphp
+                                <img src="{{ $profilePhotoUrl }}" alt="Profile" class="w-full h-full object-cover">
                             @else
                                 <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold text-4xl">
                                     {{ strtoupper(substr($user->name ?? $user->username ?? 'U', 0, 2)) }}
@@ -60,7 +70,7 @@
 
                 <!-- Info Section -->
                 <div class="flex-1 w-full text-center lg:text-left">
-                    
+
                     <!-- Name & Role -->
                     <div class="mb-6 flex flex-col lg:flex-row justify-between items-center lg:items-start gap-4">
                         <div>
@@ -72,7 +82,7 @@
                             </div>
                             <p class="text-gray-500 font-medium text-lg">{{ $user->profile->professional_headline ?? 'Job Seeker / Candidate' }}</p>
                         </div>
-                        
+
                         <!-- Percentage Badge (Minimal) -->
                         <div class="bg-white border border-gray-200 rounded-lg px-4 py-2 flex items-center gap-3 shadow-sm">
                             <div class="relative w-10 h-10 flex items-center justify-center">
@@ -91,7 +101,7 @@
 
                     <!-- Details Grid -->
                     <div class="grid lg:grid-cols-12 gap-8 border-t border-gray-100 pt-6">
-                        
+
                         <!-- Summary (Left 8 cols) -->
                         <div class="lg:col-span-8 space-y-3">
                             <div class="flex items-center gap-2 mb-2">
@@ -163,7 +173,7 @@
             @if($user->profile && $user->profile->cv_file)
                 <div class="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 h-[600px] relative group">
                     <iframe src="{{ asset('storage/' . $user->profile->cv_file) }}" class="w-full h-full" frameborder="0"></iframe>
-                    
+
                     <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-black/50 rounded-lg backdrop-blur-sm">
                         <a href="{{ asset('storage/' . $user->profile->cv_file) }}" target="_blank" class="p-2 text-white hover:text-red-400 transition-colors" title="Open in New Tab">
                             <i class="fas fa-external-link-alt"></i>
@@ -404,14 +414,14 @@
     <!-- Modal Panel -->
     <div class="flex min-h-screen items-center justify-center p-4">
         <div class="relative w-full max-w-lg transform rounded-2xl bg-white p-6 text-left shadow-xl transition-all">
-            
+
             <div class="flex justify-between items-center mb-5">
                 <h3 class="text-xl font-bold text-gray-900" id="modal-title">Edit Social Links</h3>
                 <button type="button" onclick="closeSocialMediaModal()" class="text-gray-400 hover:text-gray-500 focus:outline-none w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            
+
             <form id="socialMediaForm" onsubmit="event.preventDefault(); submitSocialMedia();" class="space-y-4">
                 @php
                     $socialsForm = [
@@ -429,9 +439,9 @@
                         <i class="{{ $social['icon'] }} text-gray-400 w-5 text-center"></i> {{ $social['label'] }}
                     </label>
                     <div class="relative">
-                        <input type="url" 
-                               id="social_{{ $social['key'] }}" 
-                               name="{{ $social['key'] }}" 
+                        <input type="url"
+                               id="social_{{ $social['key'] }}"
+                               name="{{ $social['key'] }}"
                                value="{{ $user->profile->{$social['key']} ?? '' }}"
                                class="block w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm placeholder-gray-400"
                                placeholder="{{ $social['placeholder'] }}">
@@ -467,7 +477,7 @@
         const form = document.getElementById('socialMediaForm');
         const updateButton = form.querySelector('button[type="submit"]');
         const originalText = updateButton.innerText;
-        
+
         updateButton.disabled = true;
         updateButton.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Saving...';
 
@@ -509,7 +519,7 @@ function addCertificateRow() {
 
   container.insertAdjacentHTML('beforeend', `
     <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center border border-gray-200 p-4 rounded-xl bg-white">
-      
+
       <div class="md:col-span-4">
         <label class="block text-xs font-bold text-gray-500 mb-1">Title (Nama Lomba/Sertifikat)</label>
         <input type="text"
