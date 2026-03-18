@@ -193,7 +193,7 @@ class CustomerDashboardController extends Controller
             $userProfile->user_id = $customerId;
         }
 
-        // Normalize old photo path and delete if exists
+        // Normalize old photo path (delete later only after new file is safely stored)
         $oldPath = ltrim((string) $userProfile->profile_photo, '/');
         if (str_starts_with($oldPath, 'storage/')) {
             $oldPath = substr($oldPath, strlen('storage/'));
@@ -202,16 +202,24 @@ class CustomerDashboardController extends Controller
             $oldPath = 'profile_photos/' . $oldPath;
         }
 
-        if ($oldPath !== '' && \Storage::disk('public')->exists($oldPath)) {
-            \Storage::disk('public')->delete($oldPath);
-        }
-
-        // Store new photo
+        // Store new photo first
         // Note: The cropper sends a blob, which Laravel treats as a file upload
         $path = $request->file('profile_photo')->store('profile_photos', 'public');
 
+        if (!$path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menyimpan file ke storage. Cek permission folder storage/app/public.',
+            ], 500);
+        }
+
         $userProfile->profile_photo = $path;
         $userProfile->save();
+
+        // Delete old photo after new one is successfully saved in DB
+        if ($oldPath !== '' && $oldPath !== $path && \Storage::disk('public')->exists($oldPath)) {
+            \Storage::disk('public')->delete($oldPath);
+        }
 
         // Update session (with cache-buster so UI always refreshes)
         $photoVersion = now()->valueOf();
