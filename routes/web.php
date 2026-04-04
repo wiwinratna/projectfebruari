@@ -555,10 +555,19 @@ Route::get('/media/{path}', function ($path) {
         abort(404);
     }
 
-    $candidates = [
-        storage_path('app/public/' . $normalizedPath),
-        public_path('storage/' . $normalizedPath),
-    ];
+    $pathCandidates = [$normalizedPath];
+
+    // Legacy rows may store only filename without directory.
+    if (!str_contains($normalizedPath, '/')) {
+        $pathCandidates[] = 'partners/' . $normalizedPath;
+        $pathCandidates[] = 'clients/' . $normalizedPath;
+    }
+
+    $candidates = [];
+    foreach ($pathCandidates as $candidatePath) {
+        $candidates[] = storage_path('app/public/' . $candidatePath);
+        $candidates[] = public_path('storage/' . $candidatePath);
+    }
 
     $file = null;
     foreach ($candidates as $candidate) {
