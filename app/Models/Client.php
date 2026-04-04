@@ -40,10 +40,39 @@ class Client extends Model
             return null;
         }
 
-        if (str_starts_with($this->logo, 'http://') || str_starts_with($this->logo, 'https://')) {
-            return $this->logo;
+        $logo = trim((string) $this->logo);
+
+        if (str_starts_with($logo, 'http://') || str_starts_with($logo, 'https://')) {
+            $parsedHost = parse_url($logo, PHP_URL_HOST);
+            $parsedPath = parse_url($logo, PHP_URL_PATH);
+
+            if (
+                is_string($parsedPath)
+                && $parsedPath !== ''
+                && (
+                    in_array($parsedHost, ['localhost', '127.0.0.1'], true)
+                    || str_contains($parsedPath, '/storage/')
+                    || str_starts_with($parsedPath, 'storage/')
+                )
+            ) {
+                $logo = $parsedPath;
+            } else {
+                return $logo;
+            }
         }
 
-        return asset('storage/' . $this->logo);
+        $path = ltrim(str_replace('\\', '/', $logo), '/');
+
+        if (str_starts_with($path, 'public/')) {
+            $path = substr($path, 7);
+        }
+
+        if (str_starts_with($path, 'storage/')) {
+            $path = substr($path, 8);
+        }
+
+        $encodedPath = implode('/', array_map('rawurlencode', explode('/', $path)));
+
+        return '/media/' . $encodedPath;
     }
 }

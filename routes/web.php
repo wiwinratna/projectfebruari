@@ -547,6 +547,39 @@ Route::get('/storage/{path}', function ($path) {
     ]);
 })->where('path', '.*')->name('storage.serve');
 
+// Public media route for logo/image files to avoid API gateway restrictions.
+Route::get('/media/{path}', function ($path) {
+    $normalizedPath = ltrim(str_replace('\\', '/', (string) $path), '/');
+
+    if ($normalizedPath === '' || str_contains($normalizedPath, '../')) {
+        abort(404);
+    }
+
+    $candidates = [
+        storage_path('app/public/' . $normalizedPath),
+        public_path('storage/' . $normalizedPath),
+    ];
+
+    $file = null;
+    foreach ($candidates as $candidate) {
+        if (is_file($candidate)) {
+            $file = $candidate;
+            break;
+        }
+    }
+
+    if (!$file) {
+        abort(404);
+    }
+
+    $mimeType = mime_content_type($file) ?: 'application/octet-stream';
+
+    return response()->file($file, [
+        'Content-Type' => $mimeType,
+        'Cache-Control' => 'public, max-age=31536000, immutable',
+    ]);
+})->where('path', '.*')->name('media.serve');
+
 // Store intended URL before redirecting to login (for apply functionality)
 Route::middleware(['web'])->group(function () {
     Route::get('/store-intended-url', function () {

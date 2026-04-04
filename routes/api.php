@@ -10,6 +10,39 @@ use App\Models\Client;
 use App\Models\Partner;
 
 Route::middleware('api')->group(function () {
+    // Public media endpoint for files stored without relying on storage symlink.
+    Route::get('/media/{path}', function ($path) {
+        $normalizedPath = ltrim(str_replace('\\', '/', (string) $path), '/');
+
+        if ($normalizedPath === '' || str_contains($normalizedPath, '../')) {
+            abort(404);
+        }
+
+        $candidates = [
+            storage_path('app/public/' . $normalizedPath),
+            public_path('storage/' . $normalizedPath),
+        ];
+
+        $file = null;
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                $file = $candidate;
+                break;
+            }
+        }
+
+        if (!$file) {
+            abort(404);
+        }
+
+        $mimeType = mime_content_type($file) ?: 'application/octet-stream';
+
+        return response()->file($file, [
+            'Content-Type' => $mimeType,
+            'Cache-Control' => 'public, max-age=31536000, immutable',
+        ]);
+    })->where('path', '.*')->name('api.media.serve');
+
     // Public API endpoint for news - accessible to everyone including React frontend
     Route::get('/news', [NewsPostController::class, 'apiIndex']);
     Route::get('/news/{news}', [NewsPostController::class, 'apiShow']);
