@@ -7,6 +7,7 @@ use App\Http\Controllers\JobController;
 use App\Http\Controllers\JobCategoryController;
 use App\Http\Controllers\EventController;
 use App\Models\Client;
+use App\Models\HeroSlide;
 use App\Models\Partner;
 
 Route::middleware('api')->group(function () {
@@ -92,5 +93,23 @@ Route::middleware('api')->group(function () {
                 ];
             });
         return response()->json($partners);
+    });
+
+    Route::get('/hero-slides', function () {
+        $slides = HeroSlide::active()
+            ->orderBy('sort_order')
+            ->orderByDesc('id')
+            ->get(['id', 'title', 'subtitle', 'description', 'image'])
+            ->map(function ($slide) {
+                return [
+                    'id'          => $slide->id,
+                    'title'       => $slide->title,
+                    'subtitle'    => $slide->subtitle,
+                    'description' => $slide->description,
+                    'image_url'   => $slide->image_url,
+                ];
+            });
+
+        return response()->json($slides);
     });
 });

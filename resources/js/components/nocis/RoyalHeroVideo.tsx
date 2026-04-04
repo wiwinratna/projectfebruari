@@ -1,46 +1,112 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 
-export function RoyalHeroVideo() {
-  const slides = [
-    {
-      image: 'https://images.unsplash.com/photo-1600408942605-e39b013aaaea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
-      title: 'ARISE',
-      subtitle: '2026',
-      description: 'Always like never before',
-      gradient: 'from-blue-600/40 to-purple-600/40'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
-      title: 'PARIS 2024',
-      subtitle: 'SUMMER',
-      description: 'The greatest show on earth',
-      gradient: 'from-red-600/40 to-orange-600/40'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1532444458054-01a7dd3e9fca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
-      title: 'CHAMPIONS',
-      subtitle: 'RISE',
-      description: 'Witness history in the making',
-      gradient: 'from-green-600/40 to-emerald-600/40'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1551958219-acbc608c6377?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
-      title: 'GLORY AWAITS',
-      subtitle: 'JOIN US',
-      description: 'Be part of the Olympic legacy',
-      gradient: 'from-yellow-600/40 to-amber-600/40'
-    },
-    {
-      image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
-      title: 'EXCELLENCE',
-      subtitle: 'UNITY',
-      description: 'One world, one dream',
-      gradient: 'from-indigo-600/40 to-blue-600/40'
-    }
-  ];
+interface HeroSlide {
+  id: number;
+  image: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  gradient: string;
+}
 
+interface HeroSlideApiItem {
+  id: number;
+  image_url: string | null;
+  title: string;
+  subtitle: string | null;
+  description: string | null;
+}
+
+const FALLBACK_SLIDES: HeroSlide[] = [
+  {
+    id: 1,
+    image: 'https://images.unsplash.com/photo-1600408942605-e39b013aaaea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
+    title: 'ARISE',
+    subtitle: '2026',
+    description: 'Always like never before',
+    gradient: 'from-blue-600/40 to-purple-600/40'
+  },
+  {
+    id: 2,
+    image: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
+    title: 'PARIS 2024',
+    subtitle: 'SUMMER',
+    description: 'The greatest show on earth',
+    gradient: 'from-red-600/40 to-orange-600/40'
+  },
+  {
+    id: 3,
+    image: 'https://images.unsplash.com/photo-1532444458054-01a7dd3e9fca?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
+    title: 'CHAMPIONS',
+    subtitle: 'RISE',
+    description: 'Witness history in the making',
+    gradient: 'from-green-600/40 to-emerald-600/40'
+  },
+  {
+    id: 4,
+    image: 'https://images.unsplash.com/photo-1551958219-acbc608c6377?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
+    title: 'GLORY AWAITS',
+    subtitle: 'JOIN US',
+    description: 'Be part of the Olympic legacy',
+    gradient: 'from-yellow-600/40 to-amber-600/40'
+  },
+  {
+    id: 5,
+    image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1920',
+    title: 'EXCELLENCE',
+    subtitle: 'UNITY',
+    description: 'One world, one dream',
+    gradient: 'from-indigo-600/40 to-blue-600/40'
+  }
+];
+
+const GRADIENTS = [
+  'from-blue-600/40 to-purple-600/40',
+  'from-red-600/40 to-orange-600/40',
+  'from-green-600/40 to-emerald-600/40',
+  'from-yellow-600/40 to-amber-600/40',
+  'from-indigo-600/40 to-blue-600/40',
+];
+
+export function RoyalHeroVideo() {
+  const [slides, setSlides] = useState<HeroSlide[]>(FALLBACK_SLIDES);
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetch('/api/hero-slides')
+      .then((r) => r.json())
+      .then((data: HeroSlideApiItem[]) => {
+        if (!mounted || !Array.isArray(data) || data.length === 0) {
+          return;
+        }
+
+        const mappedSlides = data
+          .filter((item) => !!item.image_url)
+          .map((item, index) => ({
+            id: item.id,
+            image: item.image_url as string,
+            title: item.title,
+            subtitle: item.subtitle ?? '',
+            description: item.description ?? '',
+            gradient: GRADIENTS[index % GRADIENTS.length],
+          }));
+
+        if (mappedSlides.length > 0) {
+          setSlides(mappedSlides);
+          setCurrentSlide(0);
+        }
+      })
+      .catch(() => {
+        // Keep fallback slides when API is unavailable.
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {

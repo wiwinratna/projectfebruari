@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\File;
 use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\HeroSlideController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\JobCategoryController;
@@ -331,6 +332,9 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_ad
 
     // Our Partners Management (Landing Page)
     Route::resource('partners', PartnerController::class)->names('partners');
+
+    // Hero Slides Management (Landing Page)
+    Route::resource('hero-slides', HeroSlideController::class)->names('hero-slides');
 });
 
 // Prevent customer users from accessing super admin routes directly

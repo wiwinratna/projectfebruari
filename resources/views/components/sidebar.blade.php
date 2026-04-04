@@ -106,6 +106,13 @@ $sidebarEventLogoUrl = asset('storage/' . ltrim($sidebarEvent->logo_path, '/'));
                     </a>
                 </li>
 
+                <li class="menu-item {{ Request::is('super-admin/hero-slides*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.hero-slides.index') }}">
+                        <i class="fas fa-images mr-3"></i>
+                        <span>Slide Landing Pages</span>
+                    </a>
+                </li>
+
                 {{-- Account Section --}}
                 <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
 
