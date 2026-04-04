@@ -337,8 +337,7 @@ export function JobsSection() {
             </span>
           </motion.h2>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            6 posisi Liaison Officer tersedia untuk event olahraga internasional — Daftar sekarang sebelum kuota penuh!
-          </p>
+            </p>
         </motion.div>
 
         {/* Jobs Grid */}
