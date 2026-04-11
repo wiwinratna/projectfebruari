@@ -162,7 +162,7 @@ export function RoyalHeroVideo() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -50 }}
               transition={{ duration: 0.6 }}
-              className="flex items-center gap-8 mb-16"
+              className="flex flex-col lg:flex-row items-start lg:items-center gap-6 lg:gap-8 mb-16 w-full"
             >
               {/* Olympic Rings Dots */}
               <motion.div
@@ -171,16 +171,16 @@ export function RoyalHeroVideo() {
                 animate={{ x: 0, opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                <div className="w-12 h-12 rounded-full bg-blue-500 opacity-80 shadow-lg"></div>
-                <div className="w-12 h-12 rounded-full bg-yellow-400 opacity-80 shadow-lg"></div>
-                <div className="w-12 h-12 rounded-full bg-black opacity-80 border-2 border-white shadow-lg"></div>
-                <div className="w-12 h-12 rounded-full bg-green-500 opacity-80 shadow-lg"></div>
-                <div className="w-12 h-12 rounded-full bg-red-600 opacity-80 shadow-lg"></div>
+                <div className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-blue-500 opacity-80 shadow-lg"></div>
+                <div className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-yellow-400 opacity-80 shadow-lg"></div>
+                <div className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-black opacity-80 border-2 border-white shadow-lg"></div>
+                <div className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-500 opacity-80 shadow-lg"></div>
+                <div className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-600 opacity-80 shadow-lg"></div>
               </motion.div>
 
               <div>
                 <motion.h1
-                  className="text-7xl md:text-9xl font-black text-white leading-none tracking-tight drop-shadow-2xl"
+                  className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white leading-none tracking-tight drop-shadow-2xl break-words"
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
@@ -190,12 +190,12 @@ export function RoyalHeroVideo() {
               </div>
 
               <motion.div
-                className="border-l-2 border-white/50 pl-8 ml-8"
+                className="lg:border-l-2 border-white/50 lg:pl-8 lg:ml-8 mt-2 lg:mt-0 w-full"
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <div className="text-7xl md:text-9xl font-black text-white drop-shadow-2xl">
+                <div className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-black text-white drop-shadow-2xl leading-none">
                   {slides[currentSlide].subtitle}
                 </div>
                 <div className="text-2xl md:text-3xl font-light text-white mt-2">
