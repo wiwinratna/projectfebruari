@@ -1,1 +1,7 @@
 @import "tailwindcss";
+
+/* Hide the native eye icon in Edge/IE to prevent double eye icons in password fields */
+input::-ms-reveal,
+input::-ms-clear {
+    display: none;
+}

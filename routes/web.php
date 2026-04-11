@@ -68,6 +68,15 @@ Route::get('/login', function () {
 
 // Customer Login processing - redirect back to jobs after login
 Route::post('/login', function () {
+    request()->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+    ], [
+        'email.required' => 'Please enter your email address.',
+        'email.email' => 'Please enter a valid email address.',
+        'password.required' => 'Please enter your password.',
+    ]);
+
     $credentials = request()->only('email', 'password');
 
     // Database-backed authentication
@@ -76,7 +85,7 @@ Route::post('/login', function () {
     if ($user && \Hash::check($credentials['password'], $user->password)) {
         // Only allow non-admin users to login via customer login
         if ($user->role === 'admin') {
-            return back()->withErrors(['email' => 'Admin users must login via admin portal'])->withInput();
+            return back()->with('error', 'Admin users must login via admin portal')->withInput(request()->except('password'));
         }
 
         session([
@@ -95,7 +104,7 @@ Route::post('/login', function () {
         return redirect($redirectTo);
     }
 
-    return back()->withErrors(['email' => 'Invalid credentials'])->withInput();
+    return back()->with('error', 'The email or password you entered is incorrect.')->withInput(request()->except('password'));
 })->middleware(['web', 'throttle:login'])->name('login.submit');
 
 Route::get('/register', function () {
@@ -108,35 +117,62 @@ Route::post('/register', function () {
         'last_name' => 'required|string|max:255',
         'email' => 'required|string|email|max:255|unique:users',
         'username' => 'required|string|max:255|unique:users',
-        'password' => 'required|string|min:8|confirmed',
+        'password' => [
+            'required',
+            'string',
+            'min:8',
+            'regex:/[a-z]/',
+            'regex:/[A-Z]/',
+            'regex:/[0-9]/',
+            'regex:/[^A-Za-z0-9]/',
+        ],
+        'password_confirmation' => 'required|same:password',
         'terms' => 'accepted',
+    ], [
+        'first_name.required' => 'Please enter your first name.',
+        'last_name.required' => 'Please enter your last name.',
+        'email.required' => 'Please enter your email address.',
+        'email.email' => 'Please enter a valid email address.',
+        'email.unique' => 'This email has already been used. Please use another email.',
+        'username.required' => 'Please enter a username.',
+        'username.unique' => 'This username is already taken.',
+        'password.required' => 'Please enter your password.',
+        'password.min' => 'Password must be at least 8 characters.',
+        'password.regex' => 'Password is too weak. Please follow the password requirements.',
+        'password_confirmation.required' => 'Please confirm your password.',
+        'password_confirmation.same' => 'Password confirmation does not match.',
+        'terms.accepted' => 'You must agree to the Terms & Conditions and Privacy Policy.',
     ]);
 
-    // Create User
-    $user = \App\Models\User::create([
-        'name' => $validated['first_name'] . ' ' . $validated['last_name'],
-        'username' => $validated['username'],
-        'email' => $validated['email'],
-        'password' => \Hash::make($validated['password']),
-        'role' => 'customer',
-    ]);
+    try {
+        // Create User
+        $user = \App\Models\User::create([
+            'name' => $validated['first_name'] . ' ' . $validated['last_name'],
+            'username' => $validated['username'],
+            'email' => $validated['email'],
+            'password' => \Hash::make($validated['password']),
+            'role' => 'customer',
+        ]);
 
-    // Create Empty Profile
-    \App\Models\UserProfile::create([
-        'user_id' => $user->id,
-    ]);
+        // Create Empty Profile
+        \App\Models\UserProfile::create([
+            'user_id' => $user->id,
+        ]);
 
-    // Login User
-    session([
-        'customer_authenticated' => true,
-        'customer_id' => $user->id,
-        'customer_username' => $user->username,
-        'customer_role' => $user->role,
-        'customer_login_time' => now(),
-        'customer_profile_photo' => null
-    ]);
+        // Login User
+        session([
+            'customer_authenticated' => true,
+            'customer_id' => $user->id,
+            'customer_username' => $user->username,
+            'customer_role' => $user->role,
+            'customer_login_time' => now(),
+            'customer_profile_photo' => null
+        ]);
 
-    return redirect('/jobs')->with('success', 'Registration successful! Welcome to NOCIS.');
+        return redirect('/jobs')->with('success', 'Registration successful! Welcome to NOCIS.');
+    } catch (\Exception $e) {
+        return back()->with('error', 'We couldn\'t create your account right now. Please try again.')->withInput(request()->except(['password', 'password_confirmation']));
+    }
 });
 
 Route::get('/password/reset', function () {
