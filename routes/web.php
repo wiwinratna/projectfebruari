@@ -179,6 +179,18 @@ Route::get('/password/reset', function () {
     return view('auth.forgot-password');
 })->name('password.request');
 
+Route::post('/password/email', [\App\Http\Controllers\Auth\PasswordResetController::class, 'sendResetLinkEmail'])
+    ->middleware('guest')
+    ->name('password.email');
+
+Route::get('/password/reset/{token}', [\App\Http\Controllers\Auth\PasswordResetController::class, 'showResetForm'])
+    ->middleware('guest')
+    ->name('password.reset');
+
+Route::post('/password/update', [\App\Http\Controllers\Auth\PasswordResetController::class, 'reset'])
+    ->middleware('guest')
+    ->name('password.update');
+
 // Customer logout
 Route::post('/logout', function () {
     session()->forget(['customer_authenticated', 'customer_username', 'customer_id', 'customer_login_time']);
