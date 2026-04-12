@@ -178,9 +178,9 @@ export function RoyalHeroVideo() {
                 <div className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-600 opacity-80 shadow-lg"></div>
               </motion.div>
 
-              <div className="w-full max-w-full">
+              <div className="w-full lg:w-auto">
                 <motion.h1
-                  className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-9xl font-black text-white leading-[1.1] tracking-tight drop-shadow-2xl break-words whitespace-normal break-all sm:break-words w-full"
+                  className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black text-white leading-none tracking-tight drop-shadow-2xl break-words"
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
@@ -190,15 +190,15 @@ export function RoyalHeroVideo() {
               </div>
 
               <motion.div
-                className="lg:border-l-2 border-white/50 lg:pl-8 lg:ml-8 mt-4 lg:mt-0 w-full max-w-full"
+                className="lg:border-l-2 border-white/50 lg:pl-8 lg:ml-8 mt-4 lg:mt-0 w-full lg:flex-1"
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <div className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white drop-shadow-2xl leading-[1.1] break-words whitespace-normal break-all sm:break-words w-full">
+                <div className="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl 2xl:text-7xl font-black text-white drop-shadow-2xl leading-none break-words">
                   {slides[currentSlide].subtitle}
                 </div>
-                <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-light text-white mt-3 md:mt-4 break-words whitespace-normal w-full">
+                <div className="text-lg sm:text-xl md:text-2xl font-light text-white mt-2 break-words">
                   {slides[currentSlide].description}
                 </div>
               </motion.div>
