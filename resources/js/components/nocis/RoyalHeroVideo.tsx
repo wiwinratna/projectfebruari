@@ -178,9 +178,9 @@ export function RoyalHeroVideo() {
                 <div className="shrink-0 w-10 h-10 md:w-12 md:h-12 rounded-full bg-red-600 opacity-80 shadow-lg"></div>
               </motion.div>
 
-              <div>
+              <div className="w-full max-w-full">
                 <motion.h1
-                  className="text-5xl sm:text-7xl md:text-8xl lg:text-9xl font-black text-white leading-none tracking-tight drop-shadow-2xl break-words"
+                  className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-9xl font-black text-white leading-[1.1] tracking-tight drop-shadow-2xl break-words whitespace-normal break-all sm:break-words w-full"
                   initial={{ opacity: 0, x: -30 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.4 }}
@@ -190,15 +190,15 @@ export function RoyalHeroVideo() {
               </div>
 
               <motion.div
-                className="lg:border-l-2 border-white/50 lg:pl-8 lg:ml-8 mt-2 lg:mt-0 w-full"
+                className="lg:border-l-2 border-white/50 lg:pl-8 lg:ml-8 mt-4 lg:mt-0 w-full max-w-full"
                 initial={{ opacity: 0, x: 30 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.5 }}
               >
-                <div className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-black text-white drop-shadow-2xl leading-none">
+                <div className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black text-white drop-shadow-2xl leading-[1.1] break-words whitespace-normal break-all sm:break-words w-full">
                   {slides[currentSlide].subtitle}
                 </div>
-                <div className="text-2xl md:text-3xl font-light text-white mt-2">
+                <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-light text-white mt-3 md:mt-4 break-words whitespace-normal w-full">
                   {slides[currentSlide].description}
                 </div>
               </motion.div>
