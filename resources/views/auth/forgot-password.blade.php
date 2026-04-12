@@ -26,7 +26,7 @@
         </div>
 
         {{-- Reset Form --}}
-        <form method="POST" action="{{ route('password.request') }}" class="space-y-6">
+        <form method="POST" action="{{ route('password.email') }}" class="space-y-6">
             @csrf
 
             {{-- Email Field --}}
