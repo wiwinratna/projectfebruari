@@ -84,6 +84,10 @@ export function RoyalHeader() {
                   News
                   <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-linear-to-r from-blue-500 to-yellow-400 group-hover:w-full transition-all duration-300"></span>
                 </a>
+                <a className="text-white/90 hover:text-white font-semibold transition-all relative py-2 group" href="/sertifikat">
+                  Sertifikat
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-linear-to-r from-yellow-400 to-sky-400 group-hover:w-full transition-all duration-300"></span>
+                </a>
               </nav>
 
               {/* Right Actions */}
@@ -183,6 +187,9 @@ export function RoyalHeader() {
                   </a>
                   <a className="text-white/90 hover:text-white font-semibold transition-colors py-2" href="#news">
                     News
+                  </a>
+                  <a className="text-white/90 hover:text-white font-semibold transition-colors py-2" href="/sertifikat">
+                    Sertifikat
                   </a>
                   {!isLoggedIn ? (
                     <>

@@ -268,6 +268,23 @@ $sidebarEventLogoUrl = asset('storage/' . ltrim($sidebarEvent->logo_path, '/'));
                     </a>
                 </li>
 
+                {{-- Certificates --}}
+                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Certificates</li>
+
+                <li class="menu-item {{ Request::is('admin/certificate-layouts*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.certificate-layouts.builder') }}">
+                        <i class="fas fa-drafting-compass mr-3"></i>
+                        <span>Certificate Layout</span>
+                    </a>
+                </li>
+
+                <li class="menu-item {{ Request::is('admin/certificates') || Request::is('admin/certificates/*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.certificates.index') }}">
+                        <i class="fas fa-award mr-3"></i>
+                        <span>Certificate List</span>
+                    </a>
+                </li>
+
                 {{-- Account Section --}}
                 <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
 

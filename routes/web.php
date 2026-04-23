@@ -28,6 +28,11 @@ use App\Http\Controllers\CardVerifyController;
 use App\Http\Controllers\Admin\Card\CardPrintController;
 use App\Http\Controllers\Customer\CustomerCardController;
 use App\Http\Controllers\Customer\NotificationController as CustomerNotificationController;
+// Certificate module
+use App\Http\Controllers\PublicCertificateLookupController;
+use App\Http\Controllers\PublicCertificateVerifyController;
+use App\Http\Controllers\Admin\Certificate\CertificateLayoutController;
+use App\Http\Controllers\Admin\Certificate\CertificateController;
 
 // Landing page route serving the React app
 Route::get('/', function () {
@@ -46,9 +51,17 @@ Route::get('/news/{news}', [NewsPostController::class, 'publicShow'])->name('new
 //absah
 
 Route::get('/cards/verify/{token}', [CardVerifyController::class, 'show'])
-  ->name('cards.verify.public');
+    ->name('cards.verify.public');
 Route::post('/cards/verify/{token}', [CardVerifyController::class, 'store'])
-  ->name('cards.verify.store');
+    ->name('cards.verify.store');
+
+// ── Public Certificate Routes ─────────────────────────────────────────────
+Route::get('/sertifikat', [PublicCertificateLookupController::class, 'index'])
+    ->name('public.certificates.lookup');
+Route::get('/sertifikat/verify/{token}', [PublicCertificateVerifyController::class, 'show'])
+    ->name('public.certificates.verify');
+Route::get('/sertifikat/download/{token}', [PublicCertificateVerifyController::class, 'download'])
+    ->name('public.certificates.download');
 
 // Customer Authentication Routes
 Route::get('/login', function () {
@@ -243,7 +256,7 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
         ->name('profile.certificate.delete');
 
     Route::get('/applications/{application}/card', [CustomerCardController::class, 'show'])
-    ->name('applications.card');
+        ->name('applications.card');
 });
 
 // Admin Authentication Routes
@@ -445,7 +458,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     })->name('events.access-codes');
 
     Route::get('/cards/{card}/pdf-a5', [CardPrintController::class, 'pdfA5'])
-    ->name('cards.pdfA5');
+        ->name('cards.pdfA5');
 
 
     // Master Data Routes (otomatis pakai event_id dari session admin)
@@ -495,8 +508,8 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
         ->name('accreditation-mapping.update');
 
     Route::resource('card-configs', AccessCardConfigController::class)
-    ->parameters(['card-configs' => 'config'])
-    ->except(['show']);
+        ->parameters(['card-configs' => 'config'])
+        ->except(['show']);
 
     //Ini yang berhubungan sama card yeah
     Route::get('/cards/{card}/access', [CardAccessController::class, 'edit'])->name('cards.access.edit');
@@ -510,10 +523,10 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     Route::get('/cards/preview-all', [CardPrintController::class, 'previewAll'])->name('cards.previewAll');
 
     //print html card cenah
-        Route::post('/cards/print-html/batch', [CardPrintController::class, 'printHtmlBatch'])
+    Route::post('/cards/print-html/batch', [CardPrintController::class, 'printHtmlBatch'])
         ->name('cards.print.html.batch');
 
-        Route::get('/cards/{card}/print-html', [CardPrintController::class, 'printHtmlSingle'])
+    Route::get('/cards/{card}/print-html', [CardPrintController::class, 'printHtmlSingle'])
         ->name('cards.print.html.single');
 
     Route::get('/icon-svg-inline/{key}', function (string $key) {
@@ -560,6 +573,40 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
 
     Route::get('/card-layouts/preview-sample', [\App\Http\Controllers\Admin\CardLayoutController::class, 'previewSample'])
         ->name('card-layouts.preview-sample');
+
+    // ── Certificate Module ────────────────────────────────────────────────
+
+    // Certificate Layout Builder
+    Route::get('/certificate-layouts', [CertificateLayoutController::class, 'index'])
+        ->name('certificate-layouts.index');
+    Route::get('/certificate-layouts/builder', [CertificateLayoutController::class, 'builder'])
+        ->name('certificate-layouts.builder');
+    Route::get('/certificate-layouts/active', [CertificateLayoutController::class, 'getActive'])
+        ->name('certificate-layouts.active');
+    Route::post('/certificate-layouts/save', [CertificateLayoutController::class, 'save'])
+        ->name('certificate-layouts.save');
+    Route::post('/certificate-layouts/reset-default', [CertificateLayoutController::class, 'resetDefault'])
+        ->name('certificate-layouts.reset-default');
+    Route::get('/certificate-layouts/preview-sample', [CertificateLayoutController::class, 'previewSample'])
+        ->name('certificate-layouts.preview-sample');
+    Route::post('/certificate-layouts/{layout}/publish', [CertificateLayoutController::class, 'publish'])
+        ->name('certificate-layouts.publish');
+    Route::post('/certificate-layouts/{layout}/unpublish', [CertificateLayoutController::class, 'unpublish'])
+        ->name('certificate-layouts.unpublish');
+    Route::post('/certificate-layouts/{layout}/duplicate', [CertificateLayoutController::class, 'duplicate'])
+        ->name('certificate-layouts.duplicate');
+    Route::post('/certificate-layouts/{layout}/upload-asset', [CertificateLayoutController::class, 'uploadAsset'])
+        ->name('certificate-layouts.upload-asset');
+    Route::post('/certificate-layouts/{layout}/upload-signature', [CertificateLayoutController::class, 'uploadSignature'])
+        ->name('certificate-layouts.upload-signature');
+
+    // Certificates Management
+    Route::get('/certificates', [CertificateController::class, 'index'])->name('certificates.index');
+    Route::post('/certificates/generate', [CertificateController::class, 'generate'])->name('certificates.generate');
+    Route::get('/certificates/{certificate}/preview', [CertificateController::class, 'preview'])->name('certificates.preview');
+    Route::get('/certificates/{certificate}/download', [CertificateController::class, 'downloadPdf'])->name('certificates.download');
+    Route::post('/certificates/{certificate}/cancel', [CertificateController::class, 'cancel'])->name('certificates.cancel');
+    Route::post('/certificates/{certificate}/restore', [CertificateController::class, 'restore'])->name('certificates.restore');
 });
 
 // Prevent customer users from accessing admin routes directly

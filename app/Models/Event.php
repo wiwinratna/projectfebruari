@@ -201,4 +201,27 @@ class Event extends Model
         return $this->hasOne(CardLayout::class)
             ->where('is_active', true);
     }
+
+    // ── Certificate relationships ──────────────────
+
+    public function certificateLayouts()
+    {
+        return $this->hasMany(CertificateLayout::class);
+    }
+
+    /**
+     * The single published (active) certificate layout used for generation.
+     * A published layout is also is_active=true; if multiple exist, take the latest.
+     */
+    public function activeCertificateLayout()
+    {
+        return $this->hasOne(CertificateLayout::class)
+            ->where('is_active', true)
+            ->orderByDesc('id');
+    }
+
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
+    }
  }
