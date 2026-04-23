@@ -104,10 +104,30 @@
                             Jobs
                             <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('jobs.*') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                         </a>
+                        <a href="{{ url('/#about') }}"
+                            class="text-sm font-semibold text-gray-600 hover:text-red-600 relative py-2 group transition-colors">
+                            About
+                            <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 w-0 group-hover:w-full"></span>
+                        </a>
+                        <a href="{{ url('/#flow') }}"
+                            class="text-sm font-semibold text-gray-600 hover:text-red-600 relative py-2 group transition-colors">
+                            Flow
+                            <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 w-0 group-hover:w-full"></span>
+                        </a>
+                        <a href="{{ url('/#features') }}"
+                            class="text-sm font-semibold text-gray-600 hover:text-red-600 relative py-2 group transition-colors">
+                            Features
+                            <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 w-0 group-hover:w-full"></span>
+                        </a>
                         <a href="{{ route('news.index') }}"
                             class="text-sm font-semibold {{ request()->routeIs('news.*') ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 relative py-2 group transition-colors">
                             News
                             <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('news.*') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
+                        </a>
+                        <a href="{{ route('public.certificates.lookup') }}"
+                            class="text-sm font-semibold {{ request()->routeIs('public.certificates.*') ? 'text-red-600' : 'text-gray-600' }} hover:text-red-600 relative py-2 group transition-colors">
+                            Certificate
+                            <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('public.certificates.*') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                         </a>
 
                         @if(session('customer_authenticated'))
@@ -250,6 +270,10 @@
                                 <span class="text-xs font-semibold">Dashboard</span>
                             </a>
                             @endif
+                            <a href="{{ route('public.certificates.lookup') }}" class="flex flex-col items-center justify-center p-3 rounded-xl {{ request()->routeIs('public.certificates.*') ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-600' }} hover:bg-red-50 hover:text-red-600 transition-colors">
+                                <i class="fas fa-certificate mb-1 text-lg"></i>
+                                <span class="text-xs font-semibold">Certificate</span>
+                            </a>
                         </div>
 
                         @if(session('customer_authenticated'))
