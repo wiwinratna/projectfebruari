@@ -1,8 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 
+interface FlowStep {
+  emoji: string;
+  number: string;
+  title: string;
+  description: string;
+  color: string;
+  bgColor: string;
+  borderColor: string;
+  iconColor: string;
+}
+
+interface LandingSectionApiItem {
+  title?: string;
+  description?: string;
+  emoji?: string;
+  highlight?: string;
+}
+
+interface LandingSectionConfig {
+  badge_text?: string | null;
+  title_text?: string | null;
+  subtitle_text?: string | null;
+  extra_text?: string | null;
+}
+
 export function FlowSection() {
-  const steps = [
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const defaultSteps: FlowStep[] = [
     {
       emoji: "📝",
       number: "01",
@@ -44,6 +70,76 @@ export function FlowSection() {
       iconColor: "text-red-600"
     }
   ];
+
+  const [steps, setSteps] = useState<FlowStep[]>(defaultSteps);
+  const [copy, setCopy] = useState({
+    badge: 'HOW IT WORKS',
+    title: 'Recruitment Flow',
+    subtitle: 'Simple 4-step process to become a Liaison Officer',
+    info: 'Need help?',
+  });
+
+  useEffect(() => {
+    const metaTag = document.querySelector('meta[name="auth-user"]');
+    const content = metaTag?.getAttribute('content');
+
+    if (!content || content === 'null') {
+      setIsLoggedIn(false);
+    } else {
+      try {
+        const parsed = JSON.parse(content);
+        setIsLoggedIn(Boolean(parsed?.id));
+      } catch {
+        setIsLoggedIn(false);
+      }
+    }
+
+    fetch('/api/landing-sections/flow')
+      .then((r) => r.json())
+      .then((data: LandingSectionApiItem[]) => {
+        if (!Array.isArray(data) || data.length === 0) {
+          return;
+        }
+
+        const mapped = data.map((item, index) => {
+          const fallback = defaultSteps[index % defaultSteps.length];
+          const defaultNumber = (index + 1).toString().padStart(2, '0');
+
+          return {
+            emoji: item.emoji ?? fallback.emoji,
+            number: item.highlight ?? defaultNumber,
+            title: item.title ?? fallback.title,
+            description: item.description ?? fallback.description,
+            color: fallback.color,
+            bgColor: fallback.bgColor,
+            borderColor: fallback.borderColor,
+            iconColor: fallback.iconColor,
+          };
+        });
+
+        setSteps(mapped);
+      })
+      .catch(() => {
+        // Keep default hardcoded content when API is unavailable.
+      });
+
+    fetch('/api/landing-section-configs/flow')
+      .then((r) => r.json())
+      .then((data: LandingSectionConfig) => {
+        setCopy((prev) => ({
+          ...prev,
+          badge: data.badge_text || prev.badge,
+          title: data.title_text || prev.title,
+          subtitle: data.subtitle_text || prev.subtitle,
+          info: data.extra_text || prev.info,
+        }));
+      })
+      .catch(() => {
+        // Keep default hardcoded copy when API is unavailable.
+      });
+  }, []);
+
+  const ctaHref = isLoggedIn ? '/jobs' : '/login?redirect=/jobs';
 
   return (
     <section id="flow" className="py-24 relative overflow-hidden">
@@ -162,13 +258,13 @@ export function FlowSection() {
           className="text-center mb-16"
         >
           <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D4FF00] rounded-full mb-6 shadow-lg">
-            <span className="text-[#4A0F1C] font-bold text-sm">HOW IT WORKS</span>
+            <span className="text-[#4A0F1C] font-bold text-sm">{copy.badge}</span>
           </div>
           <h2 className="text-5xl md:text-7xl font-black text-white mb-4">
-            Recruitment <span className="text-[#D4FF00]">Flow</span>
+            {copy.title}
           </h2>
           <p className="text-xl text-gray-200 max-w-2xl mx-auto">
-            Simple 4-step process to become a Liaison Officer
+            {copy.subtitle}
           </p>
         </motion.div>
 
@@ -283,7 +379,7 @@ export function FlowSection() {
           className="text-center mt-16"
         >
           <motion.a
-            href="/register"
+            href={ctaHref}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="px-10 py-5 bg-linear-to-r from-red-600 to-red-700 text-white font-bold rounded-full hover:shadow-2xl transition-all text-lg"
@@ -300,7 +396,7 @@ export function FlowSection() {
           className="mt-12 bg-white/10 backdrop-blur-md rounded-3xl p-8 text-center border-2 border-white/20"
         >
           <p className="text-white text-lg">
-            <span className="font-black text-[#D4FF00]">Need help?</span> Contact our support team at{' '}
+            <span className="font-black text-[#D4FF00]">{copy.info}</span> Contact our support team at{' '}
             <a href="mailto:support@arise.com" className="text-[#D4FF00] font-bold hover:underline">
               support@arise.com
             </a>{' '}

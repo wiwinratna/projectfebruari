@@ -8,6 +8,9 @@ use App\Http\Controllers\JobCategoryController;
 use App\Http\Controllers\EventController;
 use App\Models\Client;
 use App\Models\HeroSlide;
+use App\Models\LandingFooterConfig;
+use App\Models\LandingSectionConfig;
+use App\Models\LandingSectionItem;
 use App\Models\Partner;
 
 Route::middleware('api')->group(function () {
@@ -111,5 +114,77 @@ Route::middleware('api')->group(function () {
             });
 
         return response()->json($slides);
+    });
+
+    Route::get('/landing-sections/{section}', function (string $section) {
+        if (!in_array($section, LandingSectionItem::SECTIONS, true)) {
+            abort(404);
+        }
+
+        $items = LandingSectionItem::active()
+            ->where('section', $section)
+            ->orderBy('sort_order')
+            ->orderBy('id')
+            ->get(['id', 'section', 'title', 'description', 'emoji', 'highlight', 'sort_order'])
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'section' => $item->section,
+                    'title' => $item->title,
+                    'description' => $item->description,
+                    'emoji' => $item->emoji,
+                    'highlight' => $item->highlight,
+                    'sort_order' => $item->sort_order,
+                ];
+            });
+
+        return response()->json($items);
+    });
+
+    Route::get('/landing-section-configs/{section}', function (string $section) {
+        if (!in_array($section, LandingSectionConfig::SECTIONS, true)) {
+            abort(404);
+        }
+
+        $config = LandingSectionConfig::query()->where('section', $section)->first();
+
+        return response()->json([
+            'section' => $section,
+            'badge_text' => $config?->badge_text,
+            'title_text' => $config?->title_text,
+            'subtitle_text' => $config?->subtitle_text,
+            'extra_text' => $config?->extra_text,
+            'extra_text_2' => $config?->extra_text_2,
+            'extra_text_3' => $config?->extra_text_3,
+            'chip_text_1' => $config?->chip_text_1,
+            'chip_text_2' => $config?->chip_text_2,
+            'chip_text_3' => $config?->chip_text_3,
+            'cta_text' => $config?->cta_text,
+            'mission_title' => $config?->mission_title,
+            'vision_title' => $config?->vision_title,
+        ]);
+    });
+
+    Route::get('/landing-footer', function () {
+        $config = LandingFooterConfig::query()->where('key', 'default')->first();
+
+        return response()->json([
+            'brand_description' => $config?->brand_description,
+            'quick_links_title' => $config?->quick_links_title,
+            'connect_title' => $config?->connect_title,
+            'quick_links' => $config?->quick_links,
+            'legal_links' => $config?->legal_links,
+            'facebook_url' => $config?->facebook_url,
+            'twitter_url' => $config?->twitter_url,
+            'instagram_url' => $config?->instagram_url,
+            'linkedin_url' => $config?->linkedin_url,
+            'address_text' => $config?->address_text,
+            'address_url' => $config?->address_url,
+            'phone_text' => $config?->phone_text,
+            'phone_url' => $config?->phone_url,
+            'email_text' => $config?->email_text,
+            'email_url' => $config?->email_url,
+            'copyright_text' => $config?->copyright_text,
+        ]);
     });
 });

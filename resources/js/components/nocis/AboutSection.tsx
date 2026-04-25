@@ -1,8 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 
+interface AboutStatItem {
+  emoji: string;
+  number: string;
+  label: string;
+  color: string;
+  bgColor: string;
+  iconColor: string;
+}
+
+interface LandingSectionApiItem {
+  title?: string;
+  highlight?: string;
+  emoji?: string;
+}
+
+interface LandingSectionConfig {
+  badge_text?: string | null;
+  title_text?: string | null;
+  subtitle_text?: string | null;
+  extra_text?: string | null;
+  extra_text_2?: string | null;
+  extra_text_3?: string | null;
+  chip_text_1?: string | null;
+  chip_text_2?: string | null;
+  chip_text_3?: string | null;
+  cta_text?: string | null;
+  mission_title?: string | null;
+  vision_title?: string | null;
+}
+
 export function AboutSection() {
-  const stats = [
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const defaultStats: AboutStatItem[] = [
     {
       emoji: "",
       number: "2,500+",
@@ -36,6 +67,91 @@ export function AboutSection() {
       iconColor: "text-red-600"
     }
   ];
+
+  const [stats, setStats] = useState<AboutStatItem[]>(defaultStats);
+  const [copy, setCopy] = useState({
+    badge: 'ABOUT ARISE',
+    title: 'Building Olympic Dreams,',
+    titleHighlight: 'One Liaison at a Time',
+    subtitle:
+      'ARISE adalah platform recruitment terdepan yang menghubungkan talenta muda Indonesia dengan kesempatan berkarir sebagai Liaison Officer di event olahraga internasional. Kami menyediakan pelatihan profesional, sertifikasi, dan penugasan langsung ke berbagai kompetisi olahraga prestisius.',
+    chip1: 'Certified Training',
+    chip2: 'International Events',
+    chip3: 'Career Growth',
+    ctaText: 'Join Our LO Community →',
+    missionTitle: 'Our Mission',
+    mission:
+      'Merekrut dan melatih Liaison Officer terbaik yang mampu memberikan pelayanan prima kepada delegasi internasional, serta menjadi duta bangsa dalam setiap event olahraga yang diselenggarakan.',
+    visionTitle: 'Our Vision',
+    vision:
+      'Menjadi platform recruitment LO terkemuka di Asia Pasifik yang menghasilkan Liaison Officer profesional dan berpengalaman untuk event olahraga internasional.',
+  });
+
+  useEffect(() => {
+    const metaTag = document.querySelector('meta[name="auth-user"]');
+    const content = metaTag?.getAttribute('content');
+
+    if (!content || content === 'null') {
+      setIsLoggedIn(false);
+    } else {
+      try {
+        const parsed = JSON.parse(content);
+        setIsLoggedIn(Boolean(parsed?.id));
+      } catch {
+        setIsLoggedIn(false);
+      }
+    }
+
+    fetch('/api/landing-sections/about')
+      .then((r) => r.json())
+      .then((data: LandingSectionApiItem[]) => {
+        if (!Array.isArray(data) || data.length === 0) {
+          return;
+        }
+
+        const mapped = data.map((item, index) => {
+          const fallback = defaultStats[index % defaultStats.length];
+          return {
+            emoji: item.emoji ?? fallback.emoji,
+            number: item.highlight ?? fallback.number,
+            label: item.title ?? fallback.label,
+            color: fallback.color,
+            bgColor: fallback.bgColor,
+            iconColor: fallback.iconColor,
+          };
+        });
+
+        setStats(mapped);
+      })
+      .catch(() => {
+        // Keep default hardcoded content when API is unavailable.
+      });
+
+    fetch('/api/landing-section-configs/about')
+      .then((r) => r.json())
+      .then((data: LandingSectionConfig) => {
+        setCopy((prev) => ({
+          ...prev,
+          badge: data.badge_text || prev.badge,
+          title: data.title_text || prev.title,
+          titleHighlight: data.extra_text_3 || prev.titleHighlight,
+          subtitle: data.subtitle_text || prev.subtitle,
+          chip1: data.chip_text_1 || prev.chip1,
+          chip2: data.chip_text_2 || prev.chip2,
+          chip3: data.chip_text_3 || prev.chip3,
+          ctaText: data.cta_text || prev.ctaText,
+          missionTitle: data.mission_title || prev.missionTitle,
+          mission: data.extra_text || prev.mission,
+          visionTitle: data.vision_title || prev.visionTitle,
+          vision: data.extra_text_2 || prev.vision,
+        }));
+      })
+      .catch(() => {
+        // Keep default hardcoded copy when API is unavailable.
+      });
+  }, []);
+
+  const ctaHref = isLoggedIn ? '/jobs' : '/login?redirect=/jobs';
 
   return (
     <section id="about" className="py-24 bg-linear-to-b from-white via-gray-50 to-white relative overflow-hidden">
@@ -217,19 +333,16 @@ export function AboutSection() {
             className="space-y-6"
           >
             <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-linear-to-r from-blue-50 to-blue-100 rounded-full shadow-lg">
-              <span className="text-blue-700 font-bold text-sm">ABOUT ARISE</span>
+              <span className="text-blue-700 font-bold text-sm">{copy.badge}</span>
             </div>
 
             <h2 className="text-5xl md:text-6xl font-black text-gray-900">
-              Building Olympic Dreams,<br />
-              <span className="text-olympic-gradient">One Liaison at a Time</span>
+              {copy.title}<br />
+              <span className="text-olympic-gradient">{copy.titleHighlight}</span>
             </h2>
 
             <p className="text-lg text-gray-600 leading-relaxed">
-              ARISE adalah platform recruitment terdepan yang menghubungkan talenta muda Indonesia
-              dengan kesempatan berkarir sebagai <span className="font-bold text-blue-600">Liaison Officer</span> di event
-              olahraga internasional. Kami menyediakan pelatihan profesional, sertifikasi, dan penugasan
-              langsung ke berbagai kompetisi olahraga prestisius.
+              {copy.subtitle}
             </p>
 
             <div className="flex flex-wrap gap-4">
@@ -237,29 +350,30 @@ export function AboutSection() {
                 whileHover={{ scale: 1.05 }}
                 className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md border-2 border-blue-100"
               >
-                <span className="font-bold text-gray-700">Certified Training</span>
+                <span className="font-bold text-gray-700">{copy.chip1}</span>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md border-2 border-yellow-100"
               >
-                <span className="font-bold text-gray-700">International Events</span>
+                <span className="font-bold text-gray-700">{copy.chip2}</span>
               </motion.div>
               <motion.div
                 whileHover={{ scale: 1.05 }}
                 className="flex items-center gap-2 px-4 py-2 bg-white rounded-full shadow-md border-2 border-green-100"
               >
-                <span className="font-bold text-gray-700">Career Growth</span>
+                <span className="font-bold text-gray-700">{copy.chip3}</span>
               </motion.div>
             </div>
 
-            <motion.button
+            <motion.a
+              href={ctaHref}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className="px-8 py-4 btn-olympic text-white font-bold rounded-full shadow-olympic hover:shadow-olympic-hover flex items-center gap-2"
             >
-              Join Our LO Community →
-            </motion.button>
+              {copy.ctaText}
+            </motion.a>
           </motion.div>
 
           {/* Right Side - Stats Grid */}
@@ -311,11 +425,10 @@ export function AboutSection() {
             className="bg-linear-to-br from-red-50 to-red-100 rounded-3xl p-8 border-2 border-red-200"
           >
             <h3 className="text-3xl font-black text-red-600 mb-4">
-             Our Mission
+             {copy.missionTitle}
             </h3>
             <p className="text-gray-700 leading-relaxed">
-              Merekrut dan melatih Liaison Officer terbaik yang mampu memberikan pelayanan prima kepada
-              delegasi internasional, serta menjadi duta bangsa dalam setiap event olahraga yang diselenggarakan.
+              {copy.mission}
             </p>
           </motion.div>
 
@@ -327,11 +440,10 @@ export function AboutSection() {
             className="bg-linear-to-br from-blue-50 to-blue-100 rounded-3xl p-8 border-2 border-blue-200"
           >
             <h3 className="text-3xl font-black text-blue-600 mb-4">
-            Our Vision
+            {copy.visionTitle}
             </h3>
             <p className="text-gray-700 leading-relaxed">
-              Menjadi platform recruitment LO terkemuka di Asia Pasifik yang menghasilkan Liaison Officer
-              profesional dan berpengalaman untuk event olahraga internasional.
+              {copy.vision}
             </p>
           </motion.div>
         </div>

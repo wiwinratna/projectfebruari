@@ -1,8 +1,40 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
 
+
+interface FeatureItem {
+  emoji: string;
+  title: string;
+  description: string;
+  gradient: string;
+  bgColor: string;
+  delay: number;
+}
+
+interface LandingSectionApiItem {
+  title?: string;
+  description?: string;
+  emoji?: string;
+}
+
+interface LandingSectionConfig {
+  badge_text?: string | null;
+  title_text?: string | null;
+  subtitle_text?: string | null;
+  extra_text?: string | null;
+  extra_text_2?: string | null;
+}
+
 export function FeatureCards() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [features, setFeatures] = useState<FeatureItem[]>([]);
+  const [copy, setCopy] = useState({
+    badge: 'EXCLUSIVE BENEFITS',
+    title: "What You'll Get as Liaison Officer",
+    subtitle: 'Fasilitas lengkap, pelatihan profesional, dan pengalaman internasional yang tak terlupakan',
+    ctaTitle: 'Ready to Join Our LO Team?',
+    ctaDescription: 'Dapatkan semua benefits di atas dan mulai perjalanan karir internasional Anda bersama ARISE',
+  });
 
   useEffect(() => {
     const metaTag = document.querySelector('meta[name="auth-user"]');
@@ -21,7 +53,7 @@ export function FeatureCards() {
     }
   }, []);
 
-  const features = [
+  const defaultFeatures: FeatureItem[] = [
     {
       emoji: "🛡️",
       title: "Official Uniform & ID",
@@ -71,6 +103,52 @@ export function FeatureCards() {
       delay: 0.5
     }
   ];
+
+  useEffect(() => {
+    setFeatures(defaultFeatures);
+
+    fetch('/api/landing-sections/features')
+      .then((r) => r.json())
+      .then((data: LandingSectionApiItem[]) => {
+        if (!Array.isArray(data) || data.length === 0) {
+          return;
+        }
+
+        const mapped = data.map((item, index) => {
+          const fallback = defaultFeatures[index % defaultFeatures.length];
+
+          return {
+            emoji: item.emoji ?? fallback.emoji,
+            title: item.title ?? fallback.title,
+            description: item.description ?? fallback.description,
+            gradient: fallback.gradient,
+            bgColor: fallback.bgColor,
+            delay: index * 0.1,
+          };
+        });
+
+        setFeatures(mapped);
+      })
+      .catch(() => {
+        // Keep default hardcoded content when API is unavailable.
+      });
+
+    fetch('/api/landing-section-configs/features')
+      .then((r) => r.json())
+      .then((data: LandingSectionConfig) => {
+        setCopy((prev) => ({
+          ...prev,
+          badge: data.badge_text || prev.badge,
+          title: data.title_text || prev.title,
+          subtitle: data.subtitle_text || prev.subtitle,
+          ctaTitle: data.extra_text || prev.ctaTitle,
+          ctaDescription: data.extra_text_2 || prev.ctaDescription,
+        }));
+      })
+      .catch(() => {
+        // Keep default hardcoded copy when API is unavailable.
+      });
+  }, []);
 
   return (
     <section id="features" className="py-24 relative overflow-hidden">
@@ -157,7 +235,7 @@ export function FeatureCards() {
           className="text-center mb-16"
         >
           <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-[#D4FF00] rounded-full mb-6 shadow-lg">
-            <span className="text-[#4A0F1C] font-bold text-sm">EXCLUSIVE BENEFITS</span>
+            <span className="text-[#4A0F1C] font-bold text-sm">{copy.badge}</span>
           </div>
           <motion.h2
             className="text-5xl md:text-7xl font-black mb-4"
@@ -165,12 +243,10 @@ export function FeatureCards() {
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
           >
-            <span className="text-white">What You'll Get as</span>
-            <br />
-            <span className="text-[#D4FF00]">Liaison Officer</span>
+            <span className="text-white">{copy.title}</span>
           </motion.h2>
           <p className="text-xl text-gray-200 max-w-3xl mx-auto">
-            Fasilitas lengkap, pelatihan profesional, dan pengalaman internasional yang tak terlupakan
+            {copy.subtitle}
           </p>
         </motion.div>
 
@@ -269,10 +345,10 @@ export function FeatureCards() {
         >
           <div className="inline-flex flex-col items-center gap-4 p-8 bg-linear-to-br from-blue-50 to-cyan-50 rounded-3xl shadow-olympic">
             <h3 className="text-2xl font-black text-gray-800">
-              Ready to Join Our LO Team?
+              {copy.ctaTitle}
             </h3>
             <p className="text-gray-600 max-w-xl">
-              Dapatkan semua benefits di atas dan mulai perjalanan karir internasional Anda bersama ARISE
+              {copy.ctaDescription}
             </p>
             <motion.a
               href={isLoggedIn ? '/jobs' : '/login?redirect=/jobs'}

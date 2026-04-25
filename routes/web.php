@@ -5,6 +5,9 @@ use App\Http\Controllers\CustomerDashboardController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\HeroSlideController;
+use App\Http\Controllers\LandingFooterConfigController;
+use App\Http\Controllers\LandingSectionConfigController;
+use App\Http\Controllers\LandingSectionItemController;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\WorkerController;
 use App\Http\Controllers\JobCategoryController;
@@ -396,6 +399,21 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_ad
 
     // Hero Slides Management (Landing Page)
     Route::resource('hero-slides', HeroSlideController::class)->names('hero-slides');
+
+    // Landing Section Content Management (About, Flow, Features)
+    Route::resource('landing-section-items', LandingSectionItemController::class)
+        ->names('landing-section-items');
+
+    // Landing Section Copy (text-only; button and image stay fixed)
+    Route::resource('landing-section-configs', LandingSectionConfigController::class)
+        ->except(['show'])
+        ->names('landing-section-configs');
+
+    // Footer Content Management (Landing Page)
+    Route::get('/landing-footer', [LandingFooterConfigController::class, 'edit'])
+        ->name('landing-footer.edit');
+    Route::put('/landing-footer', [LandingFooterConfigController::class, 'update'])
+        ->name('landing-footer.update');
 });
 
 // Prevent customer users from accessing super admin routes directly

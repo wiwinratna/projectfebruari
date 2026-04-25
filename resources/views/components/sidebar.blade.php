@@ -113,6 +113,27 @@ $sidebarEventLogoUrl = asset('storage/' . ltrim($sidebarEvent->logo_path, '/'));
                     </a>
                 </li>
 
+                <li class="menu-item {{ Request::is('super-admin/landing-section-items*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.landing-section-items.index') }}">
+                        <i class="fas fa-layer-group mr-3"></i>
+                        <span>About, Flow, Feature Content Card</span>
+                    </a>
+                </li>
+
+                <li class="menu-item {{ Request::is('super-admin/landing-section-configs*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.landing-section-configs.index') }}">
+                        <i class="fas fa-pen-nib mr-3"></i>
+                        <span>About Content</span>
+                    </a>
+                </li>
+
+                <li class="menu-item {{ Request::is('super-admin/landing-footer*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.landing-footer.edit') }}">
+                        <i class="fas fa-window-minimize mr-3"></i>
+                        <span>Footer Content</span>
+                    </a>
+                </li>
+
                 {{-- Account Section --}}
                 <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
 

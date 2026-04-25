@@ -83,7 +83,7 @@ export function FloatingAthletesMarquee() {
   const duplicatedClients  = fill(clients);
 
   return (
-    <section className="relative py-24 bg-linear-to-b from-red-950 to-black overflow-hidden">
+    <section id="our-partners" className="relative py-24 bg-linear-to-b from-red-950 to-black overflow-hidden">
 
       {/* --- Our Partner Row --- */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10">
