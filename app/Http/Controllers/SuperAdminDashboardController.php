@@ -9,6 +9,7 @@ use App\Models\City;
 use App\Models\Sport;
 use App\Services\EventStatusService;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class SuperAdminDashboardController extends Controller
@@ -311,6 +312,230 @@ class SuperAdminDashboardController extends Controller
         $event->delete();
         return redirect()->route('super-admin.events.index')->with('success', 'Event deleted successfully!');
     }
+
+    // ── Volunteer Management ──────────────────────────────────────────────
+
+    public function volunteers(Request $request)
+    {
+        $query = User::where('role', 'customer')
+            ->with(['profile', 'applications.opening.event']);
+
+        // Search filter
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('username', 'like', "%{$search}%");
+            });
+        }
+
+        // Profile completion filter
+        if ($filter = $request->input('filter')) {
+            if ($filter === 'complete') {
+                $query->whereHas('profile', function ($q) {
+                    $q->whereNotNull('phone')
+                      ->whereNotNull('summary')
+                      ->whereNotNull('cv_file');
+                });
+            } elseif ($filter === 'incomplete') {
+                $query->where(function ($q) {
+                    $q->whereDoesntHave('profile')
+                      ->orWhereHas('profile', function ($q2) {
+                          $q2->where(function ($q3) {
+                              $q3->whereNull('phone')
+                                 ->orWhereNull('summary')
+                                 ->orWhereNull('cv_file');
+                          });
+                      });
+                });
+            }
+        }
+
+        // Sort
+        $sortBy = $request->input('sort', 'latest');
+        if ($sortBy === 'name') {
+            $query->orderBy('name');
+        } elseif ($sortBy === 'oldest') {
+            $query->oldest();
+        } else {
+            $query->latest();
+        }
+
+        $volunteers = $query->paginate(15)->withQueryString();
+
+        // Stats
+        $totalVolunteers = User::where('role', 'customer')->count();
+        $withProfile = User::where('role', 'customer')
+            ->whereHas('profile', function ($q) {
+                $q->whereNotNull('phone')->whereNotNull('summary');
+            })->count();
+        $withApplications = User::where('role', 'customer')
+            ->has('applications')->count();
+        $totalApplications = \App\Models\Application::whereHas('user', fn($q) => $q->where('role', 'customer'))->count();
+
+        // ── Chart Data ───────────────────────────────────────────────────
+
+        // 1. Registration trend (last 6 months)
+        $registrationTrend = collect(range(5, 0))->map(function ($i) {
+            $date = now()->subMonths($i);
+            return [
+                'label' => $date->translatedFormat('M Y'),
+                'count' => User::where('role', 'customer')
+                    ->whereYear('created_at', $date->year)
+                    ->whereMonth('created_at', $date->month)
+                    ->count(),
+            ];
+        });
+
+        // 2. Domicile / Address distribution (extract city-ish from address)
+        $domicileData = \App\Models\UserProfile::whereHas('user', fn($q) => $q->where('role', 'customer'))
+            ->whereNotNull('address')
+            ->where('address', '!=', '')
+            ->pluck('address')
+            ->map(function ($addr) {
+                // Take last meaningful segment as city proxy
+                $parts = preg_split('/[,\n]/', $addr);
+                $city = trim(end($parts));
+                return $city ?: 'Unknown';
+            })
+            ->countBy()
+            ->sortDesc()
+            ->take(8);
+
+        $noAddress = $totalVolunteers - $domicileData->sum();
+        if ($noAddress > 0) {
+            $domicileData->put('Belum diisi', $noAddress);
+        }
+
+        // 3. Profile completion distribution
+        $allCustomers = User::where('role', 'customer')->with('profile')->get();
+        $profileDistribution = [
+            '0-25%'   => $allCustomers->filter(fn($u) => $u->profile_completion <= 25)->count(),
+            '26-50%'  => $allCustomers->filter(fn($u) => $u->profile_completion > 25 && $u->profile_completion <= 50)->count(),
+            '51-75%'  => $allCustomers->filter(fn($u) => $u->profile_completion > 50 && $u->profile_completion <= 75)->count(),
+            '76-100%' => $allCustomers->filter(fn($u) => $u->profile_completion > 75)->count(),
+        ];
+
+        // 4. Application status distribution
+        $appStatusData = \App\Models\Application::whereHas('user', fn($q) => $q->where('role', 'customer'))
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        // 5. Education level distribution
+        $educationData = \App\Models\UserProfile::whereHas('user', fn($q) => $q->where('role', 'customer'))
+            ->whereNotNull('last_education')
+            ->where('last_education', '!=', '')
+            ->selectRaw('last_education, COUNT(*) as total')
+            ->groupBy('last_education')
+            ->pluck('total', 'last_education');
+
+        // 6. Applications per event
+        $perEventData = Event::select('id', 'title')
+            ->withCount(['workerOpenings as applications_count' => function ($q) {
+                // count applications through worker_openings
+            }])
+            ->get()
+            ->map(function ($event) {
+                $total = \App\Models\Application::whereHas('opening', fn($q) => $q->where('event_id', $event->id))->count();
+                $accepted = \App\Models\Application::whereHas('opening', fn($q) => $q->where('event_id', $event->id))->where('status', 'accepted')->count();
+                $pending = \App\Models\Application::whereHas('opening', fn($q) => $q->where('event_id', $event->id))->where('status', 'pending')->count();
+                $rejected = \App\Models\Application::whereHas('opening', fn($q) => $q->where('event_id', $event->id))->where('status', 'rejected')->count();
+                return [
+                    'title' => Str::limit($event->title, 20),
+                    'total' => $total,
+                    'accepted' => $accepted,
+                    'pending' => $pending,
+                    'rejected' => $rejected,
+                ];
+            })
+            ->filter(fn($e) => $e['total'] > 0)
+            ->values();
+
+        // Accepted rate
+        $acceptedRate = $totalApplications > 0
+            ? round(($appStatusData['accepted'] ?? 0) / $totalApplications * 100, 1)
+            : 0;
+
+        return view('super-admin.volunteers.index', compact(
+            'volunteers', 'totalVolunteers', 'withProfile', 'withApplications', 'totalApplications',
+            'registrationTrend', 'domicileData', 'profileDistribution', 'appStatusData', 'educationData',
+            'perEventData', 'acceptedRate'
+        ));
+    }
+
+    public function volunteerShow(User $user)
+    {
+        abort_unless($user->role === 'customer', 404);
+
+        $user->load([
+            'profile',
+            'certificates',
+            'applications' => function ($q) {
+                $q->with(['opening.event', 'opening.jobCategory', 'reviewer'])
+                  ->latest();
+            },
+        ]);
+
+        return view('super-admin.volunteers.show', compact('user'));
+    }
+
+    public function volunteerEdit(User $user)
+    {
+        abort_unless($user->role === 'customer', 404);
+        $user->load('profile');
+
+        return view('super-admin.volunteers.edit', compact('user'));
+    }
+
+    public function volunteerUpdate(Request $request, User $user)
+    {
+        abort_unless($user->role === 'customer', 404);
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'username' => 'required|string|max:255|unique:users,username,' . $user->id,
+        ]);
+
+        $user->update($validated);
+
+        return redirect()->route('super-admin.volunteers.show', $user)
+            ->with('status', 'Volunteer data updated successfully!');
+    }
+
+    public function volunteerDelete(User $user)
+    {
+        abort_unless($user->role === 'customer', 404);
+
+        // Delete profile and related data
+        if ($user->profile) {
+            $user->profile->delete();
+        }
+        $user->applications()->delete();
+        $user->certificates()->delete();
+        $user->delete();
+
+        return redirect()->route('super-admin.volunteers.index')
+            ->with('status', 'Volunteer deleted successfully!');
+    }
+
+    public function volunteerResetPassword(Request $request, User $user)
+    {
+        abort_unless($user->role === 'customer', 404);
+
+        $validated = $request->validate([
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        $user->update([
+            'password' => bcrypt($validated['password']),
+        ]);
+
+        return back()->with('status', 'Password reset successfully!');
+    }
+
+    // ── Event Data Validation ────────────────────────────────────────────
 
     private function validateEventData(Request $request, ?Event $event = null): array
     {

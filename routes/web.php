@@ -381,6 +381,14 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_ad
     Route::put('/events/{event}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventUpdate'])->name('events.update');
     Route::delete('/events/{event}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventDelete'])->name('events.delete');
 
+    // Volunteers Management
+    Route::get('/volunteers', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteers'])->name('volunteers.index');
+    Route::get('/volunteers/{user}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteerShow'])->name('volunteers.show');
+    Route::get('/volunteers/{user}/edit', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteerEdit'])->name('volunteers.edit');
+    Route::put('/volunteers/{user}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteerUpdate'])->name('volunteers.update');
+    Route::delete('/volunteers/{user}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteerDelete'])->name('volunteers.delete');
+    Route::post('/volunteers/{user}/reset-password', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteerResetPassword'])->name('volunteers.reset-password');
+
     // News Management
     Route::resource('news', NewsPostController::class)->names('news');
 
