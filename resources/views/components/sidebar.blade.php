@@ -75,6 +75,13 @@ $sidebarEventLogoUrl = asset('storage/' . ltrim($sidebarEvent->logo_path, '/'));
                     </a>
                 </li>
 
+                <li class="menu-item {{ Request::is('super-admin/volunteers*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.volunteers.index') }}">
+                        <i class="fas fa-users mr-3"></i>
+                        <span>Manage Volunteers</span>
+                    </a>
+                </li>
+
                 <li class="menu-item {{ Request::is('super-admin/job-categories*') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('super-admin.job-categories.index') }}">
                         <i class="fas fa-tags mr-3"></i>
