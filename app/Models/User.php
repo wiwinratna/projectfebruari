@@ -100,6 +100,11 @@ class User extends Authenticatable
     {
         return $this->hasOne(UserProfile::class);
     }
+
+    public function educationHistories()
+    {
+        return $this->hasMany(UserEducationHistory::class)->orderBy('sort_order')->orderBy('graduation_year', 'desc');
+    }
     public function certificates()
     {
         return $this->hasMany(\App\Models\UserCertificate::class);

@@ -58,9 +58,11 @@ class CustomerDashboardController extends Controller
     public function settings()
     {
         $customerId = session('customer_id');
-        $user = \App\Models\User::with('profile')->find($customerId);
+        $user = \App\Models\User::with(['profile', 'educationHistories'])->find($customerId);
 
-        return view('menu.customer.settings', compact('user'));
+        $educationLevels = \App\Models\UserEducationHistory::educationLevels();
+
+        return view('menu.customer.settings', compact('user', 'educationLevels'));
     }
 
     public function updateSettings(Request $request)
@@ -117,38 +119,81 @@ class CustomerDashboardController extends Controller
         }
 
         // Handle personal data updates (from personal data tab)
-        if ($request->has('professional_headline') || $request->has('phone') || $request->has('date_of_birth') || $request->has('address')) {
+        if ($request->has('professional_headline') || $request->has('phone') || $request->has('date_of_birth') || $request->has('nationality_type')) {
             $request->validate([
                 'professional_headline' => 'nullable|string|max:100',
-                'phone' => 'nullable|string|max:20',
-                'date_of_birth' => 'nullable|date',
-                'address' => 'nullable|string|max:500',
+                'phone'                 => 'nullable|string|max:20',
+                'date_of_birth'         => 'nullable|date',
+                'nationality_type'      => 'nullable|in:wni,wna',
             ]);
 
-            $profileData['professional_headline'] = $request->professional_headline;
-            if ($request->filled('phone')) $profileData['phone'] = $request->phone;
-            if ($request->filled('date_of_birth')) $profileData['date_of_birth'] = $request->date_of_birth;
-            if ($request->filled('address')) $profileData['address'] = $request->address;
+            if ($request->filled('professional_headline')) $profileData['professional_headline'] = $request->professional_headline;
+            if ($request->filled('phone'))          $profileData['phone']          = $request->phone;
+            if ($request->filled('date_of_birth'))  $profileData['date_of_birth']  = $request->date_of_birth;
+
+            $nationalityType = $request->input('nationality_type');
+            if ($nationalityType) {
+                $profileData['nationality_type'] = $nationalityType;
+
+                if ($nationalityType === 'wni') {
+                    $request->validate([
+                        'province'     => 'required|string|max:150',
+                        'city_regency' => 'required|string|max:150',
+                        'district'     => 'nullable|string|max:150',
+                        'village'      => 'nullable|string|max:150',
+                        'postal_code'  => 'nullable|string|max:10',
+                        'rt'           => 'nullable|string|max:5',
+                        'rw'           => 'nullable|string|max:5',
+                        'address'      => 'nullable|string|max:500',
+                    ]);
+
+                    $profileData['province']     = $request->province;
+                    $profileData['city_regency'] = $request->city_regency;
+                    $profileData['district']     = $request->district;
+                    $profileData['village']      = $request->village;
+                    $profileData['postal_code']  = $request->postal_code;
+                    $profileData['rt']           = $request->rt;
+                    $profileData['rw']           = $request->rw;
+                    $profileData['address']      = $request->address;
+                    // Clear WNA fields
+                    $profileData['country']      = null;
+                    $profileData['state_region'] = null;
+
+                } elseif ($nationalityType === 'wna') {
+                    $request->validate([
+                        'country'         => 'nullable|string|max:100',
+                        'state_region'    => 'nullable|string|max:150',
+                        'wna_city'        => 'nullable|string|max:150',
+                        'wna_postal_code' => 'nullable|string|max:20',
+                        'wna_address'     => 'nullable|string|max:500',
+                    ]);
+
+                    $profileData['country']      = $request->country;
+                    $profileData['state_region'] = $request->state_region;
+                    $profileData['city_regency'] = $request->wna_city;
+                    $profileData['postal_code']  = $request->wna_postal_code;
+                    $profileData['address']      = $request->wna_address;
+                    // Clear WNI-specific fields
+                    $profileData['province']  = null;
+                    $profileData['district']  = null;
+                    $profileData['village']   = null;
+                    $profileData['rt']        = null;
+                    $profileData['rw']        = null;
+                }
+            }
         }
 
         // Handle Education & Preferences
-        if ($request->has('last_education')) {
+        if ($request->has('skills') || $request->has('languages')) {
             $request->validate([
-                'last_education' => 'nullable|string|max:50',
-                'field_of_study' => 'nullable|string|max:100',
-                'university' => 'nullable|string|max:100',
-                'graduation_year' => 'nullable|integer|min:1900|max:'.(date('Y')+10),
                 'skills' => 'nullable|string|max:1000',
                 'languages' => 'nullable|string|max:500',
             ]);
 
-            $profileData['last_education'] = $request->last_education;
-            $profileData['field_of_study'] = $request->field_of_study;
-            $profileData['university'] = $request->university;
-            $profileData['graduation_year'] = $request->graduation_year;
             $profileData['skills'] = $request->skills;
             $profileData['languages'] = $request->languages;
         }
+
 
         // Save profile data if any exists
         if (!empty($profileData)) {

@@ -47,6 +47,14 @@ Route::get('/', function () {
 Route::get('/jobs', [JobController::class, 'index'])->name('jobs.index');
 Route::get('/jobs/{job}', [JobController::class, 'show'])->name('jobs.show');
 
+// ── Indonesia Region API (public, cached) ────────────────────────────────
+Route::prefix('api/indonesia')->name('api.indonesia.')->group(function () {
+    Route::get('/provinces', [\App\Http\Controllers\IndonesiaRegionController::class, 'provinces'])->name('provinces');
+    Route::get('/cities/{provinceId}', [\App\Http\Controllers\IndonesiaRegionController::class, 'cities'])->name('cities');
+    Route::get('/districts/{cityId}', [\App\Http\Controllers\IndonesiaRegionController::class, 'districts'])->name('districts');
+    Route::get('/villages/{districtId}', [\App\Http\Controllers\IndonesiaRegionController::class, 'villages'])->name('villages');
+});
+
 //  Public News Routes (accessible without login)
 Route::get('/news', [NewsPostController::class, 'publicIndex'])->name('news.index');
 Route::get('/news/{news}', [NewsPostController::class, 'publicShow'])->name('news.show');
@@ -260,6 +268,18 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
 
     Route::get('/applications/{application}/card', [CustomerCardController::class, 'show'])
         ->name('applications.card');
+
+    // ── Education History (multi-record) ────────────────────────────────────
+    Route::get('/education', [\App\Http\Controllers\EducationHistoryController::class, 'index'])
+        ->name('education.index');
+    Route::post('/education', [\App\Http\Controllers\EducationHistoryController::class, 'store'])
+        ->name('education.store');
+    Route::post('/education/{education}', [\App\Http\Controllers\EducationHistoryController::class, 'update'])
+        ->name('education.update');
+    Route::delete('/education/{education}', [\App\Http\Controllers\EducationHistoryController::class, 'destroy'])
+        ->name('education.destroy');
+    Route::delete('/education/{education}/proof', [\App\Http\Controllers\EducationHistoryController::class, 'removeProof'])
+        ->name('education.proof.remove');
 });
 
 // Admin Authentication Routes
