@@ -21,20 +21,45 @@ class UserProfile extends Model
         'phone',
         'date_of_birth',
         'address',
+
+        // Nationality & structured address
+        'nationality_type',   // 'wni' | 'wna'
+
+        // WNI - Indonesian cascading address
+        'province',
+        'city_regency',
+        'district',
+        'village',
+        'postal_code',
+        'rt',
+        'rw',
+
+        // WNA - international manual address
+        'country',
+        'state_region',
+
+        // Social media
         'linkedin',
         'instagram',
         'twitter',
         'tiktok',
         'website',
+
+        // CV
         'cv_file',
         'cv_updated_at',
+
+        // Profile photo & summary
         'profile_photo',
         'summary',
-        // Education & Preferences
+
+        // Legacy single-entry education (kept for backward compat)
         'last_education',
         'field_of_study',
         'university',
         'graduation_year',
+
+        // Skills & Languages
         'skills',
         'languages',
     ];
