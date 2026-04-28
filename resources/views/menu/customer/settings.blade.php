@@ -62,7 +62,7 @@
                         @csrf
                         <div>
                             <div class="flex items-center gap-2 mb-3"><i class="fas fa-align-left text-red-500"></i><label for="summary" class="text-sm font-bold text-gray-900 uppercase tracking-wide">Professional Summary</label></div>
-                            <textarea id="summary" name="summary" rows="5" placeholder="Write a brief professional summary about yourself..." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium text-gray-800 placeholder-gray-400">{{ old('summary', optional($user->profile)->summary ?? '') }}</textarea>
+                            <textarea id="summary" name="summary" rows="5" placeholder="Write a brief professional summary about yourself..." class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium text-gray-800 placeholder-gray-400">{{ old('summary', optional($user->profile)->summary ?? '') }}</textarea>
                             @error('summary')<p class="text-red-500 text-sm mt-1 font-medium">{{ $message }}</p>@enderror
                         </div>
                         <div class="mt-6 flex justify-end">
@@ -80,21 +80,21 @@
                             <div class="md:col-span-2">
                                 <label for="username" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Username</label>
                                 <div class="relative"><div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-user text-gray-400"></i></div>
-                                <input type="text" id="username" name="username" value="{{ old('username', $user->username??'') }}" required class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium"></div>
+                                <input type="text" id="username" name="username" value="{{ old('username', $user->username??'') }}" required class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium"></div>
                                 @error('username')<p class="text-red-500 text-sm mt-1 font-medium">{{ $message }}</p>@enderror
                             </div>
                             {{-- Name --}}
                             <div class="md:col-span-2">
                                 <label for="name" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Full Name</label>
                                 <div class="relative"><div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-user text-gray-400"></i></div>
-                                <input type="text" id="name" name="name" value="{{ old('name', $user->name??'') }}" required class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium"></div>
+                                <input type="text" id="name" name="name" value="{{ old('name', $user->name??'') }}" required class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium"></div>
                                 @error('name')<p class="text-red-500 text-sm mt-1 font-medium">{{ $message }}</p>@enderror
                             </div>
                             {{-- Email --}}
                             <div class="md:col-span-2">
                                 <label for="email" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Email Address</label>
                                 <div class="relative"><div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-envelope text-gray-400"></i></div>
-                                <input type="email" id="email" name="email" value="{{ old('email', $user->email??'') }}" required class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium"></div>
+                                <input type="email" id="email" name="email" value="{{ old('email', $user->email??'') }}" required class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium"></div>
                                 <p class="text-[10px] text-gray-400 mt-1.5 ml-1">Changes may require verification via email.</p>
                                 @error('email')<p class="text-red-500 text-sm mt-1 font-medium">{{ $message }}</p>@enderror
                             </div>
@@ -102,21 +102,21 @@
                             <div class="md:col-span-2">
                                 <label for="professional_headline" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Professional Headline</label>
                                 <div class="relative"><div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-briefcase text-gray-400"></i></div>
-                                <input type="text" id="professional_headline" name="professional_headline" value="{{ old('professional_headline', optional($user->profile)->professional_headline??'') }}" placeholder="e.g. Event Specialist" class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium"></div>
+                                <input type="text" id="professional_headline" name="professional_headline" value="{{ old('professional_headline', optional($user->profile)->professional_headline??'') }}" placeholder="e.g. Event Specialist" class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium"></div>
                                 <p class="text-[10px] text-gray-400 mt-1.5 ml-1">Appears below your name on your profile.</p>
                             </div>
                             {{-- Phone --}}
                             <div>
                                 <label for="phone" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Phone Number</label>
                                 <div class="relative"><div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none border-r border-gray-200 pr-3 bg-gray-100 rounded-l-xl"><span class="text-gray-500 text-sm font-bold">🇮🇩 +62</span></div>
-                                <input type="tel" id="phone" name="phone" value="{{ old('phone', optional($user->profile)->phone??'') }}" placeholder="81234567890" class="w-full pl-24 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium"></div>
+                                <input type="tel" id="phone" name="phone" value="{{ old('phone', optional($user->profile)->phone??'') }}" placeholder="81234567890" class="w-full pl-24 pr-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium"></div>
                                 @error('phone')<p class="text-red-500 text-sm mt-1 font-medium">{{ $message }}</p>@enderror
                             </div>
                             {{-- Date of Birth --}}
                             <div>
                                 <label for="date_of_birth" class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Date of Birth</label>
                                 <div class="relative"><div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-calendar-alt text-gray-400"></i></div>
-                                <input type="date" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', optional($user->profile)->date_of_birth ? optional($user->profile)->date_of_birth->format('Y-m-d') : '') }}" class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium text-gray-800"></div>
+                                <input type="date" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth', optional($user->profile)->date_of_birth ? optional($user->profile)->date_of_birth->format('Y-m-d') : '') }}" class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium text-gray-800"></div>
                                 @error('date_of_birth')<p class="text-red-500 text-sm mt-1 font-medium">{{ $message }}</p>@enderror
                             </div>
                         </div>
@@ -129,12 +129,12 @@
                             <div class="mb-6">
                                 <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-3">Kewarganegaraan</label>
                                 <div class="flex flex-wrap gap-4">
-                                    <label class="nationality-radio-label flex items-center gap-3 px-5 py-3 rounded-xl border-2 cursor-pointer transition-all {{ old('nationality_type', optional($user->profile)->nationality_type) === 'wni' ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-gray-50' }}" id="lbl-wni">
-                                        <input type="radio" name="nationality_type" value="wni" class="accent-red-600" onchange="switchNationality('wni')" {{ old('nationality_type', optional($user->profile)->nationality_type) === 'wni' ? 'checked' : '' }}>
+                                    <label class="nationality-radio-label flex items-center gap-3 px-5 py-3 rounded-xl border-2 cursor-pointer transition-all shadow-sm hover:border-gray-300 {{ old('nationality_type', optional($user->profile)->nationality_type) === 'wni' ? 'border-red-500 bg-red-50 ring-2 ring-red-500/20' : 'border-gray-200 bg-white' }}" id="lbl-wni">
+                                        <input type="radio" name="nationality_type" value="wni" class="accent-red-600 w-4 h-4" onchange="switchNationality('wni')" {{ old('nationality_type', optional($user->profile)->nationality_type) === 'wni' ? 'checked' : '' }}>
                                         <div><div class="font-bold text-gray-900 text-sm">Indonesian Citizen (WNI)</div></div>
                                     </label>
-                                    <label class="nationality-radio-label flex items-center gap-3 px-5 py-3 rounded-xl border-2 cursor-pointer transition-all {{ old('nationality_type', optional($user->profile)->nationality_type) === 'wna' ? 'border-red-500 bg-red-50' : 'border-gray-200 bg-gray-50' }}" id="lbl-wna">
-                                        <input type="radio" name="nationality_type" value="wna" class="accent-red-600" onchange="switchNationality('wna')" {{ old('nationality_type', optional($user->profile)->nationality_type) === 'wna' ? 'checked' : '' }}>
+                                    <label class="nationality-radio-label flex items-center gap-3 px-5 py-3 rounded-xl border-2 cursor-pointer transition-all shadow-sm hover:border-gray-300 {{ old('nationality_type', optional($user->profile)->nationality_type) === 'wna' ? 'border-red-500 bg-red-50 ring-2 ring-red-500/20' : 'border-gray-200 bg-white' }}" id="lbl-wna">
+                                        <input type="radio" name="nationality_type" value="wna" class="accent-red-600 w-4 h-4" onchange="switchNationality('wna')" {{ old('nationality_type', optional($user->profile)->nationality_type) === 'wna' ? 'checked' : '' }}>
                                         <div><div class="font-bold text-gray-900 text-sm">Foreign Citizen (WNA)</div></div>
                                     </label>
                                 </div>
@@ -150,46 +150,46 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Provinsi <span class="text-red-500">*</span></label>
-                                        <select id="sel-province" name="province" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                                        <select id="sel-province" name="province" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                                             <option value="">-- Pilih Provinsi --</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Kota / Kabupaten <span class="text-red-500">*</span></label>
-                                        <select id="sel-city" name="city_regency" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium" disabled>
+                                        <select id="sel-city" name="city_regency" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium" disabled>
                                             <option value="">-- Pilih Kota/Kabupaten --</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Kecamatan</label>
-                                        <select id="sel-district" name="district" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium" disabled>
+                                        <select id="sel-district" name="district" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium" disabled>
                                             <option value="">-- Pilih Kecamatan --</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Kelurahan / Desa</label>
-                                        <select id="sel-village" name="village" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium" disabled>
+                                        <select id="sel-village" name="village" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium" disabled>
                                             <option value="">-- Pilih Kelurahan --</option>
                                         </select>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Kode Pos</label>
-                                        <input type="text" name="postal_code" id="wni-postal" value="{{ old('postal_code', optional($user->profile)->postal_code??'') }}" placeholder="e.g. 12345" maxlength="10" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                                        <input type="text" name="postal_code" id="wni-postal" value="{{ old('postal_code', optional($user->profile)->postal_code??'') }}" placeholder="e.g. 12345" maxlength="10" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                                     </div>
                                     <div class="grid grid-cols-2 gap-3">
                                         <div>
                                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">RT</label>
-                                            <input type="text" name="rt" value="{{ old('rt', optional($user->profile)->rt??'') }}" placeholder="e.g. 001" maxlength="5" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                                            <input type="text" name="rt" value="{{ old('rt', optional($user->profile)->rt??'') }}" placeholder="e.g. 001" maxlength="5" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                                         </div>
                                         <div>
                                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">RW</label>
-                                            <input type="text" name="rw" value="{{ old('rw', optional($user->profile)->rw??'') }}" placeholder="e.g. 005" maxlength="5" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                                            <input type="text" name="rw" value="{{ old('rw', optional($user->profile)->rw??'') }}" placeholder="e.g. 005" maxlength="5" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                                         </div>
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Alamat Lengkap / Detail</label>
-                                    <textarea name="address" rows="3" placeholder="Nama jalan, nomor rumah, kompleks, dll." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">{{ old('address', optional($user->profile)->address??'') }}</textarea>
+                                    <textarea name="address" rows="3" placeholder="Nama jalan, nomor rumah, kompleks, dll." class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">{{ old('address', optional($user->profile)->address??'') }}</textarea>
                                 </div>
                             </div>
 
@@ -198,27 +198,42 @@
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div class="md:col-span-2">
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Country / Negara <span class="text-red-500">*</span></label>
-                                        <div class="relative"><div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none"><i class="fas fa-globe text-gray-400"></i></div>
-                                        <input type="text" name="country" id="wna-country" value="{{ old('country', optional($user->profile)->country??'') }}" placeholder="e.g. Malaysia, Singapore, Japan" class="w-full pl-11 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium" list="country-list">
-                                        <datalist id="country-list"><option value="Afghanistan"><option value="Albania"><option value="Algeria"><option value="Australia"><option value="Austria"><option value="Belgium"><option value="Brazil"><option value="Cambodia"><option value="Canada"><option value="China"><option value="Denmark"><option value="Egypt"><option value="Finland"><option value="France"><option value="Germany"><option value="Greece"><option value="India"><option value="Indonesia"><option value="Iran"><option value="Iraq"><option value="Ireland"><option value="Italy"><option value="Japan"><option value="Jordan"><option value="Kenya"><option value="Korea, South"><option value="Kuwait"><option value="Malaysia"><option value="Mexico"><option value="Morocco"><option value="Netherlands"><option value="New Zealand"><option value="Nigeria"><option value="Norway"><option value="Pakistan"><option value="Philippines"><option value="Poland"><option value="Portugal"><option value="Qatar"><option value="Romania"><option value="Russia"><option value="Saudi Arabia"><option value="Singapore"><option value="South Africa"><option value="Spain"><option value="Sweden"><option value="Switzerland"><option value="Thailand"><option value="Turkey"><option value="Ukraine"><option value="United Arab Emirates"><option value="United Kingdom"><option value="United States"><option value="Vietnam"><option value="Yemen"></datalist>
+                                        <div class="relative">
+                                            <select name="country" id="wna-country" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                                                <option value="">e.g. Malaysia, Singapore, Japan</option>
+                                                @php
+                                                    $countries = [
+                                                        'Afghanistan','Albania','Algeria','Australia','Austria','Belgium','Brazil','Cambodia',
+                                                        'Canada','China','Denmark','Egypt','Finland','France','Germany','Greece','India',
+                                                        'Indonesia','Iran','Iraq','Ireland','Italy','Japan','Jordan','Kenya','Korea, South',
+                                                        'Kuwait','Malaysia','Mexico','Morocco','Netherlands','New Zealand','Nigeria','Norway',
+                                                        'Pakistan','Philippines','Poland','Portugal','Qatar','Romania','Russia','Saudi Arabia',
+                                                        'Singapore','South Africa','Spain','Sweden','Switzerland','Thailand','Turkey','Ukraine',
+                                                        'United Arab Emirates','United Kingdom','United States','Vietnam','Yemen'
+                                                    ];
+                                                @endphp
+                                                @foreach($countries as $c)
+                                                    <option value="{{ $c }}" {{ old('country', optional($user->profile)->country) == $c ? 'selected' : '' }}>{{ $c }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">State / Province / Region</label>
-                                        <input type="text" name="state_region" value="{{ old('state_region', optional($user->profile)->state_region??'') }}" placeholder="e.g. Selangor, New South Wales" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                                        <input type="text" name="state_region" value="{{ old('state_region', optional($user->profile)->state_region??'') }}" placeholder="e.g. Selangor, New South Wales" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">City</label>
-                                        <input type="text" name="wna_city" id="wna-city" value="{{ old('wna_city', optional($user->profile)->city_regency??'') }}" placeholder="e.g. Kuala Lumpur" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                                        <input type="text" name="wna_city" id="wna-city" value="{{ old('wna_city', optional($user->profile)->city_regency??'') }}" placeholder="e.g. Kuala Lumpur" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Postal Code</label>
-                                        <input type="text" name="wna_postal_code" id="wna-postal" value="{{ old('wna_postal_code', optional($user->profile)->postal_code??'') }}" placeholder="e.g. 50450" maxlength="20" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                                        <input type="text" name="wna_postal_code" id="wna-postal" value="{{ old('wna_postal_code', optional($user->profile)->postal_code??'') }}" placeholder="e.g. 50450" maxlength="20" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                                     </div>
                                 </div>
                                 <div>
                                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Full Address / Detail</label>
-                                    <textarea name="wna_address" rows="3" placeholder="Street, building number, unit, etc." class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">{{ old('wna_address', optional($user->profile)->address??'') }}</textarea>
+                                    <textarea name="wna_address" rows="3" placeholder="Street, building number, unit, etc." class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">{{ old('wna_address', optional($user->profile)->address??'') }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -265,7 +280,7 @@
                                     <input type="hidden" id="skills_input" name="skills" value="{{ old('skills', optional($user->profile)->skills ?? '') }}">
                                     <div id="skills_tags" class="flex flex-wrap gap-2 mb-3"></div>
                                     <div class="relative">
-                                        <select id="skills_select" onchange="addTag('skills', this.value); this.value='';" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium appearance-none">
+                                        <select id="skills_select" onchange="addTag('skills', this.value); this.value='';" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium appearance-none">
                                             <option value="">+ Add Skill</option>
                                             @foreach(['Public Speaking', 'Time Management', 'Leadership', 'Teamwork', 'Problem Solving', 'Data Analysis', 'Event Management', 'First Aid', 'Photography', 'Social Media'] as $skill)
                                                 <option value="{{ $skill }}">{{ $skill }}</option>
@@ -280,7 +295,7 @@
                                     <input type="hidden" id="languages_input" name="languages" value="{{ old('languages', optional($user->profile)->languages ?? '') }}">
                                     <div id="languages_tags" class="flex flex-wrap gap-2 mb-3"></div>
                                     <div class="relative">
-                                        <select id="languages_select" onchange="addTag('languages', this.value); this.value='';" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium appearance-none">
+                                        <select id="languages_select" onchange="addTag('languages', this.value); this.value='';" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium appearance-none">
                                             <option value="">+ Add Language</option>
                                             @foreach(['Indonesian', 'English', 'Mandarin', 'Japanese', 'Korean', 'Arabic', 'French', 'German', 'Spanish'] as $lang)
                                                 <option value="{{ $lang }}">{{ $lang }}</option>
@@ -317,7 +332,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Tingkat Pendidikan <span class="text-red-500">*</span></label>
-                    <select id="edu_level" name="education_level" required class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                    <select id="edu_level" name="education_level" required class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                         <option value="">Pilih Tingkat</option>
                         @foreach($educationLevels as $val => $label)
                         <option value="{{ $val }}">{{ $label }}</option>
@@ -326,15 +341,15 @@
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Nama Institusi <span class="text-red-500">*</span></label>
-                    <input type="text" id="edu_institution" name="institution_name" required placeholder="Nama Sekolah/Universitas" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                    <input type="text" id="edu_institution" name="institution_name" required placeholder="Nama Sekolah/Universitas" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                 </div>
                 <div class="md:col-span-2">
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Jurusan / Program Studi</label>
-                    <input type="text" id="edu_major" name="field_of_study" placeholder="Kosongkan jika tidak ada" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                    <input type="text" id="edu_major" name="field_of_study" placeholder="Kosongkan jika tidak ada" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Tahun Lulus</label>
-                    <input type="number" id="edu_year" name="graduation_year" min="1950" max="{{ date('Y')+10 }}" placeholder="Contoh: 2020" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
+                    <input type="number" id="edu_year" name="graduation_year" min="1950" max="{{ date('Y')+10 }}" placeholder="Contoh: 2020" class="w-full px-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium">
                 </div>
                 <div class="flex items-center mt-6">
                     <label class="flex items-center gap-2 cursor-pointer">
@@ -380,24 +395,59 @@
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/css/tom-select.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tom-select@2.2.2/dist/js/tom-select.complete.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.2.2/css/tom-select.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.2.2/js/tom-select.complete.min.js"></script>
 
 <style>
-/* Custom style for TomSelect to match the red theme */
+/* Modern SaaS styling for TomSelect */
 .ts-control {
     border-radius: 0.75rem !important;
     border-color: #e5e7eb !important;
     padding: 0.75rem 1rem !important;
-    background-color: #f9fafb !important;
+    background-color: #ffffff !important;
     font-weight: 500 !important;
-    box-shadow: none !important;
-    transition: all 0.3s !important;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    color: #1f2937 !important;
+}
+.ts-control:hover:not(.disabled) {
+    border-color: #d1d5db !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05) !important;
 }
 .ts-control.focus {
-    border-color: rgba(239, 68, 68, 0.5) !important;
-    box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
-    background-color: #fff !important;
+    border-color: rgba(239, 68, 68, 0.6) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15) !important;
+    background-color: #ffffff !important;
+}
+.ts-control.disabled, .ts-control.disabled * {
+    background-color: #f9fafb !important;
+    color: #9ca3af !important;
+    cursor: not-allowed !important;
+    border-color: #f3f4f6 !important;
+    box-shadow: none !important;
+}
+.ts-dropdown {
+    border-radius: 0.75rem !important;
+    border: 1px solid #f3f4f6 !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+    overflow: hidden !important;
+    margin-top: 0.35rem !important;
+    background-color: #ffffff !important;
+}
+.ts-dropdown .ts-dropdown-content {
+    padding: 0.35rem !important;
+}
+.ts-dropdown .option {
+    border-radius: 0.5rem !important;
+    padding: 0.6rem 1rem !important;
+    transition: all 0.15s ease !important;
+    color: #4b5563 !important;
+    font-size: 0.9rem !important;
+}
+.ts-dropdown .option:hover, .ts-dropdown .option.active {
+    background-color: #fef2f2 !important; /* red-50 */
+    color: #b91c1c !important; /* red-700 */
+    font-weight: 600 !important;
 }
 </style>
 
@@ -513,19 +563,32 @@ function switchNationality(type) {
     const placeholder = document.getElementById('nationality-placeholder');
     const wniFields = document.getElementById('wni-fields');
     const wnaFields = document.getElementById('wna-fields');
+    const lblWni = document.getElementById('lbl-wni');
+    const lblWna = document.getElementById('lbl-wna');
     
     placeholder.classList.add('hidden');
+    
+    const activeClasses = ['border-red-500', 'bg-red-50', 'ring-2', 'ring-red-500/20'];
+    const inactiveClasses = ['border-gray-200', 'bg-white'];
+
     if(type === 'wni') {
         wniFields.classList.remove('hidden');
         wnaFields.classList.add('hidden');
-        
-        // Disable WNA required attributes if any
         document.getElementById('wna-country').removeAttribute('required');
+        
+        lblWni.classList.remove(...inactiveClasses);
+        lblWni.classList.add(...activeClasses);
+        lblWna.classList.remove(...activeClasses);
+        lblWna.classList.add(...inactiveClasses);
     } else {
         wnaFields.classList.remove('hidden');
         wniFields.classList.add('hidden');
-        
         document.getElementById('wna-country').setAttribute('required', 'required');
+        
+        lblWna.classList.remove(...inactiveClasses);
+        lblWna.classList.add(...activeClasses);
+        lblWni.classList.remove(...activeClasses);
+        lblWni.classList.add(...inactiveClasses);
     }
 }
 
@@ -850,6 +913,14 @@ document.addEventListener('DOMContentLoaded', () => {
     
     loadProvinces(); // init regional selects
     loadEducations(); // init education history
+    
+    if (document.getElementById('wna-country')) {
+        new TomSelect('#wna-country', {
+            create: false,
+            sortField: { field: "text", direction: "asc" },
+            placeholder: "e.g. Malaysia, Singapore, Japan"
+        });
+    }
 });
 </script>
 @endsection

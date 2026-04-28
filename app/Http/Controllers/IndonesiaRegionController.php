@@ -18,41 +18,42 @@ class IndonesiaRegionController extends Controller
 
     public function provinces()
     {
-        $data = Cache::remember('id_provinces', self::CACHE_TTL * 60, function () {
-            $response = Http::timeout(10)->get(self::BASE_URL . '/provinsi.json');
-            return $response->successful() ? $response->json() : [];
-        });
-
-        return response()->json($data);
+        return response()->json($this->fetchAndCache('id_provinces', '/provinsi.json'));
     }
 
     public function cities(string $provinceId)
     {
-        $data = Cache::remember("id_cities_{$provinceId}", self::CACHE_TTL * 60, function () use ($provinceId) {
-            $response = Http::timeout(10)->get(self::BASE_URL . "/kabupaten/{$provinceId}.json");
-            return $response->successful() ? $response->json() : [];
-        });
-
-        return response()->json($data);
+        return response()->json($this->fetchAndCache("id_cities_{$provinceId}", "/kabupaten/{$provinceId}.json"));
     }
 
     public function districts(string $cityId)
     {
-        $data = Cache::remember("id_districts_{$cityId}", self::CACHE_TTL * 60, function () use ($cityId) {
-            $response = Http::timeout(10)->get(self::BASE_URL . "/kecamatan/{$cityId}.json");
-            return $response->successful() ? $response->json() : [];
-        });
-
-        return response()->json($data);
+        return response()->json($this->fetchAndCache("id_districts_{$cityId}", "/kecamatan/{$cityId}.json"));
     }
 
     public function villages(string $districtId)
     {
-        $data = Cache::remember("id_villages_{$districtId}", self::CACHE_TTL * 60, function () use ($districtId) {
-            $response = Http::timeout(10)->get(self::BASE_URL . "/kelurahan/{$districtId}.json");
-            return $response->successful() ? $response->json() : [];
-        });
+        return response()->json($this->fetchAndCache("id_villages_{$districtId}", "/kelurahan/{$districtId}.json"));
+    }
 
-        return response()->json($data);
+    private function fetchAndCache(string $cacheKey, string $endpoint)
+    {
+        if (Cache::has($cacheKey)) {
+            $data = Cache::get($cacheKey);
+            if (!empty($data)) return $data;
+        }
+
+        try {
+            $response = Http::timeout(10)->get(self::BASE_URL . $endpoint);
+            if ($response->successful() && !empty($response->json())) {
+                $data = $response->json();
+                Cache::put($cacheKey, $data, self::CACHE_TTL * 60);
+                return $data;
+            }
+        } catch (\Exception $e) {
+            // Log error if needed, fallback to empty array
+        }
+
+        return [];
     }
 }
