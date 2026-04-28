@@ -333,7 +333,7 @@
       $event = $card->event;
       $templatePath = $event?->card_template_path;
       $templateExists = $templatePath ? Storage::disk('public')->exists($templatePath) : false;
-      $templateUrl = $templatePath ? asset('storage/' . ltrim($templatePath, '/')) : null;
+      $templateUrl = $templatePath ? url('/media/' . ltrim($templatePath, '/')) : null;
     @endphp
     
     @if($templateExists && $templateUrl)

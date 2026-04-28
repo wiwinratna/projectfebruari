@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
   <title>Verifikasi Sertifikat</title>
   <style>
     @keyframes blobFloatA { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(24px,-18px,0) scale(1.08)} }

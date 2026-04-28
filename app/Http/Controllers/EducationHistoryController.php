@@ -171,7 +171,7 @@ class EducationHistoryController extends Controller
             'proof_document'              => $record->proof_document,
             'proof_document_original_name' => $record->proof_document_original_name,
             'proof_document_url'          => $record->proof_document
-                ? asset('storage/' . ltrim($record->proof_document, '/'))
+                ? url('/media/' . ltrim($record->proof_document, '/'))
                 : null,
             'sort_order'                  => $record->sort_order,
         ];

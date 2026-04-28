@@ -1389,7 +1389,8 @@ function doUploadAsset(type){
     .then(r=>r.json())
     .then(d=>{
         if(d.success){
-            const relativeUrl = '/storage/' + d.path;
+            // Use d.url from server — it already returns /media/... (Cloudflare-safe)
+            const relativeUrl = d.url;
             if(type==='background'){
                 const bg=document.getElementById('canvasBgImg');
                 if(bg){bg.src=relativeUrl;bg.classList.remove('hidden');}
