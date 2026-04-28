@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
   <title>Card Verification</title>
   <style>
     @keyframes blobFloatA {
@@ -55,7 +55,7 @@
             $eventTitle = $eventData->title ?? 'Event';
             $eventLogoPath = $eventData->logo_path ?? null;
             $eventLogoExists = $eventLogoPath ? \Illuminate\Support\Facades\Storage::disk('public')->exists($eventLogoPath) : false;
-            $eventLogoUrl = $eventLogoExists ? asset('storage/' . ltrim($eventLogoPath, '/')) : null;
+            $eventLogoUrl = $eventLogoExists ? url('/media/' . ltrim($eventLogoPath, '/')) : null;
             $eventInitials = collect(preg_split('/\s+/', trim((string)$eventTitle)) ?: [])
                 ->filter()
                 ->take(2)
