@@ -375,7 +375,9 @@ class CertificateLayoutController extends Controller
         return response()->json([
             'success' => true,
             'path'    => $path,
-            'url'     => Storage::disk('public')->url($path),
+            // Use /media/ route — Storage::disk()->url() builds an absolute https://arise.games/storage/...
+            // URL which Cloudflare WAF blocks with 403 for certificate-assets/* paths.
+            'url'     => url('/media/' . ltrim($path, '/')),
         ]);
     }
 
@@ -426,7 +428,9 @@ class CertificateLayoutController extends Controller
         return response()->json([
             'success'    => true,
             'path'       => $path,
-            'url'        => Storage::disk('public')->url($path),
+            // Use /media/ route — Storage::disk()->url() builds an absolute https://arise.games/storage/...
+            // URL which Cloudflare WAF blocks with 403 for certificate-assets/* paths.
+            'url'        => url('/media/' . ltrim($path, '/')),
             'element_id' => $elementId,
         ]);
     }
