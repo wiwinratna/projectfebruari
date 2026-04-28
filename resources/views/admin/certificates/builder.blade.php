@@ -375,7 +375,7 @@
                             <span class="block text-[10px] text-gray-300 mt-0.5">PNG / JPG / WebP, max. 5MB</span>
                         </div>
                     </div>
-                    <input type="file" id="bgFile" accept="image/*" class="hidden" onchange="previewAsset('bgFile','bgPreview','bgPh'); doUploadAsset('background');">
+                    <input type="file" id="bgFile" accept="image/*" class="hidden" onchange="previewAsset('bgFile','bgPreview','bgPh','canvasBgImg'); doUploadAsset('background');">
                     <button onclick="doUploadAsset('background')" {{ $locked ? 'disabled' : '' }}
                         class="mt-2 w-full py-2 text-xs font-bold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-1.5 {{ $locked ? 'opacity-50 cursor-not-allowed' : '' }}">
                         <i class="fas fa-upload"></i>{{ $bgUrl ? 'Replace Background' : 'Upload Background' }}
@@ -1363,7 +1363,7 @@ function doPublish(){
 }
 
 // ════ ASSET UPLOADS ═══════════════════════════════════
-function previewAsset(fileInputId, previewId, placeholderId){
+function previewAsset(fileInputId, previewId, placeholderId, canvasElementId = null){
     const fi=document.getElementById(fileInputId);
     if(!fi||!fi.files[0])return;
     const url=URL.createObjectURL(fi.files[0]);
@@ -1371,6 +1371,11 @@ function previewAsset(fileInputId, previewId, placeholderId){
     const ph=document.getElementById(placeholderId);
     if(prev){prev.src=url;prev.classList.remove('hidden');}
     if(ph) ph.classList.add('hidden');
+    
+    if(canvasElementId) {
+        const canvasEl=document.getElementById(canvasElementId);
+        if(canvasEl){canvasEl.src=url;canvasEl.classList.remove('hidden');}
+    }
 }
 const ASSET_FILE={background:'bgFile',event_logo:'evLogoFile',org_logo:'orgLogoFile'};
 function doUploadAsset(type){
@@ -1384,26 +1389,27 @@ function doUploadAsset(type){
     .then(r=>r.json())
     .then(d=>{
         if(d.success){
+            const relativeUrl = '/storage/' + d.path;
             if(type==='background'){
                 const bg=document.getElementById('canvasBgImg');
-                if(bg){bg.src=d.url;bg.classList.remove('hidden');}
+                if(bg){bg.src=relativeUrl;bg.classList.remove('hidden');}
                 // Also update the Aset tab preview
                 const prev=document.getElementById('bgPreview');
                 const ph=document.getElementById('bgPh');
-                if(prev){prev.src=d.url;prev.classList.remove('hidden');}
+                if(prev){prev.src=relativeUrl;prev.classList.remove('hidden');}
                 if(ph) ph.classList.add('hidden');
             } else if(type==='event_logo'){
                 globalEventLogoPath = d.path;
                 const prev=document.getElementById('evLogoPreview');
                 const ph=document.getElementById('evLogoPh');
-                if(prev){prev.src=d.url;prev.classList.remove('hidden');}
+                if(prev){prev.src=relativeUrl;prev.classList.remove('hidden');}
                 if(ph) ph.classList.add('hidden');
                 renderCanvas();
             } else if(type==='org_logo'){
                 globalOrgLogoPath = d.path;
                 const prev=document.getElementById('orgLogoPreview');
                 const ph=document.getElementById('orgLogoPh');
-                if(prev){prev.src=d.url;prev.classList.remove('hidden');}
+                if(prev){prev.src=relativeUrl;prev.classList.remove('hidden');}
                 if(ph) ph.classList.add('hidden');
                 renderCanvas();
             }

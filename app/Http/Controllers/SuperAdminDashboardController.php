@@ -32,26 +32,45 @@ class SuperAdminDashboardController extends Controller
             ->take(5)
             ->get();
 
-        $allMapEvents = Event::with(['city:id,name,province'])->get()->map(function($e) {
-            return [
-                'id' => $e->id,
-                'title' => $e->title,
-                'start_at' => $e->start_at ? $e->start_at->format('M d, Y') : 'N/A',
-                'end_at' => $e->end_at ? $e->end_at->format('M d, Y') : 'N/A',
-                'venue' => $e->venue ?: 'TBA',
-                'city_name' => $e->city_name ?: ($e->city ? $e->city->name : 'Unknown City'),
-                'province_name' => $e->province_name ?: ($e->city ? $e->city->province : 'Unknown Province'),
-                'latitude' => $e->latitude,
-                'longitude' => $e->longitude,
-                'status' => $e->status,
-                'status_color' => match($e->status) {
-                    'active' => 'green',
-                    'upcoming' => 'blue',
-                    'completed' => 'gray',
-                    default => 'red'
-                }
-            ];
-        });
+        $allMapEvents = Event::with(['city:id,name,province'])->get()
+            ->filter(function($e) {
+                // Only include events with valid coordinates
+                if (!$e->latitude || !$e->longitude) return false;
+                // Filter out null-island / obviously wrong coords
+                if (abs($e->latitude) < 0.01 && abs($e->longitude) < 0.01) return false;
+                // Must have at least one location identifier (country + city/province OR venue)
+                $hasLocation = $e->country
+                    || $e->province_name || $e->city_name
+                    || ($e->city && $e->city->name)
+                    || $e->venue;
+                return $hasLocation;
+            })
+            ->map(function($e) {
+                // Build consistent location labels
+                $country = $e->country ?: 'Indonesia';
+                $cityName = $e->city_name ?: ($e->city ? $e->city->name : null);
+                $provinceName = $e->province_name ?: ($e->city ? $e->city->province : null);
+
+                return [
+                    'id' => $e->id,
+                    'title' => $e->title,
+                    'start_at' => $e->start_at ? $e->start_at->format('M d, Y') : 'N/A',
+                    'end_at' => $e->end_at ? $e->end_at->format('M d, Y') : 'N/A',
+                    'venue' => $e->venue ?: 'TBA',
+                    'city_name' => $cityName ?: '',
+                    'province_name' => $provinceName ?: '',
+                    'country' => $country,
+                    'latitude' => $e->latitude,
+                    'longitude' => $e->longitude,
+                    'status' => $e->status,
+                    'status_color' => match($e->status) {
+                        'active' => 'green',
+                        'upcoming' => 'blue',
+                        'completed' => 'gray',
+                        default => 'red'
+                    }
+                ];
+            })->values();
 
         // Additional Analytics
         $eventsByStatus = Event::selectRaw('status, count(*) as count')->groupBy('status')->pluck('count', 'status');
@@ -79,6 +98,58 @@ class SuperAdminDashboardController extends Controller
             'slides' => \App\Models\HeroSlide::count(),
         ];
 
+        // ── Volunteer Insights ──────────────────────────
+
+        // Nationality distribution from user_profiles
+        $nationalityStats = \App\Models\UserProfile::whereHas('user', function($q) {
+                $q->where('role', 'customer');
+            })
+            ->selectRaw("
+                COALESCE(nationality_type, 'unknown') as nat_type,
+                COUNT(*) as count
+            ")
+            ->groupBy('nat_type')
+            ->pluck('count', 'nat_type');
+
+        // Education distribution — highest level per volunteer
+        // Use user_education_histories (multi-entry) with priority ordering
+        $educationLevelOrder = ['S3','S2','S1','D4','D3','D2','D1','SMK','SMA','SMP','SD','Lainnya'];
+
+        $educationStats = \App\Models\UserEducationHistory::whereHas('user', function($q) {
+                $q->where('role', 'customer');
+            })
+            ->selectRaw('education_level, COUNT(DISTINCT user_id) as count')
+            ->groupBy('education_level')
+            ->pluck('count', 'education_level');
+
+        // Also count from legacy last_education on user_profiles for volunteers without education_histories
+        $legacyEducation = \App\Models\UserProfile::whereHas('user', function($q) {
+                $q->where('role', 'customer');
+            })
+            ->whereNotNull('last_education')
+            ->where('last_education', '!=', '')
+            ->whereDoesntHave('user.educationHistories')
+            ->selectRaw('last_education as education_level, COUNT(*) as count')
+            ->groupBy('last_education')
+            ->pluck('count', 'education_level');
+
+        // Merge legacy into education stats
+        foreach ($legacyEducation as $level => $count) {
+            $educationStats[$level] = ($educationStats[$level] ?? 0) + $count;
+        }
+
+        // Volunteer registration trend (last 6 months)
+        $volunteerTrend = collect(range(5, 0))->map(function ($i) {
+            $date = now()->subMonths($i);
+            return [
+                'label' => $date->translatedFormat('M Y'),
+                'count' => User::where('role', 'customer')
+                    ->whereYear('created_at', $date->year)
+                    ->whereMonth('created_at', $date->month)
+                    ->count(),
+            ];
+        });
+
         return view('super-admin.dashboard', compact(
             'totalAdmins',
             'unassignedAdmins',
@@ -91,7 +162,10 @@ class SuperAdminDashboardController extends Controller
             'eventsByStatus',
             'topProvinces',
             'eventTrend',
-            'contentStats'
+            'contentStats',
+            'nationalityStats',
+            'educationStats',
+            'volunteerTrend'
         ));
     }
 
@@ -107,7 +181,12 @@ class SuperAdminDashboardController extends Controller
 
     public function adminCreate()
     {
-        $events = Event::orderBy('title')->get();
+        // Only show events not already assigned to another admin
+        $assignedEventIds = User::where('role', 'admin')->whereNotNull('event_id')->pluck('event_id');
+        $events = Event::whereNotIn('id', $assignedEventIds)
+            ->with('city:id,name,province')
+            ->orderBy('title')
+            ->get();
         return view('super-admin.admins.create', compact('events'));
     }
 
@@ -138,7 +217,15 @@ class SuperAdminDashboardController extends Controller
     {
         abort_unless($user->role === 'admin', 403);
 
-        $events = Event::orderBy('title')->get();
+        // Show unassigned events + the event currently assigned to this admin
+        $assignedEventIds = User::where('role', 'admin')
+            ->where('id', '!=', $user->id)
+            ->whereNotNull('event_id')
+            ->pluck('event_id');
+        $events = Event::whereNotIn('id', $assignedEventIds)
+            ->with('city:id,name,province')
+            ->orderBy('title')
+            ->get();
         return view('super-admin.admins.edit', compact('user', 'events'));
     }
 
@@ -597,6 +684,7 @@ class SuperAdminDashboardController extends Controller
             'start_at' => ['required', 'date'],
             'end_at' => ['nullable', 'date', 'after_or_equal:start_at'],
             'venue' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'string', 'max:255'],
             'province_code' => ['nullable', 'string', 'max:50'],
             'province_name' => ['nullable', 'string', 'max:255'],
             'city_code' => ['nullable', 'string', 'max:50'],
@@ -623,6 +711,7 @@ class SuperAdminDashboardController extends Controller
                 'start_at',
                 'end_at',
                 'venue',
+                'country',
                 'province_code',
                 'province_name',
                 'city_code',

@@ -157,6 +157,10 @@ class WorkerController extends Controller
             'status' => 'required|in:planned,open,closed',
             'requirements_text' => 'nullable|string',
             'benefits' => 'nullable|string',
+            'required_skills' => 'nullable|array',
+            'required_skills.*' => 'string',
+            'preferred_skills' => 'nullable|array',
+            'preferred_skills.*' => 'string',
             'access_code_ids' => ['nullable','array'],
             'access_code_ids.*' => ['exists:event_access_codes,id'],
         ]);
@@ -177,6 +181,8 @@ class WorkerController extends Controller
             'slots_filled' => $validated['slots_filled'] ?? 0,
             'status' => $validated['status'],
             'requirements' => $requirements,
+            'required_skills' => $validated['required_skills'] ?? [],
+            'preferred_skills' => $validated['preferred_skills'] ?? [],
             'benefits' => $validated['benefits'],
         ]);
 
@@ -234,6 +240,10 @@ class WorkerController extends Controller
             'status' => 'required|in:planned,open,closed',
             'requirements_text' => 'nullable|string',
             'benefits' => 'nullable|string',
+            'required_skills' => 'nullable|array',
+            'required_skills.*' => 'string',
+            'preferred_skills' => 'nullable|array',
+            'preferred_skills.*' => 'string',
             'access_code_ids' => ['nullable','array'],
             'access_code_ids.*' => ['exists:event_access_codes,id'],
         ]);
@@ -253,6 +263,8 @@ class WorkerController extends Controller
             'slots_filled' => $validated['slots_filled'] ?? 0,
             'status' => $validated['status'],
             'requirements' => $requirements,
+            'required_skills' => $validated['required_skills'] ?? [],
+            'preferred_skills' => $validated['preferred_skills'] ?? [],
             'benefits' => $validated['benefits'],
         ]);
         $worker->accessCodes()->sync($request->input('access_code_ids', []));

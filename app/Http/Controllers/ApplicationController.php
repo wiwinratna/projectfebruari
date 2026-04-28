@@ -29,6 +29,7 @@ class ApplicationController extends Controller
 
         $application->load([
             'user.profile',
+            'user.educationHistories',
             'user.certificates' => fn($q) => $q->latest(), //paling baru cenah
             'opening.event',
             'opening.jobCategory',
@@ -55,8 +56,8 @@ public function update(Request $request, Application $application)
     ]);
 
     $oldStatus = $application->status;
-    DB::transaction(function () use ($validated, $application, $oldStatus) {
-
+    DB::beginTransaction();
+    try {
         $application->update([
             'status' => $validated['status'],
             'review_notes' => $validated['review_notes'],
@@ -96,8 +97,8 @@ public function update(Request $request, Application $application)
                 ->first();
 
             if (!$pivot) {
-                // stop transaksi biar admin sadar mapping belum diset
-                throw new \Exception("Job Category belum dimapping ke Accreditation untuk event ini. Set dulu di Accreditation Mapping.");
+                DB::rollBack();
+                return back()->with('error', 'Cannot approve: The Job Category for this role has not been mapped to an Accreditation yet. Please set it up in Accreditation Mapping first.');
             }
 
             $mappingId = (int) $pivot->accreditation_mapping_id;
@@ -143,7 +144,12 @@ public function update(Request $request, Application $application)
                 $card->delete();
             }
         }
-    });
+
+        DB::commit();
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Failed to process: ' . $e->getMessage());
+    }
 
     if ($oldStatus !== $validated['status'] && in_array($validated['status'], ['approved', 'rejected'], true)) {
         $application->loadMissing(['user', 'opening.event']);

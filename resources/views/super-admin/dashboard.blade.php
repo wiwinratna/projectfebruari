@@ -82,7 +82,9 @@
         <h2 class="text-xl font-bold text-gray-900 mb-6 flex items-center">
             <i class="fas fa-chart-line text-blue-600 mr-3"></i> Volunteer & Platform Insights
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        {{-- Row 1: Key Metrics --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {{-- Volunteer Engagement --}}
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 flex flex-col justify-center">
                 <div class="flex justify-between items-start mb-4">
@@ -119,7 +121,7 @@
                 <p class="text-xs text-gray-500 mt-2">{{ $appPercentage }}% acceptance rate</p>
             </div>
 
-            {{-- System Content --}}
+            {{-- Platform Content --}}
             <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 flex flex-col justify-center">
                 <div class="flex justify-between items-start mb-4">
                     <div>
@@ -145,6 +147,141 @@
                         <p class="text-[10px] text-gray-500 uppercase">Slides</p>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        {{-- Row 2: Volunteer Deep Insights --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {{-- Nationality Distribution --}}
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                <h3 class="text-gray-900 font-semibold mb-6 flex items-center">
+                    <i class="fas fa-globe-asia text-blue-500 w-5"></i> NATIONALITY
+                </h3>
+                @php
+                    $wni = $nationalityStats['wni'] ?? 0;
+                    $wna = $nationalityStats['wna'] ?? 0;
+                    $unknown = $nationalityStats['unknown'] ?? 0;
+                    $totalNat = $wni + $wna + $unknown;
+                    $wniPct = $totalNat > 0 ? round(($wni / $totalNat) * 100) : 0;
+                    $wnaPct = $totalNat > 0 ? round(($wna / $totalNat) * 100) : 0;
+                    $unkPct = $totalNat > 0 ? round(($unknown / $totalNat) * 100) : 0;
+                @endphp
+                @if($totalNat > 0)
+                    <div class="space-y-5">
+                        {{-- WNI --}}
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>
+                                    <span class="text-sm font-medium text-gray-700">WNI</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">{{ $wni }} <span class="text-gray-400 font-normal">({{ $wniPct }}%)</span></span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full transition-all" style="width: {{ $wniPct }}%"></div>
+                            </div>
+                        </div>
+                        {{-- WNA --}}
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 rounded-full bg-blue-500 mr-2"></span>
+                                    <span class="text-sm font-medium text-gray-700">WNA</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">{{ $wna }} <span class="text-gray-400 font-normal">({{ $wnaPct }}%)</span></span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full transition-all" style="width: {{ $wnaPct }}%"></div>
+                            </div>
+                        </div>
+                        {{-- Not Set --}}
+                        @if($unknown > 0)
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <div class="flex items-center">
+                                    <span class="w-3 h-3 rounded-full bg-gray-300 mr-2"></span>
+                                    <span class="text-sm font-medium text-gray-700">Not Set</span>
+                                </div>
+                                <span class="text-sm font-semibold text-gray-900">{{ $unknown }} <span class="text-gray-400 font-normal">({{ $unkPct }}%)</span></span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2">
+                                <div class="bg-gray-300 h-2 rounded-full transition-all" style="width: {{ $unkPct }}%"></div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
+                    <p class="text-xs text-gray-400 mt-5 pt-3 border-t border-gray-50">Total {{ $totalNat }} volunteer profiles</p>
+                @else
+                    <div class="text-center py-8">
+                        <i class="fas fa-globe text-gray-200 text-4xl mb-3"></i>
+                        <p class="text-sm text-gray-500 italic">No nationality data yet.</p>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Education Distribution --}}
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                <h3 class="text-gray-900 font-semibold mb-6 flex items-center">
+                    <i class="fas fa-graduation-cap text-amber-500 w-5"></i> EDUCATION LEVEL
+                </h3>
+                @php
+                    $eduOrder = ['S3','S2','S1','D4','D3','D2','D1','SMK','SMA','SMP','SD','Lainnya'];
+                    $totalEdu = $educationStats->sum();
+                    $eduColors = [
+                        'S3' => 'bg-purple-600', 'S2' => 'bg-purple-500', 'S1' => 'bg-blue-500',
+                        'D4' => 'bg-blue-400', 'D3' => 'bg-cyan-500', 'D2' => 'bg-cyan-400', 'D1' => 'bg-teal-500',
+                        'SMK' => 'bg-amber-500', 'SMA' => 'bg-orange-500', 'SMP' => 'bg-red-400', 'SD' => 'bg-red-300',
+                        'Lainnya' => 'bg-gray-400',
+                    ];
+                @endphp
+                @if($totalEdu > 0)
+                    <div class="space-y-3 max-h-[280px] overflow-y-auto pr-1">
+                        @foreach($eduOrder as $level)
+                            @if(($educationStats[$level] ?? 0) > 0)
+                                @php $eduPct = round(($educationStats[$level] / $totalEdu) * 100); @endphp
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="font-medium text-gray-700">{{ $level }}</span>
+                                        <span class="text-gray-500">{{ $educationStats[$level] }} ({{ $eduPct }}%)</span>
+                                    </div>
+                                    <div class="w-full bg-gray-100 rounded-full h-2">
+                                        <div class="{{ $eduColors[$level] ?? 'bg-gray-400' }} h-2 rounded-full transition-all" style="width: {{ max($eduPct, 3) }}%"></div>
+                                    </div>
+                                </div>
+                            @endif
+                        @endforeach
+                    </div>
+                    <p class="text-xs text-gray-400 mt-5 pt-3 border-t border-gray-50">Total {{ $totalEdu }} education records</p>
+                @else
+                    <div class="text-center py-8">
+                        <i class="fas fa-graduation-cap text-gray-200 text-4xl mb-3"></i>
+                        <p class="text-sm text-gray-500 italic">No education data yet.</p>
+                    </div>
+                @endif
+            </div>
+
+            {{-- Volunteer Registration Trend --}}
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8">
+                <h3 class="text-gray-900 font-semibold mb-6 flex items-center">
+                    <i class="fas fa-user-plus text-green-500 w-5"></i> REGISTRATION TREND
+                </h3>
+                <div class="h-40 flex items-end justify-between space-x-2 pt-4">
+                    @php $maxVol = max($volunteerTrend->max('count'), 1); @endphp
+                    @foreach($volunteerTrend as $vt)
+                        @php $vHeight = ($vt['count'] / $maxVol) * 100; @endphp
+                        <div class="flex flex-col items-center w-full group">
+                            <div class="relative flex justify-center w-full h-28 items-end">
+                                <div class="w-full max-w-[28px] bg-green-100 group-hover:bg-green-500 rounded-t-md transition-all duration-300 relative" style="height: {{ max($vHeight, 5) }}%">
+                                    <span class="absolute -top-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity">{{ $vt['count'] }}</span>
+                                </div>
+                            </div>
+                            <span class="text-[10px] text-gray-400 mt-2 font-medium uppercase tracking-wider truncate w-full text-center" title="{{ $vt['label'] }}">
+                                {{ substr($vt['label'], 0, 3) }}
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+                <p class="text-xs text-gray-400 mt-4 pt-3 border-t border-gray-50">New volunteer registrations per month</p>
             </div>
         </div>
     </div>
@@ -344,8 +481,8 @@
     document.addEventListener('DOMContentLoaded', function() {
         const events = @json($allMapEvents);
         
-        // Initialize Map centered on Indonesia
-        const map = L.map('event-map').setView([-2.548926, 118.0148634], 5);
+        // Initialize Map — will auto-fit to markers
+        const map = L.map('event-map').setView([0, 118], 3);
         
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
@@ -355,7 +492,9 @@
 
         const markers = L.markerClusterGroup({
             chunkedLoading: true,
-            maxClusterRadius: 50
+            maxClusterRadius: 50,
+            spiderfyOnMaxZoom: true,
+            showCoverageOnHover: false
         });
 
         // Custom pin icons
@@ -382,40 +521,55 @@
             })
         };
 
-        events.forEach(ev => {
-            const statusColors = {
-                'active': 'text-green-600 bg-green-100',
-                'upcoming': 'text-blue-600 bg-blue-100',
-                'completed': 'text-gray-600 bg-gray-100',
-                'planning': 'text-red-600 bg-red-100'
-            };
-            const statusTextColor = statusColors[ev.status] ? statusColors[ev.status].split(' ')[0] : 'text-red-600';
+        const statusBadgeColors = {
+            'active':    'background:#DEF7EC;color:#03543F;',
+            'upcoming':  'background:#DBEAFE;color:#1E40AF;',
+            'completed': 'background:#F3F4F6;color:#374151;',
+            'planning':  'background:#FEE2E2;color:#991B1B;'
+        };
 
+        events.forEach(ev => {
             if (ev.latitude && ev.longitude) {
                 const marker = L.marker([ev.latitude, ev.longitude], { icon: iconColors[ev.status_color] || iconColors['red'] });
                 
+                const badgeStyle = statusBadgeColors[ev.status] || statusBadgeColors['planning'];
+                const locationParts = [ev.city_name, ev.province_name].filter(p => p && p.trim());
+                const locationLine = locationParts.length > 0 ? locationParts.join(', ') : '';
+
                 const popupContent = `
-                    <div class="p-3 max-w-xs">
-                        <div class="text-xs uppercase font-bold ${statusTextColor} mb-1">${ev.status}</div>
-                        <h4 class="font-bold text-gray-900 text-base mb-1">${ev.title}</h4>
-                        <div class="text-sm text-gray-600 space-y-1 mt-2">
-                            <p><i class="fas fa-map-marker-alt w-4 text-center mr-1"></i> ${ev.venue}</p>
-                            <p><i class="fas fa-city w-4 text-center mr-1"></i> ${ev.city_name}, ${ev.province_name}</p>
-                            <p><i class="fas fa-calendar w-4 text-center mr-1"></i> ${ev.start_at} - ${ev.end_at}</p>
+                    <div style="padding:12px;max-width:280px;font-family:system-ui,-apple-system,sans-serif;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                            <span style="${badgeStyle}font-size:11px;font-weight:700;text-transform:uppercase;padding:2px 8px;border-radius:20px;letter-spacing:0.5px;">${ev.status}</span>
+                            <span style="font-size:11px;color:#6B7280;">🌐 ${ev.country}</span>
+                        </div>
+                        <h4 style="font-weight:700;color:#111827;font-size:15px;margin:0 0 8px 0;line-height:1.3;">${ev.title}</h4>
+                        <div style="font-size:13px;color:#4B5563;line-height:1.8;">
+                            ${ev.venue !== 'TBA' ? `<div>📍 ${ev.venue}</div>` : ''}
+                            ${locationLine ? `<div>🏙️ ${locationLine}</div>` : ''}
+                            <div>🗓️ ${ev.start_at} — ${ev.end_at}</div>
                         </div>
                     </div>
                 `;
                 
-                marker.bindPopup(popupContent);
+                marker.bindPopup(popupContent, { maxWidth: 300, className: 'event-popup' });
                 markers.addLayer(marker);
             }
         });
 
         map.addLayer(markers);
         
-        // Auto-fit bounds if there are markers
-        if (markers.getLayers().length > 0) {
+        // Smart zoom: single marker zooms in, multiple markers auto-fit
+        const layerCount = markers.getLayers().length;
+        if (layerCount === 1) {
+            const singleMarker = markers.getLayers()[0];
+            const latlng = singleMarker.getLatLng();
+            map.setView(latlng, 10);
+            singleMarker.openPopup();
+        } else if (layerCount > 1) {
             map.fitBounds(markers.getBounds(), { padding: [50, 50], maxZoom: 12 });
+        } else {
+            // No markers — center on Indonesia
+            map.setView([-2.548926, 118.0148634], 5);
         }
     });
 </script>

@@ -82,8 +82,13 @@
                         required>
                     <option value="">-- Select Event --</option>
                     @foreach ($events as $event)
+                        @php
+                            $loc = $event->country ?? 'Indonesia';
+                            $city = $event->city_name ?: ($event->city->name ?? null);
+                            if ($city && !str_contains(strtolower($city), 'belum')) $loc .= ', ' . $city;
+                        @endphp
                         <option value="{{ $event->id }}" @selected(old('event_id', $user->event_id) == $event->id)>
-                            {{ $event->title }} ({{ $event->city->name ?? 'N/A' }})
+                            {{ $event->title }} — {{ $loc }}
                         </option>
                     @endforeach
                 </select>

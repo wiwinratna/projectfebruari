@@ -122,9 +122,114 @@
     </div>
 </div>
 
-<div>
-    <label class="block text-sm font-semibold text-gray-700 mb-1">Requirements (one per line)</label>
-    <textarea name="requirements_text" rows="4" placeholder="Enter requirements (one per line)..."
+@php
+    $availableSkills = ['Public Speaking', 'Time Management', 'Leadership', 'Teamwork', 'Problem Solving', 'Data Analysis', 'Event Management', 'First Aid', 'Photography', 'Social Media'];
+    $selectedRequiredSkills = old('required_skills', $opening->required_skills ?? []);
+    $selectedPreferredSkills = old('preferred_skills', $opening->preferred_skills ?? []);
+@endphp
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <!-- Required Skills -->
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Required Professional Skills</label>
+        <p class="text-xs text-gray-500 mb-2">Skills that applicants must have.</p>
+        
+        <div id="req_skills_tags" class="flex flex-wrap gap-2 mb-3"></div>
+        <div class="relative">
+            <select id="req_skills_selector" onchange="addSkillTag('req', this.value); this.value='';" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium appearance-none">
+                <option value="">+ Add Skill</option>
+                @foreach($availableSkills as $skill)
+                    <option value="{{ $skill }}">{{ $skill }}</option>
+                @endforeach
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500"><i class="fas fa-chevron-down text-xs"></i></div>
+        </div>
+        
+        <select name="required_skills[]" id="req_skills_hidden" multiple class="hidden">
+            @foreach($availableSkills as $skill)
+                <option value="{{ $skill }}" @selected(in_array($skill, $selectedRequiredSkills))>{{ $skill }}</option>
+            @endforeach
+        </select>
+        
+        @error('required_skills')
+            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+        @enderror
+    </div>
+
+    <!-- Preferred Skills -->
+    <div>
+        <label class="block text-sm font-semibold text-gray-700 mb-1">Preferred Skills (Optional)</label>
+        <p class="text-xs text-gray-500 mb-2">Nice-to-have skills for this role.</p>
+        
+        <div id="pref_skills_tags" class="flex flex-wrap gap-2 mb-3"></div>
+        <div class="relative">
+            <select id="pref_skills_selector" onchange="addSkillTag('pref', this.value); this.value='';" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-medium appearance-none">
+                <option value="">+ Add Skill</option>
+                @foreach($availableSkills as $skill)
+                    <option value="{{ $skill }}">{{ $skill }}</option>
+                @endforeach
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-500"><i class="fas fa-chevron-down text-xs"></i></div>
+        </div>
+        
+        <select name="preferred_skills[]" id="pref_skills_hidden" multiple class="hidden">
+            @foreach($availableSkills as $skill)
+                <option value="{{ $skill }}" @selected(in_array($skill, $selectedPreferredSkills))>{{ $skill }}</option>
+            @endforeach
+        </select>
+
+        @error('preferred_skills')
+            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+        @enderror
+    </div>
+</div>
+
+<script>
+    function renderSkillTags(type) {
+        const hiddenSelect = document.getElementById(type + '_skills_hidden');
+        const container = document.getElementById(type + '_skills_tags');
+        container.innerHTML = '';
+        
+        Array.from(hiddenSelect.options).filter(opt => opt.selected).forEach(opt => {
+            const el = document.createElement('span');
+            // Using a slightly different color for preferred to distinguish
+            const colorClass = type === 'req' ? 'bg-red-50 text-red-700 border-red-200' : 'bg-blue-50 text-blue-700 border-blue-200';
+            el.className = `inline-flex items-center px-3 py-1 ${colorClass} text-sm font-medium rounded-full border`;
+            el.innerHTML = `${opt.value} <button type="button" onclick="removeSkillTag('${type}', '${opt.value}')" class="ml-2 hover:opacity-75"><i class="fas fa-times"></i></button>`;
+            container.appendChild(el);
+        });
+    }
+
+    function addSkillTag(type, value) {
+        if(!value) return;
+        const hiddenSelect = document.getElementById(type + '_skills_hidden');
+        const opt = Array.from(hiddenSelect.options).find(o => o.value === value);
+        if(opt && !opt.selected) {
+            opt.selected = true;
+            renderSkillTags(type);
+        }
+    }
+
+    function removeSkillTag(type, value) {
+        const hiddenSelect = document.getElementById(type + '_skills_hidden');
+        const opt = Array.from(hiddenSelect.options).find(o => o.value === value);
+        if(opt && opt.selected) {
+            opt.selected = false;
+            renderSkillTags(type);
+        }
+    }
+
+    // Initialize tags on load
+    document.addEventListener('DOMContentLoaded', () => {
+        renderSkillTags('req');
+        renderSkillTags('pref');
+    });
+</script>
+
+<div class="mb-6">
+    <label class="block text-sm font-semibold text-gray-700 mb-1">General Requirements (one per line)</label>
+    <p class="text-xs text-gray-500 mb-2">e.g., "Available on event dates", "Able to attend briefing".</p>
+    <textarea name="requirements_text" rows="4" placeholder="Enter general requirements (one per line)..."
               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">@if(isset($opening) && is_array($opening->requirements)){{ implode("\n", $opening->requirements) }}@else{{ old('requirements_text') }}@endif</textarea>
     @error('requirements_text')
         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
