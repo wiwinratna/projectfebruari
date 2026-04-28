@@ -63,43 +63,42 @@
     </div>
 </div>
 
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-    <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">Venue</label>
-        <input type="text" name="venue" value="{{ old('venue', $event->venue) }}"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
-        @error('venue')
-            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-        @enderror
-    </div>
-    <div>
-        <label class="block text-sm font-semibold text-gray-700 mb-1">City</label>
-        <select name="city_id"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
-            <option value="">-- Select City --</option>
-            @php
-                $currentProvince = '';
-            @endphp
-            @foreach ($cities as $city)
-                @if($city->province !== $currentProvince)
-                    @if($currentProvince !== '')
-                        </optgroup>
-                    @endif
-                    <optgroup label="{{ $city->province }}">
-                    @php $currentProvince = $city->province; @endphp
-                @endif
-                <option value="{{ $city->id }}"
-                        @selected(old('city_id', $event->city_id) == $city->id)>
-                    {{ $city->name }}
-                </option>
-            @endforeach
-            @if($currentProvince !== '')
-                </optgroup>
-            @endif
-        </select>
-        @error('city_id')
-            <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-        @enderror
+<div class="mt-8 mb-4 border-t border-gray-100 pt-6">
+    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-map-marker-alt text-red-500 mr-2"></i> Event Location</h3>
+    
+    <input type="hidden" name="province_name" id="province_name" value="{{ old('province_name', $event->province_name) }}">
+    <input type="hidden" name="city_name" id="city_name" value="{{ old('city_name', $event->city_name) }}">
+    <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $event->latitude) }}">
+    <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $event->longitude) }}">
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Province</label>
+            <select name="province_code" id="sel-province" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+                <option value="">-- Select Province --</option>
+            </select>
+            @error('province_code')
+                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+        
+        <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">City / Regency</label>
+            <select name="city_code" id="sel-city" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" disabled>
+                <option value="">-- Select City --</option>
+            </select>
+            @error('city_code')
+                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Venue Name / Detail</label>
+            <input type="text" name="venue" value="{{ old('venue', $event->venue) }}" placeholder="e.g. Gelora Bung Karno" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+            @error('venue')
+                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+            @enderror
+        </div>
     </div>
 </div>
 
@@ -221,3 +220,110 @@
     <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
   @enderror
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+        const provinceSelect = document.getElementById('sel-province');
+        const citySelect = document.getElementById('sel-city');
+        const provinceNameInput = document.getElementById('province_name');
+        const cityNameInput = document.getElementById('city_name');
+        const latInput = document.getElementById('latitude');
+        const lngInput = document.getElementById('longitude');
+
+        const currentProvince = "{{ old('province_code', $event->province_code ?? '') }}";
+        const currentCity = "{{ old('city_code', $event->city_code ?? '') }}";
+
+        let regionData = { provinces: [], cities: [] };
+
+        async function loadProvinces() {
+            try {
+                const res = await fetch('/api/indonesia/provinces');
+                regionData.provinces = await res.json();
+                
+                regionData.provinces.forEach(p => {
+                    const option = new Option(p.nama, p.id, false, p.id === currentProvince);
+                    provinceSelect.appendChild(option);
+                });
+
+                if (currentProvince) {
+                    await loadCities(currentProvince, currentCity);
+                }
+            } catch(e) { console.error("Error loading provinces:", e); }
+        }
+
+        async function loadCities(provinceId, selectedCityId = '') {
+            citySelect.innerHTML = '<option value="">-- Select City --</option>';
+            citySelect.disabled = true;
+            
+            if(!provinceId) return;
+
+            try {
+                const res = await fetch(`/api/indonesia/cities/${provinceId}`);
+                regionData.cities = await res.json();
+                
+                regionData.cities.forEach(c => {
+                    const option = new Option(c.nama, c.id, false, c.id === selectedCityId);
+                    citySelect.appendChild(option);
+                });
+                
+                citySelect.disabled = false;
+            } catch(e) { console.error("Error loading cities", e); }
+        }
+
+        async function geocodeLocation(cityName, provinceName) {
+            try {
+                // Remove prefixes like "Kabupaten " or "Kota " for better geocoding results
+                let cleanCity = cityName.replace(/^(Kabupaten|Kota)\s+/i, '');
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(cleanCity)},${encodeURIComponent(provinceName)},Indonesia&format=json&limit=1`);
+                const data = await res.json();
+                
+                if (data && data.length > 0) {
+                    latInput.value = data[0].lat;
+                    lngInput.value = data[0].lon;
+                } else {
+                    // Fallback to province level if city not found
+                    const resProv = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(provinceName)},Indonesia&format=json&limit=1`);
+                    const dataProv = await resProv.json();
+                    if (dataProv && dataProv.length > 0) {
+                        latInput.value = dataProv[0].lat;
+                        lngInput.value = dataProv[0].lon;
+                    }
+                }
+            } catch(e) { console.error("Geocoding failed", e); }
+        }
+
+        provinceSelect.addEventListener('change', async (e) => {
+            const val = e.target.value;
+            const text = e.target.options[e.target.selectedIndex].text;
+            provinceNameInput.value = val ? text : '';
+            
+            // Reset city and coords
+            cityNameInput.value = '';
+            latInput.value = '';
+            lngInput.value = '';
+            
+            await loadCities(val);
+        });
+
+        citySelect.addEventListener('change', async (e) => {
+            const val = e.target.value;
+            if(!val) {
+                cityNameInput.value = '';
+                latInput.value = '';
+                lngInput.value = '';
+                return;
+            }
+            
+            const text = e.target.options[e.target.selectedIndex].text;
+            cityNameInput.value = text;
+            
+            // Fetch coordinates via Nominatim API when city changes
+            if (provinceNameInput.value && text) {
+                await geocodeLocation(text, provinceNameInput.value);
+            }
+        });
+
+        // Initialize
+        loadProvinces();
+    });
+</script>

@@ -24,6 +24,12 @@ class Event extends Model
         'logo_path',
         'card_template_path',
         'card_template_updated_at',
+        'province_code',
+        'province_name',
+        'city_code',
+        'city_name',
+        'latitude',
+        'longitude',
     ];
 
     protected function casts(): array

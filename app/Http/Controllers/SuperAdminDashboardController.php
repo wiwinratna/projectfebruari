@@ -32,6 +32,53 @@ class SuperAdminDashboardController extends Controller
             ->take(5)
             ->get();
 
+        $allMapEvents = Event::with(['city:id,name,province'])->get()->map(function($e) {
+            return [
+                'id' => $e->id,
+                'title' => $e->title,
+                'start_at' => $e->start_at ? $e->start_at->format('M d, Y') : 'N/A',
+                'end_at' => $e->end_at ? $e->end_at->format('M d, Y') : 'N/A',
+                'venue' => $e->venue ?: 'TBA',
+                'city_name' => $e->city_name ?: ($e->city ? $e->city->name : 'Unknown City'),
+                'province_name' => $e->province_name ?: ($e->city ? $e->city->province : 'Unknown Province'),
+                'latitude' => $e->latitude,
+                'longitude' => $e->longitude,
+                'status' => $e->status,
+                'status_color' => match($e->status) {
+                    'active' => 'green',
+                    'upcoming' => 'blue',
+                    'completed' => 'gray',
+                    default => 'red'
+                }
+            ];
+        });
+
+        // Additional Analytics
+        $eventsByStatus = Event::selectRaw('status, count(*) as count')->groupBy('status')->pluck('count', 'status');
+        
+        $topProvinces = Event::selectRaw('COALESCE(province_name, (SELECT province FROM cities WHERE cities.id = events.city_id)) as province, count(*) as count')
+            ->havingRaw('province IS NOT NULL')
+            ->groupBy('province')
+            ->orderByDesc('count')
+            ->take(5)
+            ->get();
+
+        $eventTrend = collect(range(5, 0))->map(function ($i) {
+            $date = now()->subMonths($i);
+            return [
+                'label' => $date->translatedFormat('M Y'),
+                'count' => Event::whereYear('start_at', $date->year)
+                    ->whereMonth('start_at', $date->month)
+                    ->count(),
+            ];
+        });
+
+        $contentStats = [
+            'news' => \App\Models\NewsPost::where('is_published', true)->count(),
+            'partners' => \App\Models\Partner::count(),
+            'slides' => \App\Models\HeroSlide::count(),
+        ];
+
         return view('super-admin.dashboard', compact(
             'totalAdmins',
             'unassignedAdmins',
@@ -39,7 +86,12 @@ class SuperAdminDashboardController extends Controller
             'activeEvents',
             'totalCustomers',
             'admins',
-            'events'
+            'events',
+            'allMapEvents',
+            'eventsByStatus',
+            'topProvinces',
+            'eventTrend',
+            'contentStats'
         ));
     }
 
@@ -545,7 +597,12 @@ class SuperAdminDashboardController extends Controller
             'start_at' => ['required', 'date'],
             'end_at' => ['nullable', 'date', 'after_or_equal:start_at'],
             'venue' => ['nullable', 'string', 'max:255'],
-            'city_id' => ['nullable', 'exists:cities,id'],
+            'province_code' => ['nullable', 'string', 'max:50'],
+            'province_name' => ['nullable', 'string', 'max:255'],
+            'city_code' => ['nullable', 'string', 'max:50'],
+            'city_name' => ['nullable', 'string', 'max:255'],
+            'latitude' => ['nullable', 'numeric'],
+            'longitude' => ['nullable', 'numeric'],
             'status' => ['required', Rule::in(['planning', 'upcoming', 'active', 'completed'])],
             'stage' => ['required', Rule::in(['province', 'national', 'asean/sea', 'asia', 'world'])],
             'penyelenggara' => ['required', 'string', 'max:255'],
@@ -566,7 +623,12 @@ class SuperAdminDashboardController extends Controller
                 'start_at',
                 'end_at',
                 'venue',
-                'city_id',
+                'province_code',
+                'province_name',
+                'city_code',
+                'city_name',
+                'latitude',
+                'longitude',
                 'status',
                 'stage',
                 'penyelenggara',
