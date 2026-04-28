@@ -41,7 +41,7 @@
                 @if ($event->card_template_path)
                     <img
                         id="template-bg"
-                        src="{{ Storage::disk('public')->url($event->card_template_path) }}"
+                        src="{{ asset('storage/' . ltrim($event->card_template_path, '/')) }}"
                         alt="Template"
                         class="absolute inset-0 w-full h-full object-cover rounded border border-gray-600"
                     />
