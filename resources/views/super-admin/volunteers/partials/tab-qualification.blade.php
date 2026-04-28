@@ -2,13 +2,43 @@
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
     {{-- Education --}}
     <div class="p-5 bg-gray-50 rounded-2xl border border-gray-100">
-        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4"><i class="fas fa-graduation-cap mr-1"></i> Education</p>
-        <dl class="space-y-3">
-            <div><dt class="text-xs text-gray-500">Last Education</dt><dd class="text-sm font-semibold text-gray-900 mt-0.5">{{ $user->profile?->last_education ?? '—' }}</dd></div>
-            <div><dt class="text-xs text-gray-500">Field of Study</dt><dd class="text-sm font-semibold text-gray-900 mt-0.5">{{ $user->profile?->field_of_study ?? '—' }}</dd></div>
-            <div><dt class="text-xs text-gray-500">University</dt><dd class="text-sm font-semibold text-gray-900 mt-0.5">{{ $user->profile?->university ?? '—' }}</dd></div>
-            <div><dt class="text-xs text-gray-500">Graduation Year</dt><dd class="text-sm font-semibold text-gray-900 mt-0.5">{{ $user->profile?->graduation_year ?? '—' }}</dd></div>
-        </dl>
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4"><i class="fas fa-graduation-cap mr-1"></i> Education History</p>
+        @if($user->educationHistories && $user->educationHistories->count() > 0)
+            <div class="space-y-4">
+                @foreach($user->educationHistories->sortByDesc('sort_order') as $edu)
+                    <div class="p-3 bg-white border border-gray-200 rounded-xl relative">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="text-sm font-bold text-gray-900">{{ $edu->institution_name }}</h4>
+                                <p class="text-xs font-semibold text-gray-700 mt-0.5">
+                                    {{ $edu->education_level }} - {{ $edu->field_of_study }}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                    @if($edu->is_still_studying)
+                                        Present (Masih menempuh pendidikan)
+                                    @else
+                                        Graduated: {{ $edu->graduation_year }}
+                                    @endif
+                                </p>
+                            </div>
+                            @if($edu->proof_document)
+                                <a href="{{ $edu->proof_document_url }}" target="_blank" class="text-xs text-blue-600 hover:text-blue-800 font-semibold bg-blue-50 px-2 py-1 rounded">
+                                    <i class="fas fa-file-alt mr-1"></i> Proof
+                                </a>
+                            @endif
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        @else
+            <dl class="space-y-3">
+                <div><dt class="text-xs text-gray-500">Last Education</dt><dd class="text-sm font-semibold text-gray-900 mt-0.5">{{ $user->profile?->last_education ?? '—' }}</dd></div>
+                <div><dt class="text-xs text-gray-500">Field of Study</dt><dd class="text-sm font-semibold text-gray-900 mt-0.5">{{ $user->profile?->field_of_study ?? '—' }}</dd></div>
+                <div><dt class="text-xs text-gray-500">University</dt><dd class="text-sm font-semibold text-gray-900 mt-0.5">{{ $user->profile?->university ?? '—' }}</dd></div>
+                <div><dt class="text-xs text-gray-500">Graduation Year</dt><dd class="text-sm font-semibold text-gray-900 mt-0.5">{{ $user->profile?->graduation_year ?? '—' }}</dd></div>
+            </dl>
+        @endif
     </div>
 
     {{-- Skills & Languages --}}
