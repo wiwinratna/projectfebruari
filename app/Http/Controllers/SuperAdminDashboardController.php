@@ -556,10 +556,17 @@ class SuperAdminDashboardController extends Controller
         ];
 
         // 4. Application status distribution
-        $appStatusData = \App\Models\Application::whereHas('user', fn($q) => $q->where('role', 'customer'))
+        $rawAppStatus = \App\Models\Application::whereHas('user', fn($q) => $q->where('role', 'customer'))
             ->selectRaw('status, COUNT(*) as total')
             ->groupBy('status')
             ->pluck('total', 'status');
+
+        $appStatusData = [
+            'pending' => ($rawAppStatus['pending'] ?? 0) + ($rawAppStatus['submitted'] ?? 0),
+            'accepted' => $rawAppStatus['accepted'] ?? 0,
+            'rejected' => $rawAppStatus['rejected'] ?? 0,
+            'reviewed' => $rawAppStatus['reviewed'] ?? 0,
+        ];
 
         // 5. Education level distribution
         $educationData = \App\Models\UserEducationHistory::whereHas('user', fn($q) => $q->where('role', 'customer'))
@@ -588,7 +595,7 @@ class SuperAdminDashboardController extends Controller
             ->map(function ($event) {
                 $total = \App\Models\Application::whereHas('opening', fn($q) => $q->where('event_id', $event->id))->count();
                 $accepted = \App\Models\Application::whereHas('opening', fn($q) => $q->where('event_id', $event->id))->where('status', 'accepted')->count();
-                $pending = \App\Models\Application::whereHas('opening', fn($q) => $q->where('event_id', $event->id))->where('status', 'pending')->count();
+                $pending = \App\Models\Application::whereHas('opening', fn($q) => $q->where('event_id', $event->id))->whereIn('status', ['pending', 'submitted'])->count();
                 $rejected = \App\Models\Application::whereHas('opening', fn($q) => $q->where('event_id', $event->id))->where('status', 'rejected')->count();
                 return [
                     'title' => Str::limit($event->title, 20),
