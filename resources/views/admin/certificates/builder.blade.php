@@ -517,7 +517,7 @@
 </style>
 
 {{-- ════ SCRIPTS ════ --}}
-<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.27/interact.min.js"></script>
 <script>
 @verbatim
 const MM2PX=3.77953, PX2MM=1/MM2PX, PT2PX=96/72;
@@ -535,7 +535,7 @@ const ROUTES = {
     preview  : '{{ route("admin.certificate-layouts.preview-sample") }}',
     publish  : '{{ $activeLayout ? route("admin.certificate-layouts.publish", $activeLayout) : "" }}',
     uploadBase: '/admin/certificate-layouts/',
-    storageBase: '/storage',
+    storageBase: '/media',
 };
 @verbatim
 const LABELS={

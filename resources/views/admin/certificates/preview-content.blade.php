@@ -17,7 +17,7 @@ $resolveImage = function ($subPath) use ($isPdf) {
     if ($isPdf) {
         return storage_path('app/public/' . ltrim($subPath, '/'));
     }
-    return asset('storage/' . ltrim($subPath, '/'));
+    return url('/media/' . ltrim($subPath, '/'));
 };
 
 $bgUrl        = $resolveImage($payload['background_path'] ?? $layoutModel?->background_path ?? null);

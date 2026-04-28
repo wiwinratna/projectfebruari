@@ -4,7 +4,7 @@
     $pxPerMm = 3.77953;
     $templatePath = $event->card_template_path;
     $templateExists = $templatePath ? Storage::disk('public')->exists($templatePath) : false;
-    $templateUrl = $templatePath ? asset('storage/' . $templatePath) : null;
+    $templateUrl = $templatePath ? url('/media/' . ltrim($templatePath, '/')) : null;
     $effectiveLayout = $layout ?: \App\Models\CardLayout::getDefaultLayout();
 @endphp
 
@@ -40,9 +40,8 @@
                             if (str_starts_with($snapshot['applicant_photo'], 'data:')) {
                                 $photoUrl = $snapshot['applicant_photo'];
                             } else {
-                                // Use asset() not Storage::disk()->url() — the latter builds an
-                                // absolute https:// URL that returns 403 in production.
-                                $photoUrl = asset('storage/' . ltrim($snapshot['applicant_photo'], '/'));
+                                // Use /media/ route to bypass Cloudflare WAF blocking /storage/* paths
+                                $photoUrl = url('/media/' . ltrim($snapshot['applicant_photo'], '/'));
                             }
                         @endphp
                         <img

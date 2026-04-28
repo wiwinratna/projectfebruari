@@ -8,11 +8,12 @@
     $logoPathRaw = $event->logo_path;
     $logoFilename = $logoPathRaw ? basename($logoPathRaw) : '';
     $logoExists = $logoPathRaw ? Storage::disk('public')->exists($logoPathRaw) : false;
-    $logoPublicUrl = $logoPathRaw ? asset('storage/' . $logoPathRaw) : null;
+    // Use /media/ route instead of /storage/ to bypass Cloudflare WAF 403 on event-logos/* paths
+    $logoPublicUrl = $logoPathRaw ? url('/media/' . ltrim($logoPathRaw, '/')) : null;
     $templatePathRaw = $event->card_template_path;
     $templateFilename = $templatePathRaw ? basename($templatePathRaw) : '';
     $templateExists = $templatePathRaw ? Storage::disk('public')->exists($templatePathRaw) : false;
-    $templatePublicUrl = $templatePathRaw ? asset('storage/' . $templatePathRaw) : null;
+    $templatePublicUrl = $templatePathRaw ? url('/media/' . ltrim($templatePathRaw, '/')) : null;
     $renderStyleConfig = \App\Support\CardLayoutRenderStyle::editorConfig();
 @endphp
 
@@ -1008,5 +1009,5 @@
     }
 </script>
 
-<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.27/interact.min.js"></script>
 @endsection

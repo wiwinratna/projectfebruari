@@ -9,7 +9,7 @@ $sidebarEvent = \App\Models\Event::query()
 ->select(['id', 'title', 'logo_path'])
 ->find(session('admin_event_id'));
 if ($sidebarEvent && filled($sidebarEvent->logo_path) && \Illuminate\Support\Facades\Storage::disk('public')->exists($sidebarEvent->logo_path)) {
-$sidebarEventLogoUrl = asset('storage/' . ltrim($sidebarEvent->logo_path, '/'));
+$sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
 }
 }
 @endphp
