@@ -33,7 +33,7 @@ Tambah Konfigurasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-
 @endsection
 
 @push('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.2.2/css/tom-select.css">
 <style>
   .ts-control{
     border-radius: .5rem !important;
@@ -58,7 +58,7 @@ Tambah Konfigurasi <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-
 @endpush
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tom-select/2.2.2/js/tom-select.complete.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
   document.querySelectorAll('select.ts-select').forEach((el) => {
