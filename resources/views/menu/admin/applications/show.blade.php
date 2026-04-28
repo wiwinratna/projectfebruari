@@ -59,10 +59,28 @@
             
             <div class="space-y-4">
                 <div>
-                    <p class="text-xs text-gray-400 uppercase mb-1">Education</p>
-                    <p class="font-bold text-gray-800">{{ $application->user->profile->university ?? '-' }}</p>
-                    <p class="text-sm text-gray-600">{{ $application->user->profile->field_of_study ?? '' }}</p>
-                    <p class="text-xs text-gray-400">{{ $application->user->profile->last_education ?? '' }} @if($application->user->profile->graduation_year) • {{ $application->user->profile->graduation_year }} @endif</p>
+                    <p class="text-xs text-gray-400 uppercase mb-2">Education</p>
+                    @if($application->user->educationHistories && $application->user->educationHistories->count())
+                        <div class="space-y-3">
+                            @foreach($application->user->educationHistories as $edu)
+                                <div class="flex items-start gap-2.5 border-l-2 border-blue-200 pl-4 py-1.5">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="flex items-center gap-2">
+                                            <p class="font-semibold text-gray-800 text-sm truncate">{{ $edu->institution_name }}</p>
+                                            @if($edu->proof_document)
+                                                <a href="{{ $edu->proof_document_url }}" target="_blank" class="text-gray-400 hover:text-red-500 transition-colors flex-shrink-0" title="View proof">
+                                                    <i class="fas fa-paperclip text-[11px]"></i>
+                                                </a>
+                                            @endif
+                                        </div>
+                                        <p class="text-xs text-gray-500">{{ $edu->education_level }}{{ $edu->field_of_study ? ' · ' . $edu->field_of_study : '' }}{{ $edu->is_still_studying ? ' · Present' : ($edu->graduation_year ? ' · ' . $edu->graduation_year : '') }}</p>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @else
+                        <p class="text-sm text-gray-400">-</p>
+                    @endif
                 </div>
 
                 <div>
@@ -110,6 +128,23 @@
             </div>
         </div>
 
+        <!-- Skill Match Insight -->
+        @php
+            $userSkills = array_filter(array_map('trim', explode(',', $application->user->profile->skills ?? '')));
+            $reqSkills = is_array($application->opening->required_skills) ? $application->opening->required_skills : [];
+            $prefSkills = is_array($application->opening->preferred_skills) ? $application->opening->preferred_skills : [];
+            
+            $matchedReq = array_intersect($userSkills, $reqSkills);
+            $matchedPref = array_intersect($userSkills, $prefSkills);
+            
+            $missingReq = array_diff($reqSkills, $userSkills);
+            $missingPref = array_diff($prefSkills, $userSkills);
+            
+            $reqMatchPerc = count($reqSkills) > 0 ? round((count($matchedReq) / count($reqSkills)) * 100) : 100;
+        @endphp
+
+
+
         <!-- Application Content -->
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
             <div class="mb-8">
@@ -123,9 +158,18 @@
 
             <div class="mb-8">
                 <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <i class="fas fa-history text-red-500"></i> Relevant Experience
+                    <i class="fas fa-history text-red-500"></i> Relevant Experience & Skills
                 </h3>
                 <div class="bg-gray-50 p-6 rounded-xl border border-gray-100">
+                    @if(count($matchedReq) > 0 || count($matchedPref) > 0)
+                        <div class="mb-4 flex flex-wrap gap-2">
+                            @foreach(array_merge($matchedReq, $matchedPref) as $skill)
+                                <span class="px-2.5 py-1 rounded-lg bg-green-50 text-green-700 text-xs font-bold border border-green-200">
+                                    <i class="fas fa-check-circle mr-1"></i>{{ $skill }}
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
                     <p class="text-gray-700 leading-relaxed text-sm whitespace-pre-line">{{ $application->experience }}</p>
                 </div>
             </div>
@@ -228,7 +272,7 @@
                             <a href="{{ asset('storage/' . $cert->file_path) }}" target="_blank"
                                 class="w-9 h-9 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center"
                                 title="Open">
-                                <i class="fas fa-arrow-up-right-from-square"></i>
+                                <i class="fas fa-external-link-alt"></i>
                             </a>
 
                             <a href="{{ asset('storage/' . $cert->file_path) }}" download
@@ -252,6 +296,20 @@
             </div>
 
         <!-- Review Action -->
+        @if(session('error'))
+            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl mb-4 flex items-start gap-3">
+                <i class="fas fa-exclamation-circle mt-0.5 text-red-500"></i>
+                <div>
+                    <p class="font-bold text-sm">Action Failed</p>
+                    <p class="text-sm">{{ session('error') }}</p>
+                </div>
+            </div>
+        @endif
+        @if(session('status'))
+            <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl mb-4">
+                <i class="fas fa-check-circle mr-2"></i>{{ session('status') }}
+            </div>
+        @endif
         <form action="{{ route('admin.applications.update', $application->id) }}" method="POST">
             @csrf
             <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6"> <!-- sticky bottom-6 z-10 for floating effect if needed, but simple is better -->

@@ -15,6 +15,8 @@ class WorkerOpening extends Model
         'title',
         'description',
         'requirements',
+        'required_skills',
+        'preferred_skills',
         'slots_total',
         'slots_filled',
         'application_deadline',
@@ -26,6 +28,8 @@ class WorkerOpening extends Model
     {
         return [
             'requirements' => 'array',
+            'required_skills' => 'array',
+            'preferred_skills' => 'array',
             'application_deadline' => 'datetime',
         ];
     }
