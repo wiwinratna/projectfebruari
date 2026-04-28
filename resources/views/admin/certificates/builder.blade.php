@@ -729,7 +729,7 @@ function makeCanvasEl(data){
     } else if(data.type==='signature'){
         const fs=(s.fontSizePt||10)*PT2PX,col=s.color||'#1a1a2e';
         const sigImg=data.signatureImagePath
-            ?`<img src="/storage/${data.signatureImagePath}" style="max-height:36%;object-fit:contain;margin-bottom:2px;">`
+            ?`<img src="${ROUTES.storageBase}/${data.signatureImagePath}" style="max-height:36%;object-fit:contain;margin-bottom:2px;">`
             :`<div style="height:28%;border-bottom:1.5px dashed #d1d5db;width:80%;margin-bottom:4px;"></div>`;
         content=`<div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px 6px;">
             ${sigImg}
