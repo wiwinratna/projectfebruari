@@ -6,25 +6,54 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
   <title>Verifikasi Sertifikat</title>
   <style>
-    @keyframes blobFloatA { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(24px,-18px,0) scale(1.08)} }
-    @keyframes blobFloatB { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(-28px,22px,0) scale(1.06)} }
-    @keyframes blobFloatC { 0%,100%{transform:translate3d(0,0,0) scale(1)} 50%{transform:translate3d(16px,20px,0) scale(1.07)} }
-    .blob-a{animation:blobFloatA 14s ease-in-out infinite}
-    .blob-b{animation:blobFloatB 16s ease-in-out infinite}
-    .blob-c{animation:blobFloatC 18s ease-in-out infinite}
-    @media(prefers-reduced-motion:reduce){.blob-a,.blob-b,.blob-c{animation:none}}
-
-    /* Print: A4 landscape certificate */
-    @media print {
-      .no-print { display: none !important; }
-      body { background: white !important; }
-      .cert-shell {
-        width: 297mm; height: 210mm; margin: 0 !important;
-        padding: 0 !important; border: none !important;
-        box-shadow: none !important; border-radius: 0 !important;
-        overflow: hidden !important;
-      }
+    /* ── Tailwind v3 compatibility: arbitrary values + opacity modifiers ── */
+    body{background-color:#0b0f19!important;}
+    .bg-\[\#0b0f19\]{background-color:#0b0f19!important;}
+    /* Main card gradient */
+    .bg-gradient-to-br.from-slate-900\/95{background:linear-gradient(to bottom right,rgba(15,23,42,.97),rgba(16,24,40,.97),rgba(2,6,23,.97))!important;}
+    /* Header gradient */
+    .bg-gradient-to-r.from-sky-500\/10{background:linear-gradient(to right,rgba(14,165,233,.1),rgba(52,211,153,.1),rgba(251,191,36,.1))!important;}
+    /* Blob backgrounds */
+    .bg-sky-500\/10{background-color:rgba(14,165,233,.1)!important;}
+    .bg-amber-400\/10{background-color:rgba(251,191,36,.1)!important;}
+    .bg-emerald-400\/10{background-color:rgba(52,211,153,.1)!important;}
+    .blur-3xl{filter:blur(64px)!important;}
+    /* White/black opacity */
+    .bg-white\/10{background-color:rgba(255,255,255,.1)!important;}
+    .bg-white\/5{background-color:rgba(255,255,255,.05)!important;}
+    .bg-black\/30{background-color:rgba(0,0,0,.3)!important;}
+    .border-white\/10{border-color:rgba(255,255,255,.1)!important;}
+    .border-white\/20{border-color:rgba(255,255,255,.2)!important;}
+    /* Section backgrounds */
+    .bg-emerald-500\/10{background-color:rgba(16,185,129,.1)!important;}
+    .bg-rose-500\/10{background-color:rgba(239,68,68,.1)!important;}
+    .bg-amber-400\/10{background-color:rgba(251,191,36,.1)!important;}
+    /* Section borders */
+    .border-emerald-500\/20{border-color:rgba(16,185,129,.2)!important;}
+    .border-rose-500\/20{border-color:rgba(239,68,68,.2)!important;}
+    .border-amber-400\/20{border-color:rgba(251,191,36,.2)!important;}
+    /* Status dots */
+    .bg-emerald-400{background-color:#34d399!important;}
+    .bg-rose-400{background-color:#fb7185!important;}
+    /* Text colors */
+    .text-emerald-200{color:#a7f3d0!important;}
+    .text-rose-200{color:#fecdd3!important;}
+    .text-amber-300{color:#fcd34d!important;}
+    /* Rounded */
+    .rounded-2xl{border-radius:1rem!important;}
+    /* Print */
+    @media print{
+      .no-print{display:none!important;}
+      body{background:white!important;}
+      .cert-shell{width:297mm;height:210mm;margin:0!important;padding:0!important;border:none!important;box-shadow:none!important;border-radius:0!important;overflow:hidden!important;}
     }
+    @keyframes blobFloatA{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(24px,-18px,0) scale(1.08)}}
+    @keyframes blobFloatB{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-28px,22px,0) scale(1.06)}}
+    @keyframes blobFloatC{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(16px,20px,0) scale(1.07)}}
+    .blob-a{animation:blobFloatA 14s ease-in-out infinite;}
+    .blob-b{animation:blobFloatB 16s ease-in-out infinite;}
+    .blob-c{animation:blobFloatC 18s ease-in-out infinite;}
+    @media(prefers-reduced-motion:reduce){.blob-a,.blob-b,.blob-c{animation:none;}}
   </style>
 </head>
 

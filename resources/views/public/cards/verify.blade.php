@@ -6,24 +6,70 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
   <title>Card Verification</title>
   <style>
-    @keyframes blobFloatA {
-      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-      50% { transform: translate3d(24px, -18px, 0) scale(1.08); }
-    }
-    @keyframes blobFloatB {
-      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-      50% { transform: translate3d(-28px, 22px, 0) scale(1.06); }
-    }
-    @keyframes blobFloatC {
-      0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
-      50% { transform: translate3d(16px, 20px, 0) scale(1.07); }
-    }
-    .blob-a { animation: blobFloatA 14s ease-in-out infinite; }
-    .blob-b { animation: blobFloatB 16s ease-in-out infinite; }
-    .blob-c { animation: blobFloatC 18s ease-in-out infinite; }
-    @media (prefers-reduced-motion: reduce) {
-      .blob-a, .blob-b, .blob-c { animation: none; }
-    }
+    /* ── Tailwind v3 compatibility: arbitrary values + opacity modifiers ── */
+    body{background-color:#0b0f19!important;}
+    .bg-\[\#0b0f19\]{background-color:#0b0f19!important;}
+    /* Slate palette */
+    .from-slate-900\/95,.bg-slate-900\/95{background-color:rgba(15,23,42,.95);}
+    .to-slate-950\/95,.bg-slate-950\/95{background-color:rgba(2,6,23,.95);}
+    /* Main card gradient */
+    .bg-gradient-to-br.from-slate-900\/95{background:linear-gradient(to bottom right,rgba(15,23,42,.97),rgba(16,24,40,.97),rgba(2,6,23,.97))!important;}
+    /* Header gradient */
+    .bg-gradient-to-r.from-sky-500\/10{background:linear-gradient(to right,rgba(14,165,233,.1),rgba(52,211,153,.1),rgba(248,113,133,.1))!important;}
+    /* Blob backgrounds */
+    .bg-sky-500\/10{background-color:rgba(14,165,233,.1)!important;}
+    .bg-amber-400\/10{background-color:rgba(251,191,36,.1)!important;}
+    .bg-emerald-400\/10{background-color:rgba(52,211,153,.1)!important;}
+    .blur-3xl{filter:blur(64px)!important;}
+    /* White/black opacity */
+    .bg-white\/10{background-color:rgba(255,255,255,.1)!important;}
+    .bg-white\/5{background-color:rgba(255,255,255,.05)!important;}
+    .bg-black\/30{background-color:rgba(0,0,0,.3)!important;}
+    .bg-black\/20{background-color:rgba(0,0,0,.2)!important;}
+    .border-white\/10{border-color:rgba(255,255,255,.1)!important;}
+    .border-white\/20{border-color:rgba(255,255,255,.2)!important;}
+    /* Section backgrounds */
+    .bg-sky-500\/5{background-color:rgba(14,165,233,.05)!important;}
+    .bg-emerald-500\/5{background-color:rgba(16,185,129,.05)!important;}
+    .bg-amber-500\/5{background-color:rgba(245,158,11,.05)!important;}
+    .bg-rose-500\/5{background-color:rgba(239,68,68,.05)!important;}
+    .bg-violet-500\/5{background-color:rgba(139,92,246,.05)!important;}
+    .bg-emerald-500\/10{background-color:rgba(16,185,129,.1)!important;}
+    .bg-rose-500\/10{background-color:rgba(239,68,68,.1)!important;}
+    /* Section borders */
+    .border-sky-300\/20{border-color:rgba(125,211,252,.2)!important;}
+    .border-emerald-300\/20{border-color:rgba(110,231,183,.2)!important;}
+    .border-amber-300\/20{border-color:rgba(252,211,77,.2)!important;}
+    .border-rose-300\/20{border-color:rgba(253,164,175,.2)!important;}
+    .border-violet-300\/20{border-color:rgba(196,181,253,.2)!important;}
+    .border-emerald-500\/20{border-color:rgba(16,185,129,.2)!important;}
+    .border-rose-500\/20{border-color:rgba(239,68,68,.2)!important;}
+    /* Chip/badge borders */
+    .border-sky-300\/30{border-color:rgba(125,211,252,.3)!important;}
+    .border-emerald-300\/30{border-color:rgba(110,231,183,.3)!important;}
+    .bg-sky-400\/10{background-color:rgba(56,189,248,.1)!important;}
+    /* Status dots */
+    .bg-emerald-400{background-color:#34d399!important;}
+    .bg-rose-400{background-color:#fb7185!important;}
+    /* Text colors */
+    .text-emerald-100{color:#d1fae5!important;}
+    .text-emerald-200{color:#a7f3d0!important;}
+    .text-rose-100{color:#ffe4e6!important;}
+    .text-rose-200{color:#fecdd3!important;}
+    /* Rounded */
+    .rounded-2xl{border-radius:1rem!important;}
+    /* Input overrides for dark mode */
+    input,textarea{color:#f3f4f6!important;background-color:rgba(0,0,0,.3)!important;border-color:rgba(255,255,255,.1)!important;}
+    input::placeholder,textarea::placeholder{color:#6b7280!important;}
+    /* Form focus */
+    input:focus,textarea:focus{outline:none!important;box-shadow:0 0 0 2px rgba(255,255,255,.1)!important;}
+    @keyframes blobFloatA{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(24px,-18px,0) scale(1.08)}}
+    @keyframes blobFloatB{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-28px,22px,0) scale(1.06)}}
+    @keyframes blobFloatC{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(16px,20px,0) scale(1.07)}}
+    .blob-a{animation:blobFloatA 14s ease-in-out infinite;}
+    .blob-b{animation:blobFloatB 16s ease-in-out infinite;}
+    .blob-c{animation:blobFloatC 18s ease-in-out infinite;}
+    @media(prefers-reduced-motion:reduce){.blob-a,.blob-b,.blob-c{animation:none;}}
   </style>
 </head>
 
