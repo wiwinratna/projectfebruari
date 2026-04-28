@@ -562,12 +562,22 @@ class SuperAdminDashboardController extends Controller
             ->pluck('total', 'status');
 
         // 5. Education level distribution
-        $educationData = \App\Models\UserProfile::whereHas('user', fn($q) => $q->where('role', 'customer'))
+        $educationData = \App\Models\UserEducationHistory::whereHas('user', fn($q) => $q->where('role', 'customer'))
+            ->selectRaw('education_level, COUNT(DISTINCT user_id) as count')
+            ->groupBy('education_level')
+            ->pluck('count', 'education_level');
+
+        $legacyEducation = \App\Models\UserProfile::whereHas('user', fn($q) => $q->where('role', 'customer'))
             ->whereNotNull('last_education')
             ->where('last_education', '!=', '')
-            ->selectRaw('last_education, COUNT(*) as total')
+            ->whereDoesntHave('user.educationHistories')
+            ->selectRaw('last_education as education_level, COUNT(*) as count')
             ->groupBy('last_education')
-            ->pluck('total', 'last_education');
+            ->pluck('count', 'education_level');
+
+        foreach ($legacyEducation as $level => $count) {
+            $educationData[$level] = ($educationData[$level] ?? 0) + $count;
+        }
 
         // 6. Applications per event
         $perEventData = Event::select('id', 'title')

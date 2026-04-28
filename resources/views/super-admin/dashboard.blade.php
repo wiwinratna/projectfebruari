@@ -533,7 +533,8 @@
                 const marker = L.marker([ev.latitude, ev.longitude], { icon: iconColors[ev.status_color] || iconColors['red'] });
                 
                 const badgeStyle = statusBadgeColors[ev.status] || statusBadgeColors['planning'];
-                const locationParts = [ev.city_name, ev.province_name].filter(p => p && p.trim());
+                const locationParts = [ev.city_name, ev.province_name]
+                    .filter(p => p && p.trim() && !p.toLowerCase().includes('belum ditentukan'));
                 const locationLine = locationParts.length > 0 ? locationParts.join(', ') : '';
 
                 const popupContent = `

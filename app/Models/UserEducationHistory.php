@@ -63,6 +63,6 @@ class UserEducationHistory extends Model
     public function getProofDocumentUrlAttribute(): ?string
     {
         if (!$this->proof_document) return null;
-        return asset('storage/' . ltrim($this->proof_document, '/'));
+        return url('media/' . ltrim($this->proof_document, '/'));
     }
 }
