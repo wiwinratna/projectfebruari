@@ -373,7 +373,7 @@
         </div>
         <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
             <button onclick="closeCropperModal()" class="px-5 py-2 rounded-xl text-gray-600 font-bold hover:bg-gray-200 transition-all">Cancel</button>
-            <button onclick="saveCroppedImage()" class="px-5 py-2 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-500/30 hover:bg-red-700 transition-all">Apply & Save</button>
+            <button onclick="saveCroppedImage(this)" class="px-5 py-2 bg-red-600 text-white rounded-xl font-bold shadow-lg shadow-red-500/30 hover:bg-red-700 transition-all">Apply & Save</button>
         </div>
     </div>
 </div>
@@ -448,17 +448,17 @@ function closeCropperModal() {
     if (cropper) cropper.destroy();
     document.getElementById('profile_photo').value = '';
 }
-function saveCroppedImage() {
+function saveCroppedImage(btn) {
     if (!cropper) return;
+    
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    btn.disabled = true;
+
     cropper.getCroppedCanvas({ width: 500, height: 500 }).toBlob((blob) => {
         const formData = new FormData();
         formData.append('profile_photo', blob, 'profile.jpg');
         formData.append('_token', '{{ csrf_token() }}');
-        
-        const btn = event.currentTarget;
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        btn.disabled = true;
 
         fetch('{{ route("customer.settings.photo") }}', { method: 'POST', body: formData })
         .then(res => res.json())
