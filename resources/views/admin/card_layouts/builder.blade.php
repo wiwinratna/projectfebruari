@@ -41,7 +41,7 @@
                 @if ($event->card_template_path)
                     <img
                         id="template-bg"
-                        src="{{ asset('storage/' . ltrim($event->card_template_path, '/')) }}"
+                        src="{{ url('/media/' . ltrim($event->card_template_path, '/')) }}"
                         alt="Template"
                         class="absolute inset-0 w-full h-full object-cover rounded border border-gray-600"
                     />
@@ -95,7 +95,7 @@
 <!-- Hidden input untuk store layout JSON -->
 <input type="hidden" id="layout-json-input" />
 
-<script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.27/interact.min.js"></script>
 
 <script>
 const GRID_SIZE = 10; // mm
