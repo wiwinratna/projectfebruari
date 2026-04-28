@@ -40,7 +40,9 @@
                             if (str_starts_with($snapshot['applicant_photo'], 'data:')) {
                                 $photoUrl = $snapshot['applicant_photo'];
                             } else {
-                                $photoUrl = Storage::disk('public')->url($snapshot['applicant_photo']);
+                                // Use asset() not Storage::disk()->url() — the latter builds an
+                                // absolute https:// URL that returns 403 in production.
+                                $photoUrl = asset('storage/' . ltrim($snapshot['applicant_photo'], '/'));
                             }
                         @endphp
                         <img

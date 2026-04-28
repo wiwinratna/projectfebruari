@@ -56,7 +56,7 @@
                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                         <div>
                             <img
-                                src="{{ Storage::disk('public')->url($event->logo_path) }}"
+                                src="{{ asset('storage/' . ltrim($event->logo_path, '/')) }}"
                                 alt="Event Logo"
                                 class="h-20 w-auto object-contain"
                             />
@@ -97,7 +97,7 @@
                     <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                         <div>
                             <img
-                                src="{{ Storage::disk('public')->url($event->card_template_path) }}"
+                                src="{{ asset('storage/' . ltrim($event->card_template_path, '/')) }}"
                                 alt="Card Template"
                                 class="h-40 w-auto object-contain rounded border border-gray-300"
                             />
