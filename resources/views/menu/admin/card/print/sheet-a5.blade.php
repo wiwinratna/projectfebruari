@@ -357,6 +357,7 @@
         'zoneMap' => $zoneMap ?? [],
         'transportById' => $transportById ?? [],
         'accomById' => $accomById ?? [],
+        'photoIsFallbackByCardId' => $photoIsFallbackByCardId ?? [],
       ])
     @else
       {{-- FALLBACK TO MODE 1 DEFAULT LAYOUT --}}
@@ -365,8 +366,10 @@
 
           {{-- Photo --}}
           <div class="photo">
+            <!-- DEBUG2: array_keys={{ json_encode(array_keys($photoIsFallbackByCardId)) }}, val={{ json_encode($photoIsFallbackByCardId[$card->id] ?? null) }} -->
             @if($photo)
-              <img src="{{ $photo }}" alt="Photo">
+              @php $isFb = $photoIsFallbackByCardId[$card->id] ?? false; @endphp
+              <img src="{{ $photo }}" alt="Photo" style="{{ $isFb ? 'object-fit: contain; background: #ffffff; padding: 4px;' : 'object-fit: cover;' }}">
             @endif
           </div>
 
@@ -380,7 +383,7 @@
 
           {{-- LEFT COLUMN (flow) --}}
           <div class="leftCol">
-            <div class="name">{{ $snap['name'] ?? '—' }}</div>
+            <div class="name">{{ $snap['name'] ?? $snap['applicant_name'] ?? '—' }}</div>
             <div class="meta">{{ $snap['job_category_name'] ?? '' }}</div>
 
             <div class="privTitle">Transportation &amp; Accommodation</div>
@@ -394,9 +397,32 @@
                     <span class="mono">{{ $tBadge['code'] }}</span>
                   @endif
                 </span>
+              @elseif(!empty($final['raw_transport']))
+                @foreach(array_filter(array_map('trim', explode(',', $final['raw_transport']))) as $code)
+                  @php
+                    $match = collect($transportById ?? [])->first(fn($t) => strtoupper(trim($t->kode ?? '')) === strtoupper($code));
+                    if ($match) {
+                        $tb = transportBadge($match);
+                        $hasIcon = filled($tb['icon'] ?? null);
+                        $showCode = $tb['show_code'] ?? true;
+                    } else {
+                        $tb = ['code' => $code];
+                        $hasIcon = false;
+                        $showCode = true;
+                    }
+                  @endphp
+                  <span class="chip">
+                    @if($hasIcon)
+                      <x-card.icon-svg :icon-key="$tb['icon']" type="transport" size="12pt" />
+                    @endif
+                    @if($showCode)
+                      <span class="mono">{{ $tb['code'] }}</span>
+                    @endif
+                  </span>
+                @endforeach
               @endif
 
-              @foreach($accommodationBadges as $ab)
+              @forelse($accommodationBadges as $ab)
                 @if(($ab['hasIcon'] ?? false) || (($ab['showCode'] ?? true) && filled($ab['code'] ?? null)))
                   <span class="chip">
                     @if(($ab['hasIcon'] ?? false) && filled($ab['icon'] ?? null))
@@ -407,26 +433,63 @@
                     @endif
                   </span>
                 @endif
-              @endforeach
+              @empty
+                @if(!empty($final['raw_seating_access']))
+                  @foreach(array_filter(array_map('trim', explode(',', $final['raw_seating_access']))) as $code)
+                    @php
+                      $match = collect($accomById ?? [])->first(fn($a) => strtoupper(trim($a->kode ?? '')) === strtoupper($code));
+                      if ($match) {
+                          $ab = accommodationBadge($match);
+                          $hasIcon = filled($ab['icon'] ?? null);
+                          $showCode = $ab['show_code'] ?? true;
+                      } else {
+                          $ab = ['code' => $code];
+                          $hasIcon = false;
+                          $showCode = true;
+                      }
+                    @endphp
+                    <span class="chip">
+                      @if($hasIcon)
+                        <x-card.icon-svg :icon-key="$ab['icon']" type="accommodation" size="12pt" />
+                      @endif
+                      @if($showCode)
+                        <span class="mono">{{ $ab['code'] }}</span>
+                      @endif
+                    </span>
+                  @endforeach
+                @endif
+              @endforelse
             </div>
 
             <div class="accessTitle">Venue &amp; Sport Access</div>
             <div class="accessRow">
-              @foreach($venueChips as $vid)
+              @forelse($venueChips as $vid)
                 @php
                   $v = ($venueMap ?? [])[$vid] ?? null;
                   $label = $v['code'] ?? ($v['name'] ?? ('V'.$vid));
                 @endphp
                 <span class="chip">{{ $label }}</span>
-              @endforeach
+              @empty
+                @if(!empty($final['raw_venue_access']))
+                  @foreach(array_filter(array_map('trim', explode(',', $final['raw_venue_access']))) as $code)
+                    <span class="chip">{{ $code }}</span>
+                  @endforeach
+                @endif
+              @endforelse
 
-              @foreach($zoneChips as $zid)
+              @forelse($zoneChips as $zid)
                 @php
                   $z = ($zoneMap ?? [])[$zid] ?? null;
                   $label = $z['code'] ?? ($z['name'] ?? ('Z'.$zid));
                 @endphp
                 <span class="chip">{{ $label }}</span>
-              @endforeach
+              @empty
+                @if(!empty($final['raw_zone_access']))
+                  @foreach(array_filter(array_map('trim', explode(',', $final['raw_zone_access']))) as $code)
+                    <span class="chip">{{ $code }}</span>
+                  @endforeach
+                @endif
+              @endforelse
             </div>
           </div>
 
@@ -480,3 +543,7 @@
 
 </body>
 </html>
+
+
+
+

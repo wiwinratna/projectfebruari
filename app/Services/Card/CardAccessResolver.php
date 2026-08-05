@@ -44,11 +44,49 @@ class CardAccessResolver
     }
 
     /**
+     * Helper to load card recipient raw data if it exists.
+     */
+    public function getRawAccessFromRecipient(Card $card): array
+    {
+        $recipient = $card->cardRecipient;
+        if (!$recipient) {
+            return [];
+        }
+
+        // Return empty arrays for relational fields to avoid breaking the renderer,
+        // and inject raw strings directly into the returned array so the renderer can pick them up.
+        return [
+            'venues' => [],
+            'zones' => [],
+            'transportation_id' => null,
+            'accommodation_ids' => [],
+            'accommodation_id' => null,
+            
+            // Raw text for CardRecipient
+            'raw_venue_access' => $recipient->venue_access,
+            'raw_zone_access' => $recipient->zone_access,
+            'raw_transport' => $recipient->transport,
+            'raw_seating_access' => $recipient->seating_access,
+        ];
+    }
+
+    /**
      * Hitung FINAL access = default ∪ add - remove (unik, anti-double).
      */
     public function getFinalAccess(Card $card): array
     {
         $default = $this->getDefaultFromConfig($card);
+
+        if ($card->card_recipient_id) {
+            $raw = $this->getRawAccessFromRecipient($card);
+            return array_merge($raw, [
+                'venues' => $default['venues'],
+                'zones' => $default['zones'],
+                'transportation_id' => $default['transportation_id'],
+                'accommodation_ids' => $default['accommodation_ids'],
+                'accommodation_id' => $default['accommodation_id'],
+            ]);
+        }
 
         $overrides = $card->overrides()
             ->select(['type', 'ref_id', 'action'])

@@ -30,8 +30,12 @@ class CardPrintController extends Controller
             $card->id => $this->qrBase64($qrText),
         ];
 
+        $resolved = $this->resolvePhotoPathInfo($card);
         $photoByCardId = [
-            $card->id => $this->photoBase64FromProfile($this->resolvePhotoPath($card)),
+            $card->id => $this->photoBase64FromProfile($resolved['path']),
+        ];
+        $photoIsFallbackByCardId = [
+            $card->id => $resolved['is_fallback']
         ];
 
         $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
@@ -47,6 +51,7 @@ class CardPrintController extends Controller
             'finalAccessByCardId' => [$card->id => $final],
             'qrByCardId' => $qrByCardId,
             'photoByCardId' => $photoByCardId,
+            'photoIsFallbackByCardId' => $photoIsFallbackByCardId,
             'transportById' => $transportById,
             'accomById' => $accomById,
             'venueMap' => $venueMap,
@@ -139,7 +144,9 @@ class CardPrintController extends Controller
             $qrText = $c->qr_payload ?: ($c->qr_token ? url("/cards/verify/{$c->qr_token}") : "ARISE-CARD-{$c->id}");
             $qrByCardId[$c->id] = $this->qrBase64($qrText);
 
-            $photoByCardId[$c->id] = $this->photoBase64FromProfile($this->resolvePhotoPath($c));
+            $resolvedPhoto = $this->resolvePhotoPathInfo($c);
+        $photoByCardId[$c->id] = $this->photoBase64FromProfile($resolvedPhoto['path']);
+        $photoIsFallbackByCardId[$c->id] = $resolvedPhoto['is_fallback'];
         }
 
         // Mode 2 rule: always use latest active event layout
@@ -240,7 +247,9 @@ class CardPrintController extends Controller
     $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : "ARISE-CARD-{$card->id}");
 
     $qrByCardId = [$card->id => $this->qrBase64($qrText)];
-    $photoByCardId = [$card->id => $this->photoBase64FromProfile($this->resolvePhotoPath($card))];
+    $resolved = $this->resolvePhotoPathInfo($card);
+    $photoByCardId = [$card->id => $this->photoBase64FromProfile($resolved['path'])];
+    $photoIsFallbackByCardId = [$card->id => $resolved['is_fallback']];
 
     $transportById = TransportationCode::where('event_id', $eventId)->get()->keyBy('id');
     $accomById     = AccommodationCode::where('event_id', $eventId)->get()->keyBy('id');
@@ -255,6 +264,7 @@ class CardPrintController extends Controller
         'finalAccessByCardId' => [$card->id => $final],
         'qrByCardId' => $qrByCardId,
         'photoByCardId' => $photoByCardId,
+        'photoIsFallbackByCardId' => $photoIsFallbackByCardId,
         'transportById' => $transportById,
         'accomById' => $accomById,
         'venueMap' => $venueMap,
@@ -301,7 +311,9 @@ public function printHtmlBatch(Request $request, CardAccessResolver $resolver)
         $qrText = $c->qr_payload ?: ($c->qr_token ? url("/cards/verify/{$c->qr_token}") : "ARISE-CARD-{$c->id}");
         $qrByCardId[$c->id] = $this->qrBase64($qrText);
 
-        $photoByCardId[$c->id] = $this->photoBase64FromProfile($this->resolvePhotoPath($c));
+        $resolvedPhoto = $this->resolvePhotoPathInfo($c);
+        $photoByCardId[$c->id] = $this->photoBase64FromProfile($resolvedPhoto['path']);
+        $photoIsFallbackByCardId[$c->id] = $resolvedPhoto['is_fallback'];
     }
 
     // Mode 2 rule: always use latest active event layout
@@ -361,7 +373,9 @@ public function previewAll(Request $request, CardAccessResolver $resolver)
         $qrText = $c->qr_payload ?: ($c->qr_token ? url("/cards/verify/{$c->qr_token}") : "ARISE-CARD-{$c->id}");
         $qrByCardId[$c->id] = $this->qrBase64($qrText);
 
-        $photoByCardId[$c->id] = $this->photoBase64FromProfile($this->resolvePhotoPath($c));
+        $resolvedPhoto = $this->resolvePhotoPathInfo($c);
+        $photoByCardId[$c->id] = $this->photoBase64FromProfile($resolvedPhoto['path']);
+        $photoIsFallbackByCardId[$c->id] = $resolvedPhoto['is_fallback'];
     }
 
     // Mode 2 rule: always use latest active event layout
@@ -381,19 +395,36 @@ public function previewAll(Request $request, CardAccessResolver $resolver)
         'layout' => $layout,
     ]);
 }
-    private function resolvePhotoPath(Card $card): ?string
+    private function resolvePhotoPathInfo(Card $card): array
     {
+        if ($card->card_recipient_id && $card->cardRecipient) {
+            // Sumber data: import recipient
+            if ($card->cardRecipient->photo_path) {
+                return ['path' => $card->cardRecipient->photo_path, 'is_fallback' => false];
+            }
+
+            // Poin 6: Fallback ke logo event jika tidak ada foto
+            $event = $card->event;
+            if ($event && $event->logo_path) {
+                return ['path' => $event->logo_path, 'is_fallback' => true];
+            }
+
+            // Tidak ada foto sama sekali → biarkan view tampilkan placeholder
+            return ['path' => null, 'is_fallback' => false];
+        }
+
+        // Sumber data: regular applicant
         $profilePhoto = $card->application?->user?->profile?->profile_photo;
         if ($profilePhoto) {
-            return $profilePhoto;
+            return ['path' => $profilePhoto, 'is_fallback' => false];
         }
 
         $snapshot = is_array($card->snapshot) ? $card->snapshot : json_decode((string) $card->snapshot, true);
         if (is_array($snapshot) && !empty($snapshot['applicant_photo'])) {
-            return (string) $snapshot['applicant_photo'];
+            return ['path' => (string) $snapshot['applicant_photo'], 'is_fallback' => false];
         }
 
-        return null;
+        return ['path' => null, 'is_fallback' => false];
     }
 }
 

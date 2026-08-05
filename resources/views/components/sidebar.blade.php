@@ -203,12 +203,19 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                     </a>
                 </li>
 
-                <!-- <li class="menu-item {{ Request::is('admin/master-data/jabatan*') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.master-data.jabatan.index') }}">
-                    <i class="fas fa-id-badge mr-3"></i>
-                    <span>Jabatan</span>
-                </a>
-            </li> -->
+                <li class="menu-item {{ Request::is('admin/master-data/jabatan*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.master-data.jabatan.index') }}">
+                        <i class="fas fa-id-badge mr-3"></i>
+                        <span>Jabatan</span>
+                    </a>
+                </li>
+                
+                <li class="menu-item {{ Request::is('admin/master-data/functional-areas*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.master-data.functional-areas.index') }}">
+                        <i class="fas fa-sitemap mr-3"></i>
+                        <span>Functional Area</span>
+                    </a>
+                </li>
 
                 <li class="menu-item {{ Request::is('admin/master-data/disciplins*') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('admin.master-data.disciplins.index') }}">

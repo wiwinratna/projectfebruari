@@ -124,7 +124,7 @@ class AccreditationMappingController extends Controller
             ],
             'warna' => ['required','string','max:20'],
             'keterangan' => ['nullable','string','max:1000'],
-            'job_category_ids' => ['required','array','min:1'],
+            'job_category_ids' => ['nullable','array'],
             'job_category_ids.*' => ['integer','exists:job_categories,id'],
         ], [
             'nama_akreditasi.unique' => 'Nama akreditasi sudah ada untuk event ini.',
@@ -139,7 +139,7 @@ class AccreditationMappingController extends Controller
             ]);
 
             // ✅ simpan pivot pakai event_id
-            $this->syncPivot($eventId, $mapping->id, $data['job_category_ids']);
+            $this->syncPivot($eventId, $mapping->id, $data['job_category_ids'] ?? []);
         });
 
         return redirect()
@@ -205,7 +205,7 @@ class AccreditationMappingController extends Controller
             ],
             'warna' => ['required','string','max:20'],
             'keterangan' => ['nullable','string','max:1000'],
-            'job_category_ids' => ['required','array','min:1'],
+            'job_category_ids' => ['nullable','array'],
             'job_category_ids.*' => ['integer','exists:job_categories,id'],
         ], [
             'nama_akreditasi.unique' => 'Nama akreditasi sudah ada untuk event ini.',
@@ -219,7 +219,7 @@ class AccreditationMappingController extends Controller
             ]);
 
             // ✅ update pivot pakai event_id
-            $this->syncPivot($eventId, $mapping->id, $data['job_category_ids']);
+            $this->syncPivot($eventId, $mapping->id, $data['job_category_ids'] ?? []);
         });
 
         return redirect()

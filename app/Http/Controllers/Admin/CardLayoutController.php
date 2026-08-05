@@ -58,7 +58,7 @@ class CardLayoutController extends Controller
         if ($convertedLegacy) {
             $layout->update([
                 'layout_json' => $normalizedLayout,
-                'updated_by' => auth()->id(),
+                'updated_by' => session('admin_id'),
             ]);
         }
 
@@ -110,8 +110,8 @@ class CardLayoutController extends Controller
             'is_active' => true,
             'version' => 1,
             'layout_json' => $normalizedLayout,
-            'created_by' => auth()->id(),
-            'updated_by' => auth()->id(),
+            'created_by' => session('admin_id'),
+            'updated_by' => session('admin_id'),
         ]);
 
         return response()->json([
@@ -148,8 +148,8 @@ class CardLayoutController extends Controller
             'is_active' => true,
             'version' => 1,
             'layout_json' => $defaultLayout,
-            'created_by' => auth()->id(),
-            'updated_by' => auth()->id(),
+            'created_by' => session('admin_id'),
+            'updated_by' => session('admin_id'),
         ]);
 
         return response()->json([
@@ -183,7 +183,7 @@ class CardLayoutController extends Controller
             if ($convertedLegacy) {
                 $layoutModel->update([
                     'layout_json' => $layout,
-                    'updated_by' => auth()->id(),
+                    'updated_by' => session('admin_id'),
                 ]);
             }
         }

@@ -47,6 +47,23 @@ class CardVerifyController extends Controller
 
         $snap = is_array($card->snapshot) ? $card->snapshot : json_decode($card->snapshot, true);
 
+        // Poin 12: Load cardRecipient untuk kartu hasil import
+        $card->load('cardRecipient');
+        if ($card->card_recipient_id && $card->cardRecipient) {
+            $r = $card->cardRecipient;
+            // Enrich snap dengan data recipient agar halaman verifikasi bisa tampilkan info
+            $snap = array_merge($snap ?? [], [
+                'applicant_name'    => $r->name,
+                'job_category_name' => $r->population,
+                'mapping_name'      => $r->category,
+                'import_source'     => true,
+                'raw_venue_access'  => $r->venue_access,
+                'raw_zone_access'   => $r->zone_access,
+                'raw_transport'     => $r->transport,
+                'raw_seating_access'=> $r->seating_access,
+            ]);
+        }
+
         $final = $resolver->getFinalAccess($card);
         // VENUE MAP: id -> (code = nama_vanue)
         $venueMap = \App\Models\VenueAccess::where('event_id', $card->event_id)

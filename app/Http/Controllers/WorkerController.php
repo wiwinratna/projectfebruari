@@ -122,7 +122,10 @@ class WorkerController extends Controller
             return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.']);
         }
 
-        $categories = JobCategory::orderBy('name')->get();
+        $categories = JobCategory::where(function ($query) use ($adminEventId) {
+                $query->whereNull('event_id')
+                      ->orWhere('event_id', $adminEventId);
+            })->orderBy('name')->get();
         // Only show admin's assigned event
         $adminEvent = Event::findOrFail($adminEventId);
         $events = collect([$adminEvent]);
@@ -205,7 +208,10 @@ class WorkerController extends Controller
 
         $worker->load(['accessCodes', 'event.accessCodes']);
 
-        $categories = JobCategory::orderBy('name')->get();
+        $categories = JobCategory::where(function ($query) use ($adminEventId) {
+                $query->whereNull('event_id')
+                      ->orWhere('event_id', $adminEventId);
+            })->orderBy('name')->get();
         // Only show admin's assigned event
         $adminEvent = Event::findOrFail($adminEventId);
         $events = collect([$adminEvent]);

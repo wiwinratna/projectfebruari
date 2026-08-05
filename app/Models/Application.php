@@ -61,4 +61,8 @@ class Application extends Model
         return $this->hasOne(\App\Models\Card::class, 'application_id');
     }
 
+    public function certificate()
+    {
+        return $this->hasOne(\App\Models\Certificate::class, 'application_id');
+    }
 }

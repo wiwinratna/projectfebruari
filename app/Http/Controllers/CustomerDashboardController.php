@@ -47,6 +47,26 @@ class CustomerDashboardController extends Controller
         ));
     }
 
+    public function certificates()
+    {
+        $customerId = session('customer_id');
+
+        // Fetch Arise generated certificates
+        $ariseCertificates = \App\Models\Certificate::whereHas('application', function ($q) use ($customerId) {
+            $q->where('user_id', $customerId);
+        })
+        ->where('status', 'published')
+        ->latest()
+        ->get();
+
+        // Fetch externally uploaded certificates
+        $externalCertificates = \App\Models\UserCertificate::where('user_id', $customerId)
+            ->latest()
+            ->get();
+
+        return view('menu.customer.certificates', compact('ariseCertificates', 'externalCertificates'));
+    }
+
     public function profile()
     {
         $customerId = session('customer_id');
@@ -489,7 +509,7 @@ class CustomerDashboardController extends Controller
     {
         $customerId = session('customer_id');
 
-        $applications = Application::with(['opening.event', 'opening.jobCategory', 'card'])
+        $applications = Application::with(['opening.event', 'opening.jobCategory', 'card', 'certificate'])
             ->where('user_id', $customerId)
             ->latest()
             ->paginate(10);

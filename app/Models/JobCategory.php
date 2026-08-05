@@ -16,6 +16,9 @@ class JobCategory extends Model
         'default_shift_hours',
         'is_active',
         'worker_type_id',
+        'event_id',
+        'jabatan_id',
+        'fa_name',
     ];
 
     protected $casts = [
@@ -31,5 +34,10 @@ class JobCategory extends Model
     public function workerType()
     {
         return $this->belongsTo(WorkerType::class);
+    }
+
+    public function jabatan()
+    {
+        return $this->belongsTo(Jabatan::class);
     }
 }

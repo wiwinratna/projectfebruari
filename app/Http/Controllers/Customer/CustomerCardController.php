@@ -54,11 +54,16 @@ class CustomerCardController extends Controller
 
         [$venueMap, $zoneMap] = $this->buildAccessMaps($eventId);
 
+        $photoIsFallbackByCardId = [
+            $card->id => false,
+        ];
+
         return view('menu.admin.card.print.sheet-a5', [
             'cards' => collect([$card]),
             'finalAccessByCardId' => [$card->id => $final],
             'qrByCardId' => $qrByCardId,
             'photoByCardId' => $photoByCardId,
+            'photoIsFallbackByCardId' => $photoIsFallbackByCardId,
             'transportById' => $transportById,
             'accomById' => $accomById,
             'venueMap' => $venueMap,
