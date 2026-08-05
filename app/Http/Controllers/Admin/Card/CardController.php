@@ -85,8 +85,8 @@ class CardController extends Controller
         if ($q !== '') {
             $appsQuery->where(function ($w) use ($q) {
                 $w->where('users.name', 'like', "%{$q}%")
-                ->orWhere('users.email', 'like', "%{$q}%")
-                ->orWhere('worker_openings.title', 'like', "%{$q}%");
+                    ->orWhere('users.email', 'like', "%{$q}%")
+                    ->orWhere('worker_openings.title', 'like', "%{$q}%");
             });
         }
 
@@ -127,13 +127,15 @@ class CardController extends Controller
         // AUTO-PROVISION: buat draft card kalau belum ada (idempotent)
         // + seed default overrides (riwayat)
         foreach ($apps as $a) {
-            if ($cardsByAppId->has($a->application_id)) continue;
+            if ($cardsByAppId->has($a->application_id))
+                continue;
 
             $jobCatId = (int) $a->job_category_id;
             $map = $mappingByJobCategory->get($jobCatId);
 
             // kalau belum ada mapping untuk job category ini, skip (biar admin benerin mapping dulu)
-            if (!$map) continue;
+            if (!$map)
+                continue;
 
             $config = AccessCardConfig::where('accreditation_mapping_id', $map->mapping_id)->first();
 
@@ -169,8 +171,26 @@ class CardController extends Controller
             })->values();
         }
 
+        $importedCardsQuery = Card::with(['cardRecipient', 'mapping'])
+            ->where('event_id', $eventId)
+            ->whereNotNull('card_recipient_id');
+
+        if ($q !== '') {
+            $importedCardsQuery->whereHas('cardRecipient', function($query) use ($q) {
+                $query->where('name', 'like', "%{$q}%")
+                      ->orWhere('population', 'like', "%{$q}%");
+            });
+        }
+
+        if ($statusCard) {
+            $importedCardsQuery->where('status', $statusCard);
+        }
+
+        $importedCards = $importedCardsQuery->orderByDesc('id')->get();
+
         return view('menu.admin.card.index', [
             'apps' => $apps,
+            'importedCards' => $importedCards,
             'cardsByAppId' => $cardsByAppId,
             'jobCategories' => $jobCategories,
             'mappingByJobCategory' => $mappingByJobCategory,
@@ -178,5 +198,164 @@ class CardController extends Controller
             'q' => $q,
             'statusCard' => $statusCard,
         ]);
+    }
+
+    public function downloadImportTemplate()
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\CardTemplateExport, 'card_import_template.xlsx');
+    }
+
+    public function importExcel(Request $request)
+    {
+        $request->validate([
+            'excel_file' => 'required|file|mimes:xlsx,xls,csv|max:10240',
+        ]);
+
+        try {
+            $data = \Maatwebsite\Excel\Facades\Excel::toArray(new \App\Imports\CardImport, $request->file('excel_file'));
+            if (empty($data) || empty($data[0])) {
+                return back()->with('error', 'File Excel kosong atau format tidak sesuai.');
+            }
+
+            session(['card_import_data' => $data[0]]);
+            return redirect()->route('admin.cards.import.preview');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error reading Excel: ' . $e->getMessage());
+        }
+    }
+
+    public function importPreview()
+    {
+        $data = session('card_import_data');
+        if (!$data) {
+            return redirect()->route('admin.cards.index')->with('error', 'Tidak ada data import.');
+        }
+
+        $eventId = session('admin_event_id');
+        $validated = [];
+
+        foreach ($data as $row) {
+            $name       = trim((string)($row['name'] ?? $row['nama_lengkap'] ?? ''));
+            $population = trim((string)($row['population'] ?? $row['jabatan'] ?? ''));
+            $category   = trim((string)($row['category'] ?? ''));
+            $venue      = trim((string)($row['venue_access'] ?? $row['venue'] ?? ''));
+            $zone       = trim((string)($row['zone_access'] ?? $row['zone'] ?? ''));
+            $transport  = trim((string)($row['transport'] ?? ''));
+
+            if ($name === '') {
+                continue; // Skip silently for completely empty names
+            }
+
+            // Lookup mapping berdasarkan nama kategori akreditasi (scoped ke event admin)
+            // Menggunakan fungsi LOWER() dan TRIM() untuk memastikan tidak peka huruf besar-kecil
+            $mapping = \Illuminate\Support\Facades\DB::table('accreditation_mappings')
+                ->where('event_id', $eventId)
+                ->whereRaw('LOWER(TRIM(nama_akreditasi)) = ?', [strtolower(trim($category))])
+                ->select('id as accreditation_mapping_id', 'nama_akreditasi', 'warna')
+                ->first();
+
+            $validated[] = [
+                'name'                     => $name,
+                'population'               => $population,
+                'category'                 => $category,
+                'venue_access'             => $venue,
+                'zone_access'              => $zone,
+                'transport'                => $transport,
+                'job_category_id'          => null, // Population sekarang teks bebas, tidak perlu ID
+                'accreditation_mapping_id' => $mapping?->accreditation_mapping_id,
+                'mapping_label'            => $mapping?->nama_akreditasi,
+                'mapping_color'            => $mapping?->warna,
+                'status'                   => $mapping ? 'valid' : 'error',
+            ];
+        }
+
+        // Simpan validated data ke session agar process tak perlu query ulang
+        session(['card_import_validated' => $validated]);
+
+        return view('menu.admin.card.import-preview', ['data' => $validated]);
+    }
+
+    public function importProcess()
+    {
+        $validated = session('card_import_validated');
+        if (!$validated) {
+            return redirect()->route('admin.cards.index')->with('error', 'Tidak ada data import yang divalidasi.');
+        }
+
+        $eventId = session('admin_event_id');
+        $adminId = session('admin_id');
+
+        if (!$eventId || !$adminId) {
+            return redirect()->route('admin.cards.index')->with('error', 'Sesi admin tidak valid.');
+        }
+
+        $count = 0;
+        $failed = 0;
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use (
+                $validated, $eventId, $adminId, &$count, &$failed
+            ) {
+                foreach ($validated as $row) {
+                    if ($row['status'] !== 'valid') {
+                        $failed++;
+                        continue; // Skip baris error (Opsi B)
+                    }
+
+                    $recipient = \App\Models\CardRecipient::create([
+                        'admin_id'                 => $adminId,
+                        'event_id'                 => $eventId,
+                        'name'                     => $row['name'],
+                        'population'               => $row['population'] ?: null,
+                        'category'                 => $row['category'] ?: null,
+                        'venue_access'             => $row['venue_access'] ?: null,
+                        'zone_access'              => $row['zone_access'] ?: null,
+                        'transport'                => $row['transport'] ?: null,
+                        'job_category_id'          => null, // Teks bebas
+                        'accreditation_mapping_id' => $row['accreditation_mapping_id'],
+                        // Kolom seating_access, identity_number tidak diisi
+                    ]);
+
+                    $snapshot = [
+                        'applicant_name'    => $row['name'],
+                        'job_category_name' => $row['population'], // text-job element
+                        'mapping_name'      => $row['mapping_label'], // Untuk fallback jika mapping terhapus
+                    ];
+
+                    $qrToken = 'IMP-' . \Illuminate\Support\Str::upper(\Illuminate\Support\Str::random(16));
+
+                    \App\Models\Card::create([
+                        'event_id'                 => $eventId,
+                        'application_id'           => null,
+                        'card_recipient_id'        => $recipient->id,
+                        'accreditation_mapping_id' => $row['accreditation_mapping_id'], // FK ke mapping
+                        'status'                   => 'issued',
+                        'card_number'              => 'IMP-' . strtoupper(\Illuminate\Support\Str::random(8)),
+                        'qr_token'                 => $qrToken,
+                        'qr_payload'               => url("/cards/verify/{$qrToken}"),
+                        'issued_at'                => now(),
+                        'issued_by'                => $adminId,
+                        'snapshot'                 => $snapshot,
+                    ]);
+
+                    $count++;
+                }
+            });
+        } catch (\Exception $e) {
+            session()->forget('card_import_data');
+            session()->forget('card_import_validated');
+            return redirect()->route('admin.cards.index')
+                ->with('error', 'Gagal mengimpor kartu: ' . $e->getMessage());
+        }
+
+        session()->forget('card_import_data');
+        session()->forget('card_import_validated');
+
+        $msg = "Berhasil menggenerate {$count} kartu.";
+        if ($failed > 0) {
+            $msg .= " {$failed} baris dilewati (Category tidak ditemukan di master data atau nama kosong).";
+        }
+
+        return redirect()->route('admin.cards.index')->with('success', $msg);
     }
 }

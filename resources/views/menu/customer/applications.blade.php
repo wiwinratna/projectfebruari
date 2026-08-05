@@ -139,6 +139,34 @@
                                         Your card will be available after the admin issues it.
                                     </p>
                                 @endif
+
+                                @php
+                                    $cert = $application->certificate;
+                                    $certPublished = $cert && $cert->status === 'published';
+                                @endphp
+                                @if($certPublished)
+                                    <a
+                                        href="{{ url('/sertifikat/verify/' . $cert->qr_token) }}"
+                                        target="_blank"
+                                        class="w-full text-center px-4 py-2 rounded-xl
+                                            bg-gradient-to-r from-yellow-400 to-yellow-500
+                                            text-white font-extrabold text-sm
+                                            shadow-md shadow-yellow-500/20
+                                            hover:shadow-lg hover:shadow-yellow-500/30
+                                            hover:-translate-y-0.5 transition-all duration-300"
+                                    >
+                                        <i class="fas fa-certificate mr-1"></i> Certificate
+                                    </a>
+                                @else
+                                    <button
+                                        type="button"
+                                        class="w-full text-center px-4 py-2 rounded-xl bg-gray-100 text-gray-400 font-bold text-sm cursor-not-allowed border border-gray-200"
+                                        title="Certificate will be available after the event."
+                                        disabled
+                                    >
+                                        <i class="fas fa-certificate mr-1 text-gray-300"></i> Certificate
+                                    </button>
+                                @endif
                                 <a href="{{ route('jobs.show', $application->opening) }}" class="w-full text-center px-4 py-2 rounded-xl bg-gray-50 hover:bg-white text-gray-600 hover:text-red-600 font-bold text-sm border border-gray-200 hover:border-red-200 hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
                                     View Job
                                 </a>

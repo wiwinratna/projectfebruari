@@ -104,6 +104,7 @@
                             Jobs
                             <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('jobs.*') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                         </a>
+                        @if(!session('customer_authenticated'))
                         <a href="{{ url('/#about') }}"
                             class="text-sm font-semibold text-gray-600 hover:text-red-600 relative py-2 group transition-colors">
                             About
@@ -129,6 +130,7 @@
                             Certificate
                             <span class="absolute bottom-0 left-0 h-0.5 bg-red-600 transition-all duration-300 {{ request()->routeIs('public.certificates.*') ? 'w-full' : 'w-0 group-hover:w-full' }}"></span>
                         </a>
+                        @endif
 
                         @if(session('customer_authenticated'))
                         <a href="{{ route('customer.dashboard') }}"
@@ -270,10 +272,12 @@
                                 <span class="text-xs font-semibold">Dashboard</span>
                             </a>
                             @endif
+                            @if(!session('customer_authenticated'))
                             <a href="{{ route('public.certificates.lookup') }}" class="flex flex-col items-center justify-center p-3 rounded-xl {{ request()->routeIs('public.certificates.*') ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-600' }} hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <i class="fas fa-certificate mb-1 text-lg"></i>
                                 <span class="text-xs font-semibold">Certificate</span>
                             </a>
+                            @endif
                         </div>
 
                         @if(session('customer_authenticated'))

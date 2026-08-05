@@ -83,6 +83,11 @@
                     <i class="fas fa-print mr-2"></i> Print Selected Issued
                 </button>
 
+                <button onclick="document.getElementById('importModal').classList.remove('hidden')" type="button"
+                        class="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-sm font-bold transition-all whitespace-nowrap">
+                    <i class="fas fa-file-excel mr-2"></i> Import Excel
+                </button>
+
                 <a href="{{ route('admin.cards.previewAll', request()->query()) }}"
                    class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-sm font-bold text-gray-700 transition-colors whitespace-nowrap">
                     <i class="fas fa-grid-2 mr-2"></i> Preview All
@@ -117,7 +122,7 @@
                         </thead>
 
                     <tbody class="divide-y divide-gray-100">
-                        @forelse($apps as $a)
+                        @foreach($apps as $a)
                             @php
                                 $card = $cardsByAppId->get($a->application_id);
                                 $jobCat = $jobCategories->get($a->job_category_id);
@@ -264,13 +269,128 @@
                                     </div>
                                 </td>
                             </tr>
-                        @empty
+                        @endforeach
+
+                        @foreach($importedCards as $card)
+                            @php
+                                $map = $card->mapping;
+                                $mappingName = $map->nama_akreditasi ?? null;
+                                $mappingColor = $map->warna ?? '#e5e7eb';
+                            @endphp
+
+                            <tr class="hover:bg-gray-50/70">
+                                <td class="px-4 py-4 align-top">
+                                    <input type="checkbox"
+                                           name="card_ids[]"
+                                           value="{{ $card->id }}"
+                                           class="rowCheck rounded border-gray-300"
+                                           data-status="{{ $card->status }}">
+                                </td>
+
+                                <td class="px-4 py-4 align-top">
+                                    @php
+                                        $initial = strtoupper(substr($card->cardRecipient->name ?? 'U', 0, 1));
+                                    @endphp
+
+                                    <div class="flex items-center gap-3">
+                                        <div class="relative w-10 h-10 flex-shrink-0">
+                                            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center text-sm font-extrabold text-gray-400 border-2 border-gray-50">
+                                                {{ $initial }}
+                                            </div>
+                                            <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+                                        </div>
+
+                                        <div class="min-w-0">
+                                            <div class="font-bold text-gray-900 leading-tight truncate">
+                                                {{ $card->cardRecipient->name }}
+                                            </div>
+                                            <div class="text-xs text-gray-500 mt-0.5 truncate">
+                                                (Imported Data)
+                                            </div>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-4 py-4 align-top">
+                                    <div class="font-semibold text-gray-800 leading-tight">
+                                        {{ $card->cardRecipient->category ?? 'Direct Import' }}
+                                    </div>
+                                </td>
+
+                                <td class="px-4 py-4 align-top text-gray-800 font-medium">
+                                    {{ $card->cardRecipient->population ?? 'Not set' }}
+                                </td>
+
+                                <td class="px-4 py-4 align-top">
+                                    @if($mappingName)
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide border"
+                                              style="background: {{ $mappingColor }}20; border-color: {{ $mappingColor }};">
+                                            {{ $mappingName }}
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full bg-yellow-50 text-yellow-700 border border-yellow-200 text-xs font-bold">
+                                            Not set
+                                        </span>
+                                    @endif
+                                </td>
+
+                                <td class="px-4 py-4 align-top">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wide border
+                                        {{ $card->status==='issued'
+                                            ? 'bg-green-50 text-green-700 border-green-200'
+                                            : 'bg-yellow-50 text-yellow-700 border-yellow-200' }}">
+                                        {{ $card->status }}
+                                    </span>
+                                </td>
+
+                                <td class="px-4 py-4 align-top">
+                                    <div class="flex flex-wrap gap-2">
+                                        <a href="{{ route('admin.cards.access.edit', $card) }}"
+                                           class="px-3 py-2 rounded-xl bg-gray-900 text-white hover:bg-gray-800 text-xs font-bold transition-all whitespace-nowrap">
+                                            Customize Access
+                                        </a>
+
+                                        <a href="{{ route('admin.cards.preview', $card) }}"
+                                           class="px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 transition-colors whitespace-nowrap">
+                                            Preview
+                                        </a>
+
+                                        @if($card->status === 'issued')
+                                            <a href="{{ route('admin.cards.print.html.single', $card) }}"
+                                               target="_blank"
+                                               class="px-3 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-xs font-bold text-gray-700 transition-colors whitespace-nowrap">
+                                                Print Single
+                                            </a>
+                                            <button type="button" disabled
+                                                    class="px-3 py-2 rounded-xl bg-gray-100 text-gray-400 text-xs font-bold cursor-not-allowed whitespace-nowrap">
+                                                Issued
+                                            </button>
+                                        @else
+                                            <button type="button" disabled
+                                                    class="px-3 py-2 rounded-xl bg-gray-100 text-gray-400 text-xs font-bold cursor-not-allowed whitespace-nowrap">
+                                                Print Single
+                                            </button>
+                                            <button type="button"
+                                                    data-applicant="{{ $card->cardRecipient->name }}"
+                                                    data-action="{{ route('admin.cards.issue', $card) }}"
+                                                    class="btnIssueRow px-3 py-2 rounded-xl bg-red-600 text-white hover:bg-red-700 text-xs font-bold transition-all whitespace-nowrap">
+                                                Issue
+                                            </button>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+
+                        @if(count($apps) === 0 && count($importedCards) === 0)
+                            
                             <tr>
                                 <td colspan="7" class="px-4 py-10 text-center text-gray-500">
                                     Tidak ada applicant approved untuk event ini.
                                 </td>
                             </tr>
-                        @endforelse
+                        
+                        @endif
                     </tbody>
                 </table>
             </div>
@@ -310,6 +430,47 @@
                     Yes, Continue
                 </button>
             </div>
+        </div>
+    </div>
+</div>
+
+{{-- Import Modal --}}
+<div id="importModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50" onclick="document.getElementById('importModal').classList.add('hidden')"></div>
+    <div class="relative min-h-full flex items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+            <form action="{{ route('admin.cards.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="p-5 border-b border-gray-100 flex justify-between items-center">
+                    <div>
+                        <div class="text-lg font-bold text-gray-900">Import Excel</div>
+                        <div class="text-sm text-gray-500 mt-1">Upload file Excel berisi data penerima kartu.</div>
+                    </div>
+                    <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div class="p-5">
+                    <a href="{{ route('admin.cards.import.template') }}" class="text-blue-600 text-sm font-semibold hover:underline mb-4 inline-block">
+                        <i class="fas fa-download mr-1"></i> Download Template Excel
+                    </a>
+                    <div class="mt-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih File (XLSX, XLS, CSV)</label>
+                        <input type="file" name="excel_file" accept=".xlsx,.xls,.csv" required
+                               class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-sm">
+                    </div>
+                </div>
+                <div class="p-5 pt-0 flex justify-end gap-2">
+                    <button type="button" onclick="document.getElementById('importModal').classList.add('hidden')"
+                            class="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-800 font-bold">
+                        Batal
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold">
+                        Import Data
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

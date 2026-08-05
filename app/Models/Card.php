@@ -11,6 +11,7 @@ class Card extends Model
     protected $fillable = [
         'event_id',
         'application_id',
+        'card_recipient_id',
         'accreditation_mapping_id',
         'access_card_config_id',
         'layout_id',
@@ -45,6 +46,11 @@ class Card extends Model
     public function application(): BelongsTo
     {
         return $this->belongsTo(Application::class, 'application_id');
+    }
+
+    public function cardRecipient(): BelongsTo
+    {
+        return $this->belongsTo(CardRecipient::class, 'card_recipient_id');
     }
 
     public function mapping(): BelongsTo

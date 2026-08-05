@@ -2,8 +2,9 @@
   use App\Support\CardLayoutRenderStyle;
   $snap  = is_array($card->snapshot) ? $card->snapshot : json_decode($card->snapshot, true);
 
-  $acc   = $snap['mapping_name'] ?? ('M'.$card->accreditation_mapping_id);
-  $color = $snap['mapping_color'] ?? '#16a34a';
+  $mapping = $card->mapping ?? null;
+  $acc     = $mapping?->nama_akreditasi ?? $snap['mapping_name'] ?? ('M'.$card->accreditation_mapping_id);
+  $color   = $mapping?->warna ?? $snap['mapping_color'] ?? '#16a34a';
 
   $final  = $finalAccessByCardId[$card->id] ?? [];
   $venues = $final['venues'] ?? [];
@@ -58,6 +59,12 @@
   $snapshotVenueChips = collect($snap['venue_chips'] ?? [])->filter(fn($item) => is_array($item))->values();
   $snapshotZoneChips = collect($snap['zone_chips'] ?? [])->filter(fn($item) => is_array($item))->values();
 
+  // Handle raw text for imported cards
+  $rawTransport = $final['raw_transport'] ?? null;
+  $rawSeating = $final['raw_seating_access'] ?? null;
+  $rawVenue = $final['raw_venue_access'] ?? null;
+  $rawZone = $final['raw_zone_access'] ?? null;
+
   if ($snapshotTransports->isEmpty() && $t) {
     $snapshotTransports = collect([[
       'code' => $tBadge['code'] ?? $t->kode,
@@ -93,6 +100,47 @@
       return ['code' => $z['code'] ?? ($z['name'] ?? ('Z'.$zid))];
     })->values();
   }
+
+  if ($rawTransport) {
+      $rawTransportsCol = collect(array_filter(array_map('trim', explode(',', $rawTransport))))
+          ->map(function($code) use ($transportById) {
+              $match = collect($transportById)->first(fn($t) => strtoupper(trim($t->kode ?? '')) === strtoupper($code));
+              if ($match) {
+                  $badge = transportBadge($match);
+                  return ['code' => $badge['code'] ?? $match->kode, 'icon_key' => $badge['icon'] ?? null, 'show_icon' => (bool)($match->show_icon ?? false), 'show_code' => (bool)($badge['show_code'] ?? true)];
+              }
+              return ['code' => $code, 'icon_key' => null, 'show_icon' => false, 'show_code' => true];
+          });
+      $existingCodes = $snapshotTransports->pluck('code')->map(fn($c) => strtoupper(trim($c)))->toArray();
+      $rawTransportsCol = $rawTransportsCol->reject(fn($t) => in_array(strtoupper(trim($t['code'])), $existingCodes));
+      $snapshotTransports = $snapshotTransports->concat($rawTransportsCol);
+  }
+  if ($rawSeating) {
+      $rawSeatingCol = collect(array_filter(array_map('trim', explode(',', $rawSeating))))
+          ->map(function($code) use ($accomById) {
+              $match = collect($accomById)->first(fn($a) => strtoupper(trim($a->kode ?? '')) === strtoupper($code));
+              if ($match) {
+                  $ab = accommodationBadge($match);
+                  return ['code' => $ab['code'] ?? $match->kode, 'icon_key' => $ab['icon'] ?? null, 'show_icon' => (bool)($match->show_icon ?? false), 'show_code' => (bool)($ab['show_code'] ?? true), 'kind' => 'hotel'];
+              }
+              return ['code' => $code, 'icon_key' => null, 'show_icon' => false, 'show_code' => true, 'kind' => 'hotel'];
+          });
+      $existingCodes = $snapshotAccommodations->pluck('code')->map(fn($c) => strtoupper(trim($c)))->toArray();
+      $rawSeatingCol = $rawSeatingCol->reject(fn($a) => in_array(strtoupper(trim($a['code'])), $existingCodes));
+      $snapshotAccommodations = $snapshotAccommodations->concat($rawSeatingCol);
+  }
+  if ($rawVenue) {
+      $rawVenueCol = collect(array_filter(array_map('trim', explode(',', $rawVenue))))->map(fn($v) => ['code' => $v]);
+      $existingCodes = $snapshotVenueChips->pluck('code')->map(fn($c) => strtoupper(trim($c)))->toArray();
+      $rawVenueCol = $rawVenueCol->reject(fn($v) => in_array(strtoupper(trim($v['code'])), $existingCodes));
+      $snapshotVenueChips = $snapshotVenueChips->concat($rawVenueCol);
+  }
+  if ($rawZone) {
+      $rawZoneCol = collect(array_filter(array_map('trim', explode(',', $rawZone))))->map(fn($z) => ['code' => $z]);
+      $existingCodes = $snapshotZoneChips->pluck('code')->map(fn($c) => strtoupper(trim($c)))->toArray();
+      $rawZoneCol = $rawZoneCol->reject(fn($z) => in_array(strtoupper(trim($z['code'])), $existingCodes));
+      $snapshotZoneChips = $snapshotZoneChips->concat($rawZoneCol);
+  }
 @endphp
 
 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2;">
@@ -106,10 +154,11 @@
         @if ($element['type'] === 'photo')
           {{-- Photo Element --}}
           @if ($photo)
+            @php $isFb = $photoIsFallbackByCardId[$card->id] ?? false; @endphp
             <img
               src="{{ $photo }}"
               alt="Photo"
-              style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;"
+              style="width: 100%; height: 100%; object-fit: {{ $isFb ? 'contain' : 'cover' }}; {{ $isFb ? 'background: #ffffff; padding: 4px;' : '' }} border-radius: 4px;"
             />
           @else
             <div style="width: 100%; height: 100%; background: #e5e7eb;"></div>
@@ -167,4 +216,6 @@
     @endif
   @endforeach
 </div>
+
+
 

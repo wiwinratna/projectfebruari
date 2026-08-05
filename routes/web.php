@@ -240,6 +240,7 @@ Route::middleware(['web', 'customer'])->group(function () {
 // Customer Dashboard Routes (require customer login)
 Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->group(function () {
     Route::get('/', [CustomerDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/certificates', [CustomerDashboardController::class, 'certificates'])->name('certificates');
     Route::get('/profile', [CustomerDashboardController::class, 'profile'])->name('profile');
     Route::post('/profile', [CustomerDashboardController::class, 'updateProfile'])->name('profile.update');
     Route::post('/profile/upload-cv', [CustomerDashboardController::class, 'uploadCv'])->name('profile.upload-cv');
@@ -511,6 +512,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     Route::prefix('master-data')->name('master-data.')->group(function () {
         Route::resource('venue-locations', \App\Http\Controllers\VenueLocationController::class)->except(['show']);
         Route::resource('jabatan', \App\Http\Controllers\JabatanController::class)->except(['show']);
+        Route::resource('functional-areas', \App\Http\Controllers\Admin\FunctionalAreaController::class)->except(['show']);
         Route::resource('disciplins', \App\Http\Controllers\DisciplinController::class)->except(['show']);
         Route::resource('accreditations', \App\Http\Controllers\AccreditationController::class)->except(['show']);
         Route::resource('accommodation-codes', \App\Http\Controllers\AccommodationCodeController::class)->except(['show']);
@@ -558,6 +560,10 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
         ->except(['show']);
 
     //Ini yang berhubungan sama card yeah
+    Route::get('/cards/import-template', [CardController::class, 'downloadImportTemplate'])->name('cards.import.template');
+    Route::post('/cards/import', [CardController::class, 'importExcel'])->name('cards.import');
+    Route::get('/cards/import-preview', [CardController::class, 'importPreview'])->name('cards.import.preview');
+    Route::post('/cards/import-process', [CardController::class, 'importProcess'])->name('cards.import.process');
     Route::get('/cards/{card}/access', [CardAccessController::class, 'edit'])->name('cards.access.edit');
     Route::post('/cards/{card}/access', [CardAccessController::class, 'update'])->name('cards.access.update');
     Route::get('/cards', [CardController::class, 'index'])->name('cards.index');
