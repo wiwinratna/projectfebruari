@@ -150,7 +150,7 @@
         $style = is_array($element['style'] ?? null) ? $element['style'] : [];
         $radiusCss = CardLayoutRenderStyle::borderRadiusCss($style, 4);
       @endphp
-      <div style="position: absolute; left: {{ $element['rect']['xMm'] }}mm; top: {{ $element['rect']['yMm'] }}mm; width: {{ $element['rect']['wMm'] }}mm; height: {{ $element['rect']['hMm'] }}mm; overflow: hidden;">
+      <div style="position: absolute; left: {{ $element['rect']['xMm'] * 3.779527 }}px; top: {{ $element['rect']['yMm'] * 3.779527 }}px; width: {{ $element['rect']['wMm'] * 3.779527 }}px; height: {{ $element['rect']['hMm'] * 3.779527 }}px; overflow: hidden;">
         @if ($element['type'] === 'photo')
           {{-- Photo Element --}}
           @if ($photo)
@@ -178,13 +178,13 @@
 
         @elseif ($element['type'] === 'text-name')
           {{-- Name Text --}}
-          <div style="width: 100%; height: 100%; padding: 2mm; font-weight: {{ ($element['style']['fontWeight'] ?? 'bold') }}; font-size: {{ ($element['style']['fontSizePt'] ?? 14) }}pt; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: {{ ($element['style']['lineClamp'] ?? 2) }}; -webkit-box-orient: vertical; color: var(--ink-strong); text-align: {{ ($element['style']['align'] ?? 'left') }};">
+          <div style="width: 100%; height: 100%; padding: 7.56px; font-weight: {{ ($element['style']['fontWeight'] ?? 'bold') }}; font-size: {{ ($element['style']['fontSizePt'] ?? 14) * 1.333333 }}px; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; color: #111827; text-align: {{ ($element['style']['align'] ?? 'left') }};">
             {{ $snap['applicant_name'] ?? $snap['name'] ?? 'Nama Peserta' }}
           </div>
 
         @elseif ($element['type'] === 'text-job')
           {{-- Job Category Text --}}
-          <div style="width: 100%; height: 100%; padding: 2mm; font-size: {{ ($element['style']['fontSizePt'] ?? 12) }}pt; font-weight: {{ ($element['style']['fontWeight'] ?? 'normal') }}; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: {{ ($element['style']['align'] ?? 'left') }};">
+          <div style="width: 100%; height: 100%; padding: 7.56px; font-size: {{ ($element['style']['fontSizePt'] ?? 12) * 1.333333 }}px; font-weight: {{ ($element['style']['fontWeight'] ?? 'normal') }}; color: #6b7280; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: {{ ($element['style']['align'] ?? 'left') }};">
             {{ $snap['job_category_name'] ?? 'Posisi' }}
           </div>
 

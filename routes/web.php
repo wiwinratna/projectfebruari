@@ -575,11 +575,17 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     Route::get('/cards/preview-all', [CardPrintController::class, 'previewAll'])->name('cards.previewAll');
 
     //print html card cenah
+    Route::post('/cards/print-batch', [CardPrintController::class, 'printBatch'])
+        ->name('cards.print.batch');
+
     Route::post('/cards/print-html/batch', [CardPrintController::class, 'printHtmlBatch'])
         ->name('cards.print.html.batch');
 
     Route::get('/cards/{card}/print-html', [CardPrintController::class, 'printHtmlSingle'])
         ->name('cards.print.html.single');
+
+    Route::get('/cards/{card}/print-pdf', [CardPrintController::class, 'printPdfSingle'])
+        ->name('cards.print.pdf.single');
 
     Route::get('/icon-svg-inline/{key}', function (string $key) {
         $svg = icon_svg_inline($key);

@@ -12,6 +12,7 @@ use App\Services\Card\CardAccessResolver;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Browsershot\Browsershot;
 
 class CardPrintController extends Controller
 {
@@ -137,6 +138,7 @@ class CardPrintController extends Controller
         $finalAccessByCardId = [];
         $qrByCardId = [];
         $photoByCardId = [];
+        $photoIsFallbackByCardId = [];
 
         foreach ($cards as $c) {
             $finalAccessByCardId[$c->id] = $resolver->getFinalAccess($c);
@@ -157,6 +159,7 @@ class CardPrintController extends Controller
             'finalAccessByCardId' => $finalAccessByCardId,
             'qrByCardId' => $qrByCardId,
             'photoByCardId' => $photoByCardId,
+            'photoIsFallbackByCardId' => $photoIsFallbackByCardId,
             'transportById' => $transportById,
             'accomById' => $accomById,
             'venueMap' => $venueMap,
@@ -164,6 +167,38 @@ class CardPrintController extends Controller
             'mode' => 'pdf',
             'layout' => $layout,
         ])->setPaper('a5', 'portrait');
+
+        if ($request->input('structure') === 'zip') {
+            $zip = new \ZipArchive();
+            $zipFileName = 'Arise_Cards_Batch_' . time() . '.zip';
+            $zipPath = storage_path('app/public/' . $zipFileName);
+            
+            if ($zip->open($zipPath, \ZipArchive::CREATE) === TRUE) {
+                foreach ($cards as $c) {
+                    $snap = is_array($c->snapshot) ? $c->snapshot : json_decode($c->snapshot, true);
+                    $name = \Illuminate\Support\Str::slug(($snap['name'] ?? $snap['applicant_name'] ?? 'Card ' . $c->id) . '-' . ($snap['job_category_name'] ?? ''));
+                    
+                    $singlePdf = Pdf::loadView('menu.admin.card.print.sheet-a5', [
+                        'cards' => collect([$c]),
+                        'finalAccessByCardId' => [$c->id => $finalAccessByCardId[$c->id]],
+                        'qrByCardId' => [$c->id => $qrByCardId[$c->id]],
+                        'photoByCardId' => [$c->id => $photoByCardId[$c->id]],
+                        'photoIsFallbackByCardId' => [$c->id => $photoIsFallbackByCardId[$c->id]],
+                        'transportById' => $transportById,
+                        'accomById' => $accomById,
+                        'venueMap' => $venueMap,
+                        'zoneMap'  => $zoneMap,
+                        'mode' => 'pdf',
+                        'layout' => $layout,
+                    ])->setPaper('a5', 'portrait');
+                    
+                    $zip->addFromString("{$name}.pdf", $singlePdf->output());
+                }
+                $zip->close();
+                
+                return response()->download($zipPath)->deleteFileAfterSend(true);
+            }
+        }
 
         return $pdf->download("cards-issued-event{$eventId}.pdf");
     }
@@ -304,6 +339,7 @@ public function printHtmlBatch(Request $request, CardAccessResolver $resolver)
     $finalAccessByCardId = [];
     $qrByCardId = [];
     $photoByCardId = [];
+    $photoIsFallbackByCardId = [];
 
     foreach ($cards as $c) {
         $finalAccessByCardId[$c->id] = $resolver->getFinalAccess($c);
@@ -324,12 +360,13 @@ public function printHtmlBatch(Request $request, CardAccessResolver $resolver)
         'finalAccessByCardId' => $finalAccessByCardId,
         'qrByCardId' => $qrByCardId,
         'photoByCardId' => $photoByCardId,
+        'photoIsFallbackByCardId' => $photoIsFallbackByCardId,
         'transportById' => $transportById,
         'accomById' => $accomById,
         'venueMap' => $venueMap,
         'zoneMap'  => $zoneMap,
         'mode' => 'print',
-        'autoPrint' => true,
+        'autoPrint' => !$request->has('no_print'),
         'layout' => $layout,
     ]);
 }
@@ -366,6 +403,7 @@ public function previewAll(Request $request, CardAccessResolver $resolver)
     $finalAccessByCardId = [];
     $qrByCardId = [];
     $photoByCardId = [];
+    $photoIsFallbackByCardId = [];
 
     foreach ($cards as $c) {
         $finalAccessByCardId[$c->id] = $resolver->getFinalAccess($c);
@@ -386,6 +424,7 @@ public function previewAll(Request $request, CardAccessResolver $resolver)
         'finalAccessByCardId' => $finalAccessByCardId,
         'qrByCardId' => $qrByCardId,
         'photoByCardId' => $photoByCardId,
+        'photoIsFallbackByCardId' => $photoIsFallbackByCardId,
         'transportById' => $transportById,
         'accomById' => $accomById,
         'venueMap' => $venueMap,
@@ -395,6 +434,69 @@ public function previewAll(Request $request, CardAccessResolver $resolver)
         'layout' => $layout,
     ]);
 }
+    public function printPdfSingle(Card $card, CardAccessResolver $resolver)
+    {
+        abort_if($card->status !== 'issued', 403, 'Card must be issued first.');
+        $layout = $card->event->activeCardLayout;
+        
+        $final = $resolver->getFinalAccess($card);
+
+        $qrText = $card->qr_payload ?: ($card->qr_token ? url("/cards/verify/{$card->qr_token}") : "ARISE-CARD-{$card->id}");
+        $qr = $this->qrBase64($qrText);
+
+        $resolvedPhoto = $this->resolvePhotoPathInfo($card);
+        $photo = $this->photoBase64FromProfile($resolvedPhoto['path']);
+        $isFallback = $resolvedPhoto['is_fallback'];
+
+        $tIds = explode(',', $final['raw_transport_access'] ?? '');
+        $transportById = \App\Models\TransportationCode::whereIn('id', $tIds)->get()->keyBy('id');
+
+        $aIds = collect(explode(',', $final['raw_accom_access'] ?? ''))
+            ->map(fn($v) => (int)$v)
+            ->filter()
+            ->unique()
+            ->values();
+        $accomById = \App\Models\AccommodationCode::whereIn('id', $aIds)->get()->keyBy('id');
+
+        $vIds = explode(',', $final['raw_venue_access'] ?? '');
+        $venueMap = \App\Models\VenueAccess::whereIn('id', $vIds)->get()->keyBy('id');
+
+        $zIds = explode(',', $final['raw_zone_access'] ?? '');
+        $zoneMap = \App\Models\ZoneAccessCode::whereIn('id', $zIds)->get()->keyBy('id');
+
+        // Render HTML
+        $html = view('menu.admin.card.print.sheet-a5', [
+            'cards' => collect([$card]),
+            'finalAccessByCardId' => [$card->id => $final],
+            'qrByCardId' => [$card->id => $qr],
+            'photoByCardId' => [$card->id => $photo],
+            'photoIsFallbackByCardId' => [$card->id => $isFallback],
+            'transportById' => $transportById,
+            'accomById' => $accomById,
+            'venueMap' => $venueMap,
+            'zoneMap'  => $zoneMap,
+            'mode' => 'print',
+            'autoPrint' => false,
+            'layout' => $layout,
+        ])->render();
+
+        try {
+            $pdf = Browsershot::html($html)
+                ->setNodeBinary('C:\Program Files\nodejs\node.exe')
+                ->setNpmBinary('C:\Program Files\nodejs\npm.cmd')
+                ->format('A5')
+                ->showBackground()
+                ->margins(0, 0, 0, 0)
+                ->waitUntilNetworkIdle()
+                ->pdf();
+
+            return response($pdf)
+                ->header('Content-Type', 'application/pdf');
+        } catch (\Exception $e) {
+            return response('Failed to generate PDF: ' . $e->getMessage(), 500);
+        }
+    }
+
     private function resolvePhotoPathInfo(Card $card): array
     {
         if ($card->card_recipient_id && $card->cardRecipient) {
