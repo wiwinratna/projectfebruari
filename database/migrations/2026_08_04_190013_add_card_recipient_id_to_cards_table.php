@@ -4,10 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
-     * Run the migrations.
+     * Run the migrations.ohh o
      * This migration only adds the FK constraint.
      * The column already exists from a previous session.
      */
@@ -16,11 +15,6 @@ return new class extends Migration
         Schema::table('cards', function (Blueprint $table) {
             // Ensure application_id is nullable
             $table->unsignedBigInteger('application_id')->nullable()->change();
-            
-            // Add column if it doesn't exist (it doesn't on the server, but does locally)
-            if (!Schema::hasColumn('cards', 'card_recipient_id')) {
-                $table->unsignedBigInteger('card_recipient_id')->nullable()->after('application_id');
-            }
 
             // Add FK from card_recipient_id to card_recipients
             $table->foreign('card_recipient_id')->references('id')->on('card_recipients')->onDelete('cascade');
