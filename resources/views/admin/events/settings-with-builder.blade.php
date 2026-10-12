@@ -169,25 +169,25 @@
         </div>
     </div>
 
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4">Card Layout Editor</h2>
+    <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-4 sm:p-6">
+        <h2 class="text-base sm:text-lg font-semibold text-gray-900 mb-3 sm:mb-4">Card Layout Editor</h2>
         @if(!$templateExists)
-            <div class="bg-blue-50 border border-blue-200 text-blue-800 px-4 py-3 rounded-lg text-sm font-medium mb-3">
-                <i class="fas fa-info-circle mr-2"></i> Editing positions uses the default built-in card design without custom template background.
+            <div class="bg-blue-50 border border-blue-200 text-blue-800 px-3.5 py-2.5 sm:px-4 sm:py-3 rounded-lg text-xs sm:text-sm font-medium mb-3">
+                <i class="fas fa-info-circle mr-1.5 sm:mr-2"></i> Editing positions uses the default built-in card design without custom template background.
             </div>
         @endif
-        <div class="editor-layout relative gap-6 items-start overflow-visible">
-            <div class="editor-toolbar w-36 flex flex-col gap-2 relative z-20">
-                <button type="button" id="btnToggleGuides" aria-pressed="false" onclick="toggleGuides()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-border-all mr-1"></i> Guides</button>
-                <button type="button" id="btnResetLayout" onclick="resetLayout()" class="px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-sm font-medium w-full"><i class="fas fa-undo mr-1"></i> Reset</button>
-                <button type="button" id="btnPreviewSample" onclick="previewSample()" class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-sm font-medium w-full" style="display:block !important; visibility:visible !important; opacity:1 !important; background-color:#4f46e5; color:#ffffff; min-height:2.5rem;"><i class="fas fa-eye mr-1"></i> Preview</button>
-                <button type="button" id="btnSaveLayout" onclick="saveLayout()" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-sm font-medium w-full"><i class="fas fa-check-circle mr-1"></i> Save</button>
+        <div class="editor-layout relative gap-4 sm:gap-6 items-start overflow-visible">
+            <div class="editor-toolbar w-full lg:w-36 grid grid-cols-2 sm:grid-cols-4 lg:flex lg:flex-col gap-2 relative z-20">
+                <button type="button" id="btnToggleGuides" aria-pressed="false" onclick="toggleGuides()" class="px-2.5 sm:px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-xs sm:text-sm font-medium w-full flex items-center justify-center gap-1.5"><i class="fas fa-border-all"></i> <span>Guides</span></button>
+                <button type="button" id="btnResetLayout" onclick="resetLayout()" class="px-2.5 sm:px-3 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors text-xs sm:text-sm font-medium w-full flex items-center justify-center gap-1.5"><i class="fas fa-undo"></i> <span>Reset</span></button>
+                <button type="button" id="btnPreviewSample" onclick="previewSample()" class="px-2.5 sm:px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors text-xs sm:text-sm font-medium w-full flex items-center justify-center gap-1.5" style="display:block !important; visibility:visible !important; opacity:1 !important; background-color:#4f46e5; color:#ffffff; min-height:2.5rem;"><i class="fas fa-eye"></i> <span>Preview</span></button>
+                <button type="button" id="btnSaveLayout" onclick="saveLayout()" class="px-2.5 sm:px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors text-xs sm:text-sm font-medium w-full flex items-center justify-center gap-1.5"><i class="fas fa-check-circle"></i> <span>Save</span></button>
             </div>
 
             <div class="editor-canvas-col min-w-0 w-full relative z-10">
-                <div class="bg-gray-50 rounded-lg overflow-auto p-4 border border-gray-200 w-full" style="max-height: 860px;">
-                    <div class="flex items-center justify-center min-w-0">
-                        <div id="cardCanvas" class="relative bg-white shadow-md shrink-0" style="width: 148mm; height: 210mm;">
+                <div id="cardCanvasOuter" class="bg-gray-50 rounded-lg overflow-hidden p-2 sm:p-4 border border-gray-200 w-full flex items-center justify-center min-w-0">
+                    <div id="cardCanvasScaleWrap" style="transform-origin: top center; transition: transform 0.15s ease;">
+                        <div id="cardCanvas" class="relative bg-white shadow-md shrink-0" style="width: 148mm; height: 210mm; touch-action: none;">
                             @if($templateExists && $templatePublicUrl)
                                 <img src="{{ $templatePublicUrl }}" alt="Template Background" class="absolute inset-0 w-full h-full object-cover rounded pointer-events-none" style="z-index: 1;">
                             @endif
@@ -200,14 +200,17 @@
                         </div>
                     </div>
                 </div>
+                <p class="mt-2 text-center text-[10px] sm:text-[11px] text-gray-400">
+                    Tampilan kartu otomatis di-fit ke layar HP. Klik <strong>Preview</strong> untuk melihat ukuran cetak asli (A5).
+                </p>
             </div>
 
             <aside class="editor-sidebar w-full max-w-full relative z-10">
-                <div class="bg-gray-50 rounded-lg p-4 space-y-4 border border-gray-200 editor-sidebar-inner" style="max-height: 860px; overflow-y: auto;">
-                    <h3 class="font-semibold text-gray-900">Elements</h3>
+                <div class="bg-gray-50 rounded-lg p-3 sm:p-4 space-y-4 border border-gray-200 editor-sidebar-inner" style="max-height: 860px; overflow-y: auto;">
+                    <h3 class="font-semibold text-gray-900 text-sm sm:text-base">Elements</h3>
                     <div id="elementsList" class="space-y-2"></div>
                     <div id="elementProperties" class="border-t border-gray-200 pt-3">
-                        <h4 class="font-semibold text-gray-900 text-sm mb-2">Properties</h4>
+                        <h4 class="font-semibold text-gray-900 text-xs sm:text-sm mb-2">Properties</h4>
                         <div id="propertiesContent" class="text-xs text-gray-500">Select an element to edit properties</div>
                     </div>
                 </div>
@@ -333,7 +336,7 @@
         flex-direction: column;
     }
     .editor-toolbar {
-        align-self: flex-start;
+        width: 100%;
     }
     @media (min-width: 900px) {
         .editor-layout {
@@ -342,8 +345,12 @@
             align-items: start;
         }
         .editor-toolbar {
+            width: 8.5rem;
+            display: flex;
+            flex-direction: column;
             position: sticky;
             top: 6rem;
+            align-self: flex-start;
         }
         .editor-sidebar {
             grid-column: 1 / -1;
@@ -403,10 +410,30 @@
     const px2mm = 1 / mm2px;
     const pt2px = Number(renderStyleConfig.ptToPx || (96/72));
     const editorEnabled = true;
+    let cardCanvasScale = 1;
+
+    function scaleCardCanvas() {
+        const outer = document.getElementById('cardCanvasOuter');
+        const wrap = document.getElementById('cardCanvasScaleWrap');
+        const canvas = document.getElementById('cardCanvas');
+        if (!outer || !wrap || !canvas) return;
+        const cW = 148 * mm2px;
+        const cH = 210 * mm2px;
+        const padding = window.innerWidth < 640 ? 16 : 32;
+        const availW = Math.max(100, outer.clientWidth - padding);
+        const scale = Math.min(1, availW / cW);
+        cardCanvasScale = scale;
+        wrap.style.transform = `scale(${scale})`;
+        wrap.style.width = cW + 'px';
+        wrap.style.height = (cH * scale) + 'px';
+        outer.style.height = (cH * scale + padding) + 'px';
+    }
 
     document.addEventListener('DOMContentLoaded', function() {
         initUploadDropzones();
         if (!editorEnabled) return;
+        scaleCardCanvas();
+        window.addEventListener('resize', scaleCardCanvas);
         loadLayout();
     });
 
@@ -507,6 +534,7 @@
         });
 
         updateTruncationWarnings();
+        scaleCardCanvas();
     }
 
     function createCanvasElement(data) {
@@ -580,8 +608,9 @@
                         const style = window.getComputedStyle(event.target);
                         let left = parseFloat(style.left) || 0;
                         let top = parseFloat(style.top) || 0;
-                        left += event.dx;
-                        top += event.dy;
+                        const sc = (typeof cardCanvasScale !== 'undefined' && cardCanvasScale > 0) ? cardCanvasScale : 1;
+                        left += (event.dx / sc);
+                        top += (event.dy / sc);
                         event.target.style.left = left + 'px';
                         event.target.style.top = top + 'px';
                         updateElementInLayout(data.id, {
@@ -595,13 +624,16 @@
                 edges: { right: true, bottom: true },
                 listeners: {
                     move(event) {
-                        event.target.style.width = event.rect.width + 'px';
-                        event.target.style.height = event.rect.height + 'px';
+                        const sc = (typeof cardCanvasScale !== 'undefined' && cardCanvasScale > 0) ? cardCanvasScale : 1;
+                        const newW = (event.rect.width / sc);
+                        const newH = (event.rect.height / sc);
+                        event.target.style.width = newW + 'px';
+                        event.target.style.height = newH + 'px';
                         updateElementInLayout(data.id, {
-                            wMm: event.rect.width * px2mm,
-                            hMm: event.rect.height * px2mm
+                            wMm: newW * px2mm,
+                            hMm: newH * px2mm
                         });
-                        updateGroupGuideVisual(event.target, data, event.rect.width, event.rect.height);
+                        updateGroupGuideVisual(event.target, data, newW, newH);
                         updateTruncationWarnings();
                     }
                 },

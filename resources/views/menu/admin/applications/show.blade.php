@@ -42,6 +42,20 @@
 
             <div class="text-left space-y-4">
                 <div>
+                    <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Identitas &amp; Kewarganegaraan</h3>
+                    <p class="text-sm font-medium text-gray-800 mb-1">
+                        <i class="fas fa-globe text-gray-400 mr-2"></i>
+                        {{ ($application->user->profile->nationality_type ?? '') === 'wna' ? 'Foreign Citizen (WNA)' : 'Indonesian Citizen (WNI)' }}
+                    </p>
+                    @if(($application->user->profile->nationality_type ?? 'wni') === 'wni')
+                        <p class="text-sm font-medium text-gray-800 font-mono">
+                            <i class="fas fa-id-card text-red-500 mr-2"></i>
+                            NIK: <span class="font-bold text-gray-900 tracking-wider">{{ $application->user->profile->nik ?? '-' }}</span>
+                        </p>
+                    @endif
+                </div>
+
+                <div>
                     <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">Contact</h3>
                     <p class="text-sm font-medium text-gray-800"><i class="fas fa-phone text-gray-400 mr-2"></i> {{ $application->user->profile->phone ?? '-' }}</p>
                     <p class="text-sm font-medium text-gray-800"><i class="fas fa-map-marker-alt text-gray-400 mr-2"></i> {{ $application->user->profile->address ?? '-' }}</p>

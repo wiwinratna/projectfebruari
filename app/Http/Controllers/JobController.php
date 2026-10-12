@@ -15,29 +15,72 @@ class JobController extends Controller
      */
     public function index(Request $request)
     {
+        $customerId = session('customer_id');
+
+        // Total opportunities count (active)
+        $allOpportunitiesCount = WorkerOpening::where('status', 'open')
+            ->where('application_deadline', '>', now())
+            ->whereColumn('slots_filled', '<', 'slots_total')
+            ->count();
+
+        // Open count
+        $openCount = $allOpportunitiesCount;
+
+        // Applied count & applied job IDs
+        $appliedJobIds = [];
+        $appliedCount = 0;
+        if (session('customer_authenticated') && $customerId) {
+            $appliedJobIds = Application::where('user_id', $customerId)
+                ->pluck('worker_opening_id')
+                ->toArray();
+            $appliedCount = count($appliedJobIds);
+        }
+
+        // Saved count & saved job IDs
+        $savedJobIds = [];
+        $savedCount = 0;
+        if (session('customer_authenticated') && $customerId) {
+            $savedJobIds = \DB::table('saved_jobs')
+                ->where('user_id', $customerId)
+                ->pluck('worker_opening_id')
+                ->toArray();
+            $savedCount = count($savedJobIds);
+        }
+
         $query = WorkerOpening::with(['event.city', 'jobCategory'])
             ->where('status', 'open')
             ->where('application_deadline', '>', now())
             ->whereColumn('slots_filled', '<', 'slots_total')
             ->orderBy('application_deadline');
 
+        // Quick filter pills
+        if ($request->filter === 'applied') {
+            $query->whereIn('id', $appliedJobIds);
+        } elseif ($request->filter === 'saved') {
+            $query->whereIn('id', $savedJobIds);
+        }
+
         // Apply filters
         $this->applyFilters($query, $request);
 
-        $jobs = $query->paginate(10);
+        $perPage = (int) $request->input('per_page', 6);
+        if ($perPage <= 0 || $perPage > 48) {
+            $perPage = 6;
+        }
+
+        $jobs = $query->paginate($perPage)->withQueryString();
 
         $filterData = $this->getFilterData();
 
-        // Get saved job IDs for authenticated customer
-        $savedJobIds = [];
-        if (session('customer_authenticated') && session('customer_id')) {
-            $savedJobIds = \DB::table('saved_jobs')
-                ->where('user_id', session('customer_id'))
-                ->pluck('worker_opening_id')
-                ->toArray();
-        }
-
-        return view('jobs.index', array_merge(compact('jobs', 'savedJobIds'), $filterData));
+        return view('jobs.index', array_merge(compact(
+            'jobs', 
+            'savedJobIds', 
+            'appliedJobIds',
+            'allOpportunitiesCount',
+            'openCount',
+            'appliedCount',
+            'savedCount'
+        ), $filterData));
     }
 
     /**
@@ -45,16 +88,33 @@ class JobController extends Controller
      */
     protected function applyFilters($query, $request)
     {
-        // Handle cities filter (checkbox array)
-        if ($request->filled('cities')) {
+        // City dropdown or cities array
+        if ($request->filled('city')) {
             $query->whereHas('event.city', function($q) use ($request) {
-                $q->whereIn('name', $request->cities);
+                $q->where('name', $request->city);
+            });
+        } elseif ($request->filled('cities')) {
+            $query->whereHas('event.city', function($q) use ($request) {
+                $q->whereIn('name', (array) $request->cities);
             });
         }
 
-        // Handle categories filter (checkbox array)
-        if ($request->filled('categories')) {
-            $query->whereIn('job_category_id', $request->categories);
+        // Category dropdown or categories array
+        if ($request->filled('category')) {
+            $query->where('job_category_id', $request->category);
+        } elseif ($request->filled('categories')) {
+            $query->whereIn('job_category_id', (array) $request->categories);
+        }
+
+        // Date filter
+        if ($request->filled('date')) {
+            if ($request->date === 'today') {
+                $query->whereDate('application_deadline', today());
+            } elseif ($request->date === 'this_week') {
+                $query->whereBetween('application_deadline', [now(), now()->endOfWeek()]);
+            } elseif ($request->date === 'this_month') {
+                $query->whereBetween('application_deadline', [now(), now()->endOfMonth()]);
+            }
         }
 
         if ($request->filled('search')) {
@@ -75,8 +135,8 @@ class JobController extends Controller
     protected function getFilterData()
     {
         return [
-            'cities' => City::active()->orderBy('name')->get(),
-            'categories' => JobCategory::where('is_active', true)->orderBy('name')->get(),
+            'cities' => City::active()->orderBy('name')->get()->unique('name'),
+            'categories' => JobCategory::where('is_active', true)->orderBy('name')->get()->unique('name'),
             'searchTerm' => request('search'),
             'selectedCity' => request('city'),
             'selectedCategory' => request('category'),

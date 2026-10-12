@@ -468,7 +468,7 @@
                     <span class="inline-block w-3 h-3 rounded-full bg-gray-500 ml-4 mr-1"></span> Completed
                 </div>
             </div>
-            <div class="h-[500px] z-0 w-full" id="event-map"></div>
+            <div class="h-[320px] sm:h-[500px] z-0 w-full" id="event-map"></div>
         </div>
     </div>
 </div>
@@ -484,9 +484,8 @@
         // Initialize Map — will auto-fit to markers
         const map = L.map('event-map').setView([0, 118], 3);
         
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            subdomains: 'abcd',
             maxZoom: 19
         }).addTo(map);
 

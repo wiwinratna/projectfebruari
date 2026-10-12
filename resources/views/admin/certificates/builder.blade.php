@@ -18,41 +18,40 @@
 <div class="max-w-screen-2xl mx-auto px-4 py-5 space-y-4">
 
 {{-- ① HEADER --}}
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4 flex flex-wrap items-center justify-between gap-3">
-    <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-            <i class="fas fa-drafting-compass text-amber-600 text-lg"></i>
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
+    <div class="flex items-center gap-2.5 sm:gap-3">
+        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+            <i class="fas fa-drafting-compass text-amber-600 text-base sm:text-lg"></i>
         </div>
         <div>
-            <h1 class="text-lg font-bold text-gray-900 leading-tight">Certificate Builder</h1>
-            <p class="text-sm text-gray-500">{{ $event->title }}</p>
+            <h1 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Certificate Builder</h1>
+            <p class="text-xs sm:text-sm text-gray-500">{{ $event->title }}</p>
         </div>
-
     </div>
-    <div class="flex items-center gap-2">
+    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
         <a href="{{ route('admin.certificates.index') }}"
-           class="px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-200 transition">
-            <i class="fas fa-list mr-1.5"></i>Certificate List
+           class="flex-1 sm:flex-none text-center px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 rounded-xl text-xs sm:text-sm font-medium hover:bg-gray-200 transition">
+            <i class="fas fa-list mr-1"></i>List
         </a>
         <button id="btnPreview" onclick="openPreview()"
-            class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition">
-            <i class="fas fa-eye mr-1.5"></i>Preview
+            class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-indigo-700 transition">
+            <i class="fas fa-eye mr-1"></i>Preview
         </button>
         <button id="btnSave" onclick="saveLayout()"
-            class="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition
+            class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-blue-700 transition
             {{ $locked ? 'opacity-50 cursor-not-allowed' : '' }}"
             {{ $locked ? 'disabled' : '' }}>
-            <i class="fas fa-check-circle mr-1.5"></i>Save
+            <i class="fas fa-check-circle mr-1"></i>Save
         </button>
         @if(!$locked)
         <button id="btnPublish" onclick="confirmPublish()"
-            class="px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-medium hover:bg-green-700 transition flex items-center gap-1.5">
+            class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-green-600 text-white rounded-xl text-xs sm:text-sm font-medium hover:bg-green-700 transition flex items-center justify-center gap-1">
             <i class="fas fa-lock"></i>Publish
         </button>
         @else
         <button onclick="openRevertModal()"
-            class="px-4 py-2 bg-amber-500 text-white rounded-xl text-sm font-bold hover:bg-amber-600 transition flex items-center gap-1.5 shadow-sm">
-            <i class="fas fa-unlock"></i>Revert to Draft
+            class="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-amber-500 text-white rounded-xl text-xs sm:text-sm font-bold hover:bg-amber-600 transition flex items-center justify-center gap-1 shadow-sm">
+            <i class="fas fa-unlock"></i>Revert
         </button>
         @endif
     </div>
@@ -139,21 +138,21 @@
 @endif
 
 {{-- ② STEP INDICATOR --}}
-<div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-6 py-4">
-    <div class="flex items-center justify-between flex-wrap gap-3">
+<div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 sm:px-6 sm:py-4">
+    <div class="grid grid-cols-2 lg:flex lg:items-center lg:justify-between gap-2.5 sm:gap-3">
         @foreach([
             ['1', 'Upload Assets', 'Upload logo, background & signature photo', 'amber'],
             ['2', 'Arrange Layout', 'Position elements on the canvas', 'blue'],
             ['3', 'Preview', 'Check the design before saving', 'indigo'],
             ['4', 'Publish', 'Lock layout & generate certificates', 'green'],
         ] as [$step, $title, $desc, $color])
-        <div class="flex items-center gap-2 flex-1 min-w-[160px]">
-            <div class="w-9 h-9 rounded-full bg-{{ $color }}-100 border-2 border-{{ $color }}-300 flex items-center justify-center flex-shrink-0">
-                <span class="text-{{ $color }}-700 font-bold text-sm">{{ $step }}</span>
+        <div class="flex items-center gap-2 flex-1 min-w-[130px]">
+            <div class="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-{{ $color }}-100 border-2 border-{{ $color }}-300 flex items-center justify-center flex-shrink-0">
+                <span class="text-{{ $color }}-700 font-bold text-xs sm:text-sm">{{ $step }}</span>
             </div>
             <div>
-                <div class="text-sm font-semibold text-gray-800">{{ $title }}</div>
-                <div class="text-[11px] text-gray-400">{{ $desc }}</div>
+                <div class="text-xs sm:text-sm font-semibold text-gray-800 leading-tight">{{ $title }}</div>
+                <div class="text-[10px] sm:text-[11px] text-gray-400 hidden sm:block">{{ $desc }}</div>
             </div>
         </div>
         @if(!$loop->last)
@@ -164,18 +163,18 @@
 </div>
 
 {{-- ③ MAIN EDITOR --}}
-<div class="flex gap-4 items-start">
+<div class="flex flex-col lg:flex-row gap-4 items-start">
 
     {{-- ── CANVAS ── --}}
-    <div class="flex-1 min-w-0 space-y-3">
+    <div class="w-full flex-1 min-w-0 space-y-3">
         {{-- Toolbar --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 px-4 py-3 flex items-center gap-2 flex-wrap">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 sm:px-4 sm:py-3 flex items-center gap-2 flex-wrap">
             <button onclick="toggleGuides()" id="btnGuides"
-                class="px-3 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-xs font-medium">
+                class="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-xs font-medium">
                 <i class="fas fa-border-all mr-1"></i>Grid Guide
             </button>
             <button onclick="resetLayout()"
-                class="px-3 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-xs font-medium">
+                class="px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition text-xs font-medium">
                 <i class="fas fa-undo mr-1"></i>Reset Default
             </button>
             <div class="ml-auto flex items-center gap-2">
@@ -184,14 +183,14 @@
         </div>
 
         {{-- Canvas area --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
-            <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-semibold text-gray-500 uppercase tracking-wide">Canvas — A4 Landscape (297 × 210 mm)</span>
-                <span class="text-[11px] text-gray-400">Click to select · Drag to move · Pull corner to resize</span>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-3 sm:p-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-2 sm:mb-3">
+                <span class="text-[11px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wide">Canvas — A4 Landscape (297 × 210 mm)</span>
+                <span class="text-[10px] sm:text-[11px] text-gray-400">Click to select · Drag to move · Pull corner to resize</span>
             </div>
-            <div id="canvasOuter" class="bg-gray-100 rounded-xl border border-gray-200 overflow-auto p-3">
-                <div id="canvasScaleWrap" style="transform-origin:top left;">
-                    <div id="certCanvas" class="relative bg-white shadow-md"
+            <div id="canvasOuter" class="bg-gray-100 rounded-xl border border-gray-200 overflow-hidden p-2 sm:p-3 flex items-center justify-center min-w-0">
+                <div id="canvasScaleWrap" style="transform-origin:top center; transition: transform 0.15s ease;">
+                    <div id="certCanvas" class="relative bg-white shadow-md shrink-0"
                          style="width:297mm;height:210mm;touch-action:none;">
                         <img id="canvasBgImg" src="{{ $bgUrl ?? '' }}"
                              class="{{ $bgUrl ? '' : 'hidden' }} absolute inset-0 w-full h-full object-cover pointer-events-none"
@@ -205,14 +204,14 @@
                     </div>
                 </div>
             </div>
-            <p class="mt-2 text-center text-[11px] text-gray-400">
-                Canvas is auto-zoomed to fit the screen. Click <strong>Preview</strong> to see the actual A4 size.
+            <p class="mt-2 text-center text-[10px] sm:text-[11px] text-gray-400">
+                Canvas otomatis di-fit ke layar HP. Klik <strong>Preview</strong> untuk melihat ukuran asli (A4).
             </p>
         </div>
     </div>
 
-    {{-- ── RIGHT PANEL ── --}}
-    <div class="w-80 flex-shrink-0 space-y-0" style="max-height:82vh;overflow-y:auto;">
+    {{-- ── RIGHT PANEL (Full width on mobile below canvas, 320px on desktop) ── --}}
+    <div class="w-full lg:w-80 flex-shrink-0 space-y-0 lg:max-h-[82vh] overflow-y-auto">
 
         {{-- Tab Nav --}}
         <div class="bg-white rounded-t-2xl border border-gray-200 border-b-0 px-2 pt-3 flex gap-1">
@@ -590,16 +589,21 @@ function switchTab(tab){
 }
 
 // ════ CANVAS SCALE ════════════════════════════════════
+let currentCanvasScale = 1;
 function scaleCanvas(){
     const wrap=document.getElementById('canvasScaleWrap');
     const outer=document.getElementById('canvasOuter');
     if(!wrap||!outer)return;
     const cW=297*MM2PX, cH=210*MM2PX;
-    const avail=outer.clientWidth-24;
-    const scale=Math.min(1,avail/cW);
+    const padding = window.innerWidth < 640 ? 16 : 24;
+    const avail=Math.max(100, outer.clientWidth - padding);
+    const scale=Math.min(1, avail/cW);
+    currentCanvasScale = scale;
     wrap.style.transform=`scale(${scale})`;
     wrap.style.width=cW+'px';
-    outer.style.minHeight=(cH*scale+24)+'px';
+    wrap.style.height=(cH*scale)+'px';
+    outer.style.minHeight=(cH*scale + padding)+'px';
+    outer.style.height=(cH*scale + padding)+'px';
 }
 
 // ════ LOAD LAYOUT ═════════════════════════════════════
@@ -747,9 +751,10 @@ function makeCanvasEl(data){
         .draggable({inertia:false,modifiers:[interact.modifiers.restrictRect({restriction:'parent',endOnly:false})],
             listeners:{
                 move(ev){
+                    const sc = (typeof currentCanvasScale !== 'undefined' && currentCanvasScale > 0) ? currentCanvasScale : 1;
                     const cs=window.getComputedStyle(ev.target);
-                    const lft=(parseFloat(cs.left)||0)+ev.dx;
-                    const tp=(parseFloat(cs.top)||0)+ev.dy;
+                    const lft=(parseFloat(cs.left)||0)+(ev.dx / sc);
+                    const tp=(parseFloat(cs.top)||0)+(ev.dy / sc);
                     ev.target.style.left=lft+'px';ev.target.style.top=tp+'px';
                     updRectData(data.id,{xMm:lft*PX2MM,yMm:tp*PX2MM});
                 },
@@ -759,8 +764,10 @@ function makeCanvasEl(data){
         .resizable({edges:{right:true,bottom:true},modifiers:[interact.modifiers.restrictSize({min:{width:20,height:12}})],
             listeners:{
                 move(ev){
-                    ev.target.style.width=ev.rect.width+'px';ev.target.style.height=ev.rect.height+'px';
-                    updRectData(data.id,{wMm:ev.rect.width*PX2MM,hMm:ev.rect.height*PX2MM});
+                    const sc = (typeof currentCanvasScale !== 'undefined' && currentCanvasScale > 0) ? currentCanvasScale : 1;
+                    ev.target.style.width=(ev.rect.width / sc)+'px';
+                    ev.target.style.height=(ev.rect.height / sc)+'px';
+                    updRectData(data.id,{wMm:(ev.rect.width / sc)*PX2MM,hMm:(ev.rect.height / sc)*PX2MM});
                 },
                 end(){checkTruncation();syncPosList();}
             }

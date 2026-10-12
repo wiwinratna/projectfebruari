@@ -139,7 +139,7 @@ class CustomerDashboardController extends Controller
         }
 
         // Handle personal data updates (from personal data tab)
-        if ($request->has('professional_headline') || $request->has('phone') || $request->has('date_of_birth') || $request->has('nationality_type')) {
+        if ($request->has('professional_headline') || $request->has('phone') || $request->has('date_of_birth') || $request->has('nationality_type') || $request->has('nik')) {
             $request->validate([
                 'professional_headline' => 'nullable|string|max:100',
                 'phone'                 => 'nullable|string|max:20',
@@ -157,6 +157,7 @@ class CustomerDashboardController extends Controller
 
                 if ($nationalityType === 'wni') {
                     $request->validate([
+                        'nik'          => 'nullable|string|digits:16',
                         'province'     => 'required|string|max:150',
                         'city_regency' => 'required|string|max:150',
                         'district'     => 'nullable|string|max:150',
@@ -165,8 +166,11 @@ class CustomerDashboardController extends Controller
                         'rt'           => 'nullable|string|max:5',
                         'rw'           => 'nullable|string|max:5',
                         'address'      => 'nullable|string|max:500',
+                    ], [
+                        'nik.digits'   => 'NIK harus berupa 16 digit angka sesuai KTP.',
                     ]);
 
+                    $profileData['nik']          = $request->nik;
                     $profileData['province']     = $request->province;
                     $profileData['city_regency'] = $request->city_regency;
                     $profileData['district']     = $request->district;
@@ -194,6 +198,7 @@ class CustomerDashboardController extends Controller
                     $profileData['postal_code']  = $request->wna_postal_code;
                     $profileData['address']      = $request->wna_address;
                     // Clear WNI-specific fields
+                    $profileData['nik']       = null;
                     $profileData['province']  = null;
                     $profileData['district']  = null;
                     $profileData['village']   = null;

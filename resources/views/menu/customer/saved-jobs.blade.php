@@ -12,93 +12,83 @@
     </div>
 
     <!-- Main Content Wrapper with Top Padding -->
-    <div class="relative z-10 pt-32 pb-16">
-        <div class="container mx-auto px-4 lg:px-6 max-w-7xl">
+    <div class="relative z-10 pt-24 sm:pt-32 pb-20 sm:pb-16">
+        <div class="w-full px-3 sm:px-6 lg:px-8">
             
             <!-- Page Header -->
-            <div class="mb-10">
-                <h1 class="text-4xl font-bold text-gray-900 mb-2 tracking-tight">Saved Jobs</h1>
-                <p class="text-gray-600 text-lg">Keep track of opportunities you're interested in.</p>
+            <div class="mb-5 sm:mb-8">
+                <h1 class="text-2xl sm:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 tracking-tight">Saved Jobs</h1>
+                <p class="text-xs sm:text-base text-gray-600">Keep track of opportunities you're interested in.</p>
             </div>
 
-            <!-- Navigation Tabs -->
-            <div class="bg-white/60 backdrop-blur-xl rounded-2xl p-2 border border-white/50 shadow-sm mb-10 inline-flex flex-wrap gap-2">
-                <a href="{{ route('customer.dashboard') }}" class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all">
-                    <i class="fas fa-th-large mr-2"></i> Dashboard
-                </a>
-                <a href="{{ route('customer.applications') }}" class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all">
-                    <i class="fas fa-file-alt mr-2"></i> My Applications
-                </a>
-                <a href="{{ route('customer.saved-jobs') }}" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-white text-red-600 shadow-md transition-all">
-                    <i class="fas fa-bookmark mr-2"></i> Saved Jobs
-                </a>
-            </div>
+            <!-- Navigation Tabs (Hidden on mobile) -->
+            @include('partials.customer-nav-tabs')
 
             <!-- Saved Jobs List -->
-            <div class="bg-white/70 backdrop-blur-xl rounded-3xl border border-white/60 shadow-xl overflow-hidden">
-                <div class="px-8 py-6 border-b border-gray-100/50 flex justify-between items-center bg-white/40">
-                    <h3 class="text-xl font-bold text-gray-900">Your Watchlist</h3>
-                    <div class="bg-white/50 px-3 py-1 rounded-lg border border-gray-100 text-sm font-medium text-gray-600">
+            <div class="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/60 shadow-lg sm:shadow-xl overflow-hidden">
+                <div class="px-4 sm:px-8 py-3.5 sm:py-6 border-b border-gray-100/50 flex justify-between items-center bg-white/40">
+                    <h3 class="text-base sm:text-xl font-bold text-gray-900">Your Watchlist</h3>
+                    <div class="bg-white/70 px-2.5 py-1 rounded-lg border border-gray-100 text-xs sm:text-sm font-medium text-gray-600">
                         Total: <span class="font-bold text-gray-900">{{ $savedJobs->total() }}</span>
                     </div>
                 </div>
 
-                <div class="p-6 space-y-4">
+                <div class="p-3.5 sm:p-6 space-y-3 sm:space-y-4">
                     @forelse($savedJobs as $job)
-                    <div class="group relative bg-white/60 backdrop-blur-sm border border-gray-100 rounded-2xl p-6 transition-all duration-300 hover:shadow-lg hover:border-red-100 hover:bg-white">
-                        <div class="flex flex-col lg:flex-row gap-6">
+                    <div class="group relative bg-white/80 backdrop-blur-sm border border-gray-100 rounded-xl sm:rounded-2xl p-3.5 sm:p-6 transition-all duration-300 hover:shadow-md hover:border-red-100 hover:bg-white">
+                        <div class="flex flex-col lg:flex-row gap-4 sm:gap-6">
                             <!-- Left: Job Info -->
-                            <div class="flex-1">
-                                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-                                    <div class="flex items-center gap-4">
-                                        <div class="w-14 h-14 rounded-xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform duration-300">
-                                            <i class="fas fa-briefcase text-2xl text-red-500/80 group-hover:text-red-600 transition-colors"></i>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                                    <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+                                        <div class="w-10 h-10 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br from-gray-50 to-white border border-gray-100 flex items-center justify-center shrink-0 shadow-xs group-hover:scale-105 transition-transform">
+                                            <i class="fas fa-briefcase text-lg sm:text-2xl text-red-500/80 group-hover:text-red-600 transition-colors"></i>
                                         </div>
-                                        <div>
+                                        <div class="min-w-0 flex-1">
                                             <div class="flex items-center gap-2 mb-1">
-                                                <span class="text-[10px] font-bold uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-100">
+                                                <span class="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-red-600 bg-red-50 px-2 py-0.5 rounded-md border border-red-100 truncate max-w-full">
                                                     {{ $job->event->title }}
                                                 </span>
                                             </div>
-                                            <h4 class="text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors">{{ $job->title }}</h4>
+                                            <h4 class="text-sm sm:text-xl font-bold text-gray-900 group-hover:text-red-600 transition-colors truncate">{{ $job->title }}</h4>
                                         </div>
                                     </div>
                                     
                                     <!-- Status Badge -->
-                                    <div class="flex-shrink-0">
+                                    <div class="shrink-0">
                                         @if($job->status === 'open' && $job->application_deadline > now())
-                                            <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-50 text-green-700 border border-green-100 shadow-sm">
-                                                <span class="relative flex h-2.5 w-2.5">
-                                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                                            <div class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] sm:text-xs font-bold shadow-2xs">
+                                                <span class="relative flex h-2 w-2">
+                                                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                                 </span>
-                                                <span class="text-sm font-bold">Applications Open</span>
+                                                <span>Applications Open</span>
                                             </div>
                                         @else
-                                            <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-red-50 text-red-700 border border-red-100 shadow-sm">
-                                                <i class="fas fa-lock text-red-500"></i>
-                                                <span class="text-sm font-bold">Closed</span>
+                                            <div class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[11px] sm:text-xs font-bold shadow-2xs">
+                                                <i class="fas fa-lock text-rose-500 text-[10px]"></i>
+                                                <span>Closed</span>
                                             </div>
                                         @endif
                                     </div>
                                 </div>
 
                                 <!-- Job Location & Deadline -->
-                                <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500 border-b border-gray-100/50 pb-4 mb-4">
-                                    <span class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                                        <i class="fas fa-map-marker-alt text-red-400"></i> {{ $job->event->city->name }}, {{ $job->event->venue }}
+                                <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs text-gray-500 border-b border-gray-100/70 pb-3 mb-3">
+                                    <span class="inline-flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
+                                        <i class="fas fa-map-marker-alt text-red-400 text-xs"></i> {{ $job->event->city->name ?? $job->event->location ?? 'Indonesia' }}{{ $job->event->venue ? ', ' . $job->event->venue : '' }}
                                     </span>
-                                    <span class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                                        <i class="fas fa-clock text-red-400"></i> Deadline: {{ $job->application_deadline->format('d M Y') }}
+                                    <span class="inline-flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
+                                        <i class="far fa-clock text-red-400 text-xs"></i> Deadline: {{ $job->application_deadline->format('d M Y') }}
                                     </span>
-                                    <span class="flex items-center gap-2 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                                        <i class="fas fa-calendar-alt text-red-400"></i> Saved: {{ $job->pivot->created_at->format('d M Y') }}
+                                    <span class="inline-flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">
+                                        <i class="far fa-calendar-alt text-red-400 text-xs"></i> Saved: {{ $job->pivot->created_at->format('d M Y') }}
                                     </span>
                                 </div>
                                 
                                 @if($job->description)
-                                <div class="mb-4">
-                                    <p class="text-sm text-gray-600 italic">
+                                <div class="mb-3">
+                                    <p class="text-xs sm:text-sm text-gray-600 italic line-clamp-2">
                                         "{{ Str::limit($job->description, 160) }}"
                                     </p>
                                 </div>
@@ -106,7 +96,7 @@
                             </div>
      
                             <!-- Right: Actions -->
-                            <div class="flex lg:flex-col justify-end gap-2 border-t lg:border-t-0 lg:border-l border-gray-100 pt-4 lg:pt-0 lg:pl-6 min-w-[160px]">
+                            <div class="grid grid-cols-2 sm:flex lg:flex-col justify-end gap-2 border-t lg:border-t-0 lg:border-l border-gray-100 pt-3 lg:pt-0 lg:pl-6 min-w-[150px]">
                                 <!-- Check if already applied -->
                                 @php
                                     $customerId = session('customer_id');
@@ -116,27 +106,29 @@
                                 @endphp
 
                                 @if($hasApplied)
-                                    <button disabled class="w-full text-center px-4 py-2.5 rounded-xl bg-gray-100 text-gray-500 font-bold text-sm cursor-not-allowed border border-gray-200">
-                                        <i class="fas fa-check mr-2"></i> Applied
+                                    <button disabled class="w-full text-center px-3 py-2 rounded-lg sm:rounded-xl bg-gray-100 text-gray-500 font-bold text-xs cursor-not-allowed border border-gray-200">
+                                        <i class="fas fa-check mr-1.5"></i> Applied
                                     </button>
                                 @elseif($job->status === 'open' && $job->application_deadline > now())
-                                    <button onclick="applyForJob({{ $job->id }})" class="w-full text-center px-4 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-sm shadow-lg shadow-red-500/30 hover:shadow-red-500/50 transition-all hover:-translate-y-0.5">
+                                    <button onclick="applyForJob({{ $job->id }})" class="w-full text-center px-3 py-2 rounded-lg sm:rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-sm hover:shadow transition-all">
                                         Apply Now
                                     </button>
                                 @else
-                                    <button disabled class="w-full text-center px-4 py-2.5 rounded-xl bg-gray-100 text-gray-400 font-bold text-sm cursor-not-allowed border border-gray-200">
+                                    <button disabled class="w-full text-center px-3 py-2 rounded-lg sm:rounded-xl bg-gray-100 text-gray-400 font-bold text-xs cursor-not-allowed border border-gray-200">
                                         Closed
                                     </button>
                                 @endif
 
-                                <a href="{{ route('jobs.show', $job) }}" class="w-full text-center px-4 py-2.5 rounded-xl bg-white hover:bg-gray-50 text-gray-700 font-bold text-sm border border-gray-200 transition-all">
+                                <a href="{{ route('jobs.show', $job) }}" class="w-full text-center px-3 py-2 rounded-lg sm:rounded-xl bg-white hover:bg-gray-50 text-gray-700 font-bold text-xs border border-gray-200 transition-all">
                                     View Details
                                 </a>
 
-                                <button onclick="removeSavedJob({{ $job->id }})" class="w-full text-center px-4 py-2.5 rounded-xl bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 font-bold text-sm border border-transparent hover:border-red-100 transition-all">
-                                    <i class="fas fa-trash-alt mr-2"></i> Remove
+                                <button onclick="removeSavedJob({{ $job->id }})" class="col-span-2 sm:col-span-1 w-full text-center px-3 py-2 rounded-lg sm:rounded-xl bg-white hover:bg-red-50 text-gray-400 hover:text-red-500 font-bold text-xs border border-transparent hover:border-red-100 transition-all">
+                                    <i class="fas fa-trash-alt mr-1.5"></i> Remove
                                 </button>
                             </div>
+                        </div>
+                    </div>
                         </div>
                     </div>
                     @empty

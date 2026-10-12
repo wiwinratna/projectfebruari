@@ -1,34 +1,34 @@
 @extends('layouts.public')
 @section('title', 'Settings - NOCIS')
 @section('content')
-<div class="relative bg-white pt-24 pb-12 overflow-hidden min-h-screen">
+<div class="relative bg-white pt-40 sm:pt-32 mobile-header-spacing pb-24 sm:pb-12 overflow-hidden min-h-screen">
     <div class="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-red-50 via-white to-white z-0"></div>
     <div class="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] bg-red-100/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
     <div class="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-50/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
-    <div class="container mx-auto px-4 relative z-10 max-w-7xl">
-        <div class="mb-8 text-center md:text-left">
-            <h1 class="text-3xl font-bold text-gray-900 tracking-tight mb-2">Account Settings</h1>
-            <p class="text-gray-500">Manage your profile information and preferences.</p>
+    <div class="w-full px-3 sm:px-6 lg:px-8 relative z-10">
+        <div class="mb-4 sm:mb-8 text-center md:text-left">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-1 sm:mb-2">Account Settings</h1>
+            <p class="text-xs sm:text-base text-gray-500">Manage your profile information and preferences.</p>
         </div>
         @if(session('success'))
-        <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 font-medium flex items-center gap-2">
+        <div class="mb-4 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-xl text-green-700 text-xs sm:text-sm font-medium flex items-center gap-2">
             <i class="fas fa-check-circle text-green-500"></i> {{ session('success') }}
         </div>
         @endif
         @if($errors->any())
-        <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm">
+        <div class="mb-4 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs sm:text-sm">
             <ul class="list-disc list-inside space-y-1">@foreach($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
         </div>
         @endif
-        <div class="bg-white rounded-2xl shadow-xl shadow-red-500/5 border border-gray-100 overflow-hidden">
-            <div class="border-b border-gray-100 p-2">
-                <nav class="flex flex-wrap gap-2" aria-label="Tabs">
-                    <button onclick="showSettingsTab('basic')" class="tab-button flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 active-tab" data-tab="basic"><i class="fas fa-id-card mr-2"></i>Basic Info</button>
-                    <button onclick="showSettingsTab('personal')" class="tab-button flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200" data-tab="personal"><i class="fas fa-user-shield mr-2"></i>Personal Data</button>
-                    <button onclick="showSettingsTab('preferences')" class="tab-button flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-bold transition-all duration-200" data-tab="preferences"><i class="fas fa-sliders-h mr-2"></i>Preferences</button>
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-xl shadow-red-500/5 border border-gray-100 overflow-hidden">
+            <div class="border-b border-gray-100 p-1.5 sm:p-2">
+                <nav class="flex flex-nowrap overflow-x-auto sm:flex-wrap gap-1.5 sm:gap-2" aria-label="Tabs">
+                    <button onclick="showSettingsTab('basic')" class="tab-button flex-1 md:flex-none whitespace-nowrap px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 active-tab" data-tab="basic"><i class="fas fa-id-card mr-1.5 sm:mr-2"></i>Basic Info</button>
+                    <button onclick="showSettingsTab('personal')" class="tab-button flex-1 md:flex-none whitespace-nowrap px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200" data-tab="personal"><i class="fas fa-user-shield mr-1.5 sm:mr-2"></i>Personal Data</button>
+                    <button onclick="showSettingsTab('preferences')" class="tab-button flex-1 md:flex-none whitespace-nowrap px-3 sm:px-6 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200" data-tab="preferences"><i class="fas fa-sliders-h mr-1.5 sm:mr-2"></i>Preferences</button>
                 </nav>
             </div>
-            <div class="p-6 md:p-8">
+            <div class="p-4 sm:p-6 md:p-8">
 
                 {{-- BASIC INFO TAB --}}
                 <div id="basic-tab" class="tab-content transition-opacity duration-300">
@@ -147,6 +147,34 @@
 
                             {{-- WNI Address Fields --}}
                             <div id="wni-fields" class="{{ old('nationality_type', optional($user->profile)->nationality_type) === 'wni' ? '' : 'hidden' }} space-y-4">
+                                {{-- NIK (Khusus WNI) --}}
+                                <div class="bg-red-50/50 border border-red-100 rounded-2xl p-4 sm:p-5">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label for="wni-nik" class="block text-xs font-bold text-gray-700 uppercase tracking-widest flex items-center gap-2">
+                                            <i class="fas fa-id-card text-red-600"></i> NIK (Nomor Induk Kependudukan) <span class="text-red-500">*</span>
+                                        </label>
+                                        <span class="text-[11px] font-semibold text-red-600 bg-red-100/70 px-2 py-0.5 rounded-md">Khusus WNI</span>
+                                    </div>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                            <i class="fas fa-fingerprint text-gray-400"></i>
+                                        </div>
+                                        <input type="text"
+                                               name="nik"
+                                               id="wni-nik"
+                                               value="{{ old('nik', optional($user->profile)->nik ?? '') }}"
+                                               placeholder="Masukkan 16 digit NIK KTP (contoh: 3201234567890001)"
+                                               maxlength="16"
+                                               inputmode="numeric"
+                                               oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 16)"
+                                               class="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 shadow-sm hover:border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all font-mono font-medium text-gray-800 tracking-wider">
+                                    </div>
+                                    <p class="text-[11px] text-gray-500 mt-2 flex items-center gap-1.5">
+                                        <i class="fas fa-shield-alt text-red-500"></i> Data NIK digunakan untuk pendaftaran BPJS Ketenagakerjaan &amp; Kesehatan saat Anda diterima.
+                                    </p>
+                                    @error('nik')<p class="text-red-500 text-sm mt-1 font-medium">{{ $message }}</p>@enderror
+                                </div>
+
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
                                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-widest mb-2">Provinsi <span class="text-red-500">*</span></label>

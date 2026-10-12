@@ -257,6 +257,18 @@ Route::prefix('dashboard')->name('customer.')->middleware(['web', 'customer'])->
     Route::delete('/jobs/{job}/unsave', [CustomerDashboardController::class, 'unsaveJob'])->name('jobs.unsave');
     Route::get('/saved-jobs', [CustomerDashboardController::class, 'savedJobs'])->name('saved-jobs');
 
+    // Training Materials (Customer)
+    Route::get('/materials', [\App\Http\Controllers\Customer\MaterialController::class, 'index'])->name('materials.index');
+    Route::get('/materials/{material}/download', [\App\Http\Controllers\Customer\MaterialController::class, 'download'])->name('materials.download');
+
+    // Event Attendance (Customer)
+    Route::get('/attendance', [\App\Http\Controllers\Customer\CustomerAttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/{event}', [\App\Http\Controllers\Customer\CustomerAttendanceController::class, 'show'])->name('attendance.show');
+    Route::post('/attendance/{event}/check-in', [\App\Http\Controllers\Customer\CustomerAttendanceController::class, 'checkIn'])->name('attendance.checkin');
+    Route::post('/attendance/{event}/check-out', [\App\Http\Controllers\Customer\CustomerAttendanceController::class, 'checkOut'])->name('attendance.checkout');
+    Route::post('/attendance/{event}/reset', [\App\Http\Controllers\Customer\CustomerAttendanceController::class, 'reset'])->name('attendance.reset');
+    Route::get('/attendance/{event}/photo/{type}', [\App\Http\Controllers\Customer\CustomerAttendanceController::class, 'photo'])->name('attendance.photo');
+
 
     Route::post('/profile/upload-certificates', [CustomerDashboardController::class, 'uploadCertificates'])
         ->name('profile.upload-certificates');
@@ -462,6 +474,15 @@ Route::middleware(['web'])->group(function () {
 Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(function () {
     // Admin Dashboard - Protected
     Route::get('/dashboard', [\App\Http\Controllers\AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Training Materials Management - Protected
+    Route::get('/materials', [\App\Http\Controllers\Admin\EventMaterialController::class, 'index'])->name('materials.index');
+    Route::post('/materials', [\App\Http\Controllers\Admin\EventMaterialController::class, 'store'])->name('materials.store');
+    Route::delete('/materials/{material}', [\App\Http\Controllers\Admin\EventMaterialController::class, 'destroy'])->name('materials.destroy');
+
+    // Event Attendance Management - Protected
+    Route::get('/attendance', [\App\Http\Controllers\Admin\EventAttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/{attendance}/photo/{type}', [\App\Http\Controllers\Admin\EventAttendanceController::class, 'photo'])->name('attendance.photo');
 
     // Analytics Dashboard - Protected
     Route::get('/analytics', [AnalyticsDashboardController::class, 'index'])->name('analytics');

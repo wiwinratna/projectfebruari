@@ -231,4 +231,14 @@ class Event extends Model
     {
         return $this->hasMany(Certificate::class);
     }
- }
+
+    public function attendances()
+    {
+        return $this->hasMany(EventAttendance::class);
+    }
+
+    public function trainingMaterials()
+    {
+        return $this->hasMany(EventTrainingMaterial::class);
+    }
+}

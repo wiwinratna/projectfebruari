@@ -25,7 +25,10 @@
 
         {{-- Contact Quick View --}}
         <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 space-y-2">
-            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contact</p>
+            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Contact &amp; Identitas</p>
+            @if($user->profile?->nik)
+                <div class="flex items-center text-sm text-gray-700 font-mono font-medium"><i class="fas fa-id-card w-5 text-emerald-600 mr-2"></i>NIK: {{ $user->profile->nik }}</div>
+            @endif
             <div class="flex items-center text-sm text-gray-700"><i class="fas fa-envelope w-5 text-gray-400 mr-2"></i>{{ $user->email }}</div>
             <div class="flex items-center text-sm text-gray-700"><i class="fas fa-phone w-5 text-gray-400 mr-2"></i>{{ $user->profile?->phone ?? '—' }}</div>
             <div class="flex items-center text-sm text-gray-700"><i class="fas fa-map-marker-alt w-5 text-gray-400 mr-2"></i>{{ Str::limit($user->profile?->address, 40) ?? '—' }}</div>

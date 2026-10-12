@@ -4,42 +4,42 @@
 
 @section('content')
 <!-- Aurora Header Background -->
-<div class="relative bg-white pt-24 pb-12 overflow-hidden">
+<div class="relative bg-white pt-28 sm:pt-32 pb-8 sm:pb-12 overflow-hidden">
     <div class="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-red-50 via-white to-white z-0"></div>
     <div class="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] bg-red-100/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
     <div class="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-50/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
 
-    <div class="container mx-auto px-4 max-w-7xl relative z-10">
+    <div class="w-full px-3 sm:px-6 lg:px-8 relative z-10">
         <!-- Breadcrumb / Back -->
-        <div class="mb-8">
-            <a href="{{ route('jobs.index') }}" class="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">
+        <div class="mb-4 sm:mb-8">
+            <a href="{{ route('jobs.index') }}" class="inline-flex items-center gap-2 text-xs sm:text-sm font-medium text-gray-500 hover:text-red-600 transition-colors">
                 <i class="fas fa-arrow-left"></i> Back to Jobs
             </a>
         </div>
 
         <!-- Header Content -->
-        <div class="flex flex-col lg:flex-row items-start justify-between gap-8">
+        <div class="flex flex-col lg:flex-row items-start justify-between gap-6 sm:gap-8">
             <div>
-                <div class="flex flex-wrap items-center gap-3 mb-4">
-                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-red-50 text-red-600 border border-red-100">
-                        <i class="fas fa-tag text-[10px]"></i> {{ $job->jobCategory->name }}
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-red-50 text-red-600 border border-red-100">
+                        <i class="fas fa-tag text-[9px] sm:text-[10px]"></i> {{ $job->jobCategory->name }}
                     </span>
                     @if($job->status === 'open')
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-600 border border-green-100">
-                            <i class="fas fa-check-circle text-[10px]"></i> Open for Applications
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-green-50 text-green-600 border border-green-100">
+                            <i class="fas fa-check-circle text-[9px] sm:text-[10px]"></i> Open for Applications
                         </span>
                     @else
-                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
-                            <i class="fas fa-lock text-[10px]"></i> {{ ucfirst($job->status) }}
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-xs font-semibold bg-gray-100 text-gray-600 border border-gray-200">
+                            <i class="fas fa-lock text-[9px] sm:text-[10px]"></i> {{ ucfirst($job->status) }}
                         </span>
                     @endif
                 </div>
 
-                <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight mb-4 leading-tight">
+                <h1 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 tracking-tight mb-3 sm:mb-4 leading-tight">
                     {{ $job->title }}
                 </h1>
 
-                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 text-sm text-gray-500 font-medium">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-6 text-xs sm:text-sm text-gray-500 font-medium">
                     <div class="flex items-center gap-2">
                         <i class="fas fa-trophy text-red-500 text-xs"></i>
                         <span>{{ $job->event?->title ?? 'Event' }}</span>
@@ -61,7 +61,7 @@
 </div>
 
 <!-- Main Content -->
-<div class="container mx-auto px-4 max-w-7xl pb-20">
+<div class="w-full px-3 sm:px-6 lg:px-8 pb-16 sm:pb-20">
     <div class="grid lg:grid-cols-12 gap-8 lg:gap-12">
 
         <!-- Left Column: Details (8 cols) -->
@@ -152,9 +152,9 @@
 
         <!-- Right Column: Sidebar (4 cols) -->
         <div class="lg:col-span-4">
-            <div id="action-card" class="bg-white rounded-2xl p-6 shadow-xl shadow-gray-200/50 sticky top-24 lg:-mt-32 relative z-20">
-                <h3 class="font-bold text-gray-900 mb-2">Interested?</h3>
-                <p class="text-sm text-gray-500 mb-6 leading-relaxed">Don't miss out on this opportunity to be part of the NOCIS team for {{ $job->event?->title ?? 'this event' }}.</p>
+            <div id="action-card" class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg sm:shadow-xl shadow-gray-200/50 sticky top-24 lg:-mt-32 relative z-20">
+                <h3 class="font-bold text-gray-900 mb-1.5 sm:mb-2 text-base sm:text-lg">Interested?</h3>
+                <p class="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6 leading-relaxed">Don't miss out on this opportunity to be part of the NOCIS team for {{ $job->event?->title ?? 'this event' }}.</p>
 
                 @php
                     $isCustomerAuthenticated = session('customer_authenticated');
@@ -168,32 +168,32 @@
                     }
                 @endphp
 
-                <div class="space-y-3">
+                <div class="space-y-2.5 sm:space-y-3">
                     @if($isCustomerAuthenticated)
                         @if($hasApplied)
-                            <button disabled class="w-full bg-gray-100 text-gray-500 py-3.5 px-4 rounded-xl font-semibold border border-gray-200 cursor-not-allowed flex items-center justify-center gap-2">
+                            <button disabled class="w-full bg-gray-100 text-gray-500 py-2.5 sm:py-3.5 px-4 rounded-xl font-semibold border border-gray-200 cursor-not-allowed flex items-center justify-center gap-2 text-xs sm:text-sm">
                                 <i class="fas fa-check"></i> Already Applied
                             </button>
                         @else
-                            <button id="applyButton" onclick="showApplyModal()" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-3.5 px-4 rounded-xl font-semibold shadow-lg shadow-red-500/30 hover:shadow-red-500/40 transform transition-all active:scale-[0.98] flex items-center justify-center gap-2">
-                                Apply Now <i class="fas fa-arrow-right text-xs"></i>
+                            <button id="applyButton" onclick="showApplyModal()" class="w-full bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white py-2.5 sm:py-3.5 px-4 rounded-xl font-semibold shadow-md sm:shadow-lg shadow-red-500/30 hover:shadow-red-500/40 transform transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-xs sm:text-sm">
+                                Apply Now <i class="fas fa-arrow-right text-[10px] sm:text-xs"></i>
                             </button>
                         @endif
 
                         @if($isSaved)
-                            <button id="saveBtn" onclick="toggleSaveJob({{ $job->id }})" class="w-full bg-white hover:bg-gray-50 text-red-600 py-3.5 px-4 rounded-xl font-semibold border border-red-200 transition-colors flex items-center justify-center gap-2 group">
+                            <button id="saveBtn" onclick="toggleSaveJob({{ $job->id }})" class="w-full bg-white hover:bg-gray-50 text-red-600 py-2.5 sm:py-3.5 px-4 rounded-xl font-semibold border border-red-200 transition-colors flex items-center justify-center gap-2 group text-xs sm:text-sm">
                                 <i class="fas fa-bookmark text-red-600"></i> Saved
                             </button>
                         @else
-                            <button id="saveBtn" onclick="toggleSaveJob({{ $job->id }})" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-3.5 px-4 rounded-xl font-semibold border border-gray-200 transition-colors flex items-center justify-center gap-2 group">
+                            <button id="saveBtn" onclick="toggleSaveJob({{ $job->id }})" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-2.5 sm:py-3.5 px-4 rounded-xl font-semibold border border-gray-200 transition-colors flex items-center justify-center gap-2 group text-xs sm:text-sm">
                                 <i class="far fa-bookmark group-hover:text-red-500 transition-colors"></i> Save Job
                             </button>
                         @endif
                     @else
-                        <a href="{{ route('login') }}" class="block w-full bg-red-600 hover:bg-red-700 text-white py-3.5 px-4 rounded-xl font-semibold shadow-lg shadow-red-500/30 text-center transition-all">
+                        <a href="{{ route('login') }}" class="block w-full bg-red-600 hover:bg-red-700 text-white py-2.5 sm:py-3.5 px-4 rounded-xl font-semibold shadow-md sm:shadow-lg shadow-red-500/30 text-center transition-all text-xs sm:text-sm">
                             Login to Apply
                         </a>
-                        <button onclick="window.location.href='{{ route('login') }}'" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-3.5 px-4 rounded-xl font-semibold border border-gray-200 transition-colors flex items-center justify-center gap-2 group">
+                        <button onclick="window.location.href='{{ route('login') }}'" class="w-full bg-white hover:bg-gray-50 text-gray-700 py-2.5 sm:py-3.5 px-4 rounded-xl font-semibold border border-gray-200 transition-colors flex items-center justify-center gap-2 group text-xs sm:text-sm">
                             <i class="far fa-bookmark group-hover:text-red-500 transition-colors"></i> Save Job
                         </button>
                     @endif

@@ -4,7 +4,7 @@
 
 @section('content')
 <div class="min-h-screen bg-gray-50 text-gray-800 relative pt-32 pb-20">
-    <div class="container mx-auto px-4 relative z-10">
+    <div class="w-full px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="max-w-4xl mx-auto">
             
             {{-- Header section --}}
