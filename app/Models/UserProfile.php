@@ -24,6 +24,7 @@ class UserProfile extends Model
 
         // Nationality & structured address
         'nationality_type',   // 'wni' | 'wna'
+        'nik',
 
         // WNI - Indonesian cascading address
         'province',

@@ -47,9 +47,9 @@
     {{-- ✅ HEADER --}}
     <!-- Modern Web3 Floating Header -->
     <header class="fixed top-4 left-0 right-0 z-50 transition-all duration-300">
-        <div class="container mx-auto px-4 lg:px-6">
-            <div class="bg-white/70 backdrop-blur-xl border border-white/40 shadow-lg shadow-gray-200/20 rounded-2xl mx-auto max-w-7xl transition-all duration-300">
-                <div class="flex justify-between items-center h-16 px-4 lg:px-6">
+        <div class="w-full px-4 sm:px-6 lg:px-8">
+            <div class="bg-white/70 backdrop-blur-xl border border-white/40 shadow-lg shadow-gray-200/20 rounded-2xl w-full transition-all duration-300">
+                <div class="flex justify-between items-center h-16 px-4 sm:px-6 lg:px-8">
                     <!-- Logo -->
                     <a href="{{ url('/') }}" class="flex items-center gap-3 group">
                         <img src="{{ asset('images/Logo ARISE PNG.png') }}" alt="NOC Logo" class="h-10 w-auto group-hover:scale-105 transition-transform duration-300">
@@ -261,27 +261,21 @@
                 <!-- Mobile Menu -->
                 <div id="mobile-menu" class="lg:hidden hidden border-t border-gray-100">
                     <div class="p-4 space-y-4">
+                        @if(!session('customer_authenticated'))
                         <div class="grid grid-cols-2 gap-3">
                             <a href="{{ route('jobs.index') }}" class="flex flex-col items-center justify-center p-3 rounded-xl {{ request()->routeIs('jobs.*') ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-600' }} hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <i class="fas fa-briefcase mb-1 text-lg"></i>
                                 <span class="text-xs font-semibold">Jobs</span>
                             </a>
-                            @if(session('customer_authenticated'))
-                            <a href="{{ route('customer.dashboard') }}" class="flex flex-col items-center justify-center p-3 rounded-xl {{ request()->routeIs('customer.dashboard') ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-600' }} hover:bg-red-50 hover:text-red-600 transition-colors">
-                                <i class="fas fa-chart-pie mb-1 text-lg"></i>
-                                <span class="text-xs font-semibold">Dashboard</span>
-                            </a>
-                            @endif
-                            @if(!session('customer_authenticated'))
                             <a href="{{ route('public.certificates.lookup') }}" class="flex flex-col items-center justify-center p-3 rounded-xl {{ request()->routeIs('public.certificates.*') ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-600' }} hover:bg-red-50 hover:text-red-600 transition-colors">
                                 <i class="fas fa-certificate mb-1 text-lg"></i>
                                 <span class="text-xs font-semibold">Certificate</span>
                             </a>
-                            @endif
                         </div>
+                        @endif
 
                         @if(session('customer_authenticated'))
-                        <div class="pt-2 border-t border-gray-100">
+                        <div>
                             <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-3">
                                 <div class="w-10 h-10 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center">
                                     @if(!empty($headerProfilePhotoUrl))
@@ -297,13 +291,26 @@
                                     <p class="text-xs text-gray-500 truncate">{{ session('customer_email') }}</p>
                                 </div>
                             </div>
-                            <div class="grid grid-cols-1 gap-2">
-                                <a href="{{ route('customer.profile') }}" class="flex items-center px-4 py-3 rounded-xl hover:bg-gray-50 text-sm font-medium text-gray-600">
-                                    <i class="fas fa-user w-6 text-center mr-2"></i> Profile
+                            <div class="grid grid-cols-1 gap-1">
+                                <a href="{{ route('customer.profile') }}" class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('customer.profile') ? 'bg-red-50 text-red-600 font-semibold' : 'text-gray-700 hover:bg-gray-50' }} text-sm transition-colors">
+                                    <i class="fas fa-user w-6 text-center mr-2 {{ request()->routeIs('customer.profile') ? 'text-red-600' : 'text-gray-400' }}"></i> Profile
                                 </a>
-                                <form method="POST" action="{{ route('logout') }}">
+                                <a href="{{ route('customer.settings') }}" class="flex items-center px-4 py-3 rounded-xl {{ request()->routeIs('customer.settings') ? 'bg-red-50 text-red-600 font-semibold' : 'text-gray-700 hover:bg-gray-50' }} text-sm transition-colors">
+                                    <i class="fas fa-cog w-6 text-center mr-2 {{ request()->routeIs('customer.settings') ? 'text-red-600' : 'text-gray-400' }}"></i> Settings
+                                </a>
+                                <a href="{{ route('customer.notifications.index') }}" class="flex items-center justify-between px-4 py-3 rounded-xl {{ request()->routeIs('customer.notifications.*') ? 'bg-red-50 text-red-600 font-semibold' : 'text-gray-700 hover:bg-gray-50' }} text-sm transition-colors">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-bell w-6 text-center mr-2 {{ request()->routeIs('customer.notifications.*') ? 'text-red-600' : 'text-gray-400' }}"></i> Notifications
+                                    </div>
+                                    @if(!empty($headerUnreadNotificationsCount) && $headerUnreadNotificationsCount > 0)
+                                    <span class="px-2 py-0.5 rounded-full bg-red-500 text-white text-[10px] font-bold">
+                                        {{ $headerUnreadNotificationsCount > 99 ? '99+' : $headerUnreadNotificationsCount }}
+                                    </span>
+                                    @endif
+                                </a>
+                                <form method="POST" action="{{ route('logout') }}" class="pt-1 border-t border-gray-100">
                                     @csrf
-                                    <button class="w-full flex items-center px-4 py-3 rounded-xl hover:bg-red-50 text-sm font-medium text-red-600">
+                                    <button type="submit" class="w-full flex items-center px-4 py-3 rounded-xl hover:bg-red-50 text-sm font-medium text-red-600 transition-colors">
                                         <i class="fas fa-sign-out-alt w-6 text-center mr-2"></i> Logout
                                     </button>
                                 </form>
@@ -326,14 +333,14 @@
     </header>
 
     <!-- Main Content -->
-    <main class="min-h-screen">
+    <main class="min-h-screen {{ session('customer_authenticated') ? 'pb-24 md:pb-0' : '' }}">
         @yield('content')
     </main>
 
     {{-- ✅ FOOTER --}}
     @unless(request()->routeIs('customer.profile', 'customer.settings'))
     <footer class="bg-white border-t border-gray-200 py-12 relative z-50">
-        <div class="container mx-auto px-4 max-w-7xl">
+        <div class="w-full px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8">
                 <!-- Brand Section -->
                 <div class="lg:col-span-2">
@@ -421,6 +428,10 @@
 
     <!-- Flash Messages -->
     @include('components.flash')
+
+    @if(session('customer_authenticated'))
+        @include('partials.customer-bottom-nav')
+    @endif
 
 
     <!-- Scripts -->

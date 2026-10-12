@@ -115,8 +115,17 @@
                                     </div>
                                 @endif
                                 <div>
-                                    <div class="text-sm font-bold text-gray-900">{{ $application->user->username }}</div>
+                                    <div class="text-sm font-bold text-gray-900">{{ $application->user->name ?? $application->user->username }}</div>
                                     <div class="text-xs text-gray-500">{{ $application->user->email }}</div>
+                                    @if(optional($application->user->profile)->nik)
+                                        <div class="text-[11px] font-mono font-medium text-emerald-700 bg-emerald-50 border border-emerald-100 rounded px-1.5 py-0.5 mt-1 inline-flex items-center gap-1">
+                                            <i class="fas fa-id-card text-[10px]"></i> NIK: {{ $application->user->profile->nik }}
+                                        </div>
+                                    @elseif(($application->user->profile->nationality_type ?? '') === 'wna')
+                                        <div class="text-[10px] font-medium text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 mt-1 inline-flex items-center gap-1">
+                                            <i class="fas fa-globe text-[9px]"></i> WNA
+                                        </div>
+                                    @endif
                                 </div>
                             </div>
                         </td>

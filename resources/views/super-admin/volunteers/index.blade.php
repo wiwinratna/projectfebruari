@@ -251,6 +251,11 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <p class="text-sm text-gray-600">{{ $volunteer->email }}</p>
                                 <p class="text-xs text-gray-500">{{ $volunteer->profile?->phone ?? '—' }}</p>
+                                @if($volunteer->profile?->nik)
+                                    <p class="text-[11px] font-mono text-emerald-700 font-semibold mt-0.5"><i class="fas fa-id-card text-[10px] mr-1"></i>NIK: {{ $volunteer->profile->nik }}</p>
+                                @elseif(($volunteer->profile?->nationality_type ?? '') === 'wna')
+                                    <span class="text-[10px] text-gray-500 bg-gray-100 rounded px-1.5 py-0.5 mt-0.5 inline-block">WNA</span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @php $c = $volunteer->profile_completion; @endphp

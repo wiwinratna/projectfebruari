@@ -18,6 +18,10 @@
     <div class="p-5 bg-gray-50 rounded-2xl border border-gray-100">
         <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4"><i class="fas fa-id-card mr-1"></i> Personal Details</p>
         <dl class="space-y-3">
+            <div class="flex justify-between"><dt class="text-sm text-gray-500">Kewarganegaraan</dt><dd class="text-sm font-semibold text-gray-900">{{ ($user->profile?->nationality_type ?? '') === 'wna' ? 'Foreign Citizen (WNA)' : 'Indonesian Citizen (WNI)' }}</dd></div>
+            @if(($user->profile?->nationality_type ?? 'wni') === 'wni')
+                <div class="flex justify-between"><dt class="text-sm text-gray-500">NIK</dt><dd class="text-sm font-semibold font-mono text-gray-900">{{ $user->profile?->nik ?? '—' }}</dd></div>
+            @endif
             <div class="flex justify-between"><dt class="text-sm text-gray-500">Phone</dt><dd class="text-sm font-semibold text-gray-900">{{ $user->profile?->phone ?? '—' }}</dd></div>
             <div class="flex justify-between"><dt class="text-sm text-gray-500">Date of Birth</dt><dd class="text-sm font-semibold text-gray-900">{{ $user->profile?->date_of_birth?->format('M d, Y') ?? '—' }}</dd></div>
             <div class="flex justify-between"><dt class="text-sm text-gray-500">Headline</dt><dd class="text-sm font-semibold text-gray-900">{{ $user->profile?->professional_headline ?? '—' }}</dd></div>

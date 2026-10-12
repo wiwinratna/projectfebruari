@@ -12,87 +12,77 @@
     </div>
 
     <!-- Main Content Wrapper with Top Padding -->
-    <div class="relative z-10 pt-32 pb-16">
-        <div class="container mx-auto px-4 lg:px-6 max-w-7xl">
+    <div class="relative z-10 pt-24 sm:pt-32 pb-20 sm:pb-16">
+        <div class="w-full px-3 sm:px-6 lg:px-8">
             
             <!-- Welcome Header -->
-            <div class="mb-10">
-                <h1 class="text-4xl font-bold text-gray-900 mb-2 tracking-tight">
+            <div class="mb-5 sm:mb-8">
+                <h1 class="text-2xl sm:text-4xl font-bold text-gray-900 mb-1 sm:mb-2 tracking-tight">
                     Welcome back, <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400">{{ session('customer_username') }}!</span>
                 </h1>
-                <p class="text-gray-600 text-lg">Here's your career activity overview.</p>
+                <p class="text-xs sm:text-base text-gray-600">Here's your career activity overview.</p>
             </div>
 
-            <!-- Navigation Tabs -->
-            <div class="bg-white/60 backdrop-blur-xl rounded-2xl p-2 border border-white/50 shadow-sm mb-10 inline-flex flex-wrap gap-2">
-                <a href="{{ route('customer.dashboard') }}" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-white text-red-600 shadow-md transition-all">
-                    <i class="fas fa-th-large mr-2"></i> Dashboard
-                </a>
-                <a href="{{ route('customer.applications') }}" class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all">
-                    <i class="fas fa-file-alt mr-2"></i> My Applications
-                </a>
-                <a href="{{ route('customer.saved-jobs') }}" class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all">
-                    <i class="fas fa-bookmark mr-2"></i> Saved Jobs
-                </a>
-            </div>
+            <!-- Navigation Tabs (Hidden on mobile) -->
+            @include('partials.customer-nav-tabs')
 
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <!-- Stats Grid (2x2 on mobile for compact fit) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-6 mb-6 sm:mb-10">
                 <!-- Total Applications -->
-                <div class="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fas fa-file-alt text-6xl text-blue-600"></i>
+                <div class="bg-white/80 backdrop-blur-md rounded-xl sm:rounded-2xl p-3.5 sm:p-6 border border-white/60 shadow-md sm:shadow-lg relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
+                    <div class="absolute top-0 right-0 p-2 sm:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fas fa-file-alt text-3xl sm:text-6xl text-blue-600"></i>
                     </div>
                     <div class="relative z-10">
-                        <p class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-1">Total Applied</p>
-                        <h3 class="text-4xl font-extrabold text-gray-900">{{ $totalApplications }}</h3>
-                        <div class="w-12 h-1 bg-blue-500 rounded-full mt-4"></div>
+                        <p class="text-[10px] sm:text-sm font-bold text-gray-500 uppercase tracking-wide mb-0.5 sm:mb-1">Total Applied</p>
+                        <h3 class="text-2xl sm:text-4xl font-extrabold text-gray-900">{{ $totalApplications }}</h3>
+                        <div class="w-8 sm:w-12 h-0.5 sm:h-1 bg-blue-500 rounded-full mt-2 sm:mt-4"></div>
                     </div>
                 </div>
 
                 <!-- Pending -->
-                <div class="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fas fa-clock text-6xl text-yellow-600"></i>
+                <div class="bg-white/80 backdrop-blur-md rounded-xl sm:rounded-2xl p-3.5 sm:p-6 border border-white/60 shadow-md sm:shadow-lg relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
+                    <div class="absolute top-0 right-0 p-2 sm:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fas fa-clock text-3xl sm:text-6xl text-yellow-600"></i>
                     </div>
                     <div class="relative z-10">
-                        <p class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-1">Pending</p>
-                        <h3 class="text-4xl font-extrabold text-gray-900">{{ $pendingApplications }}</h3>
-                        <div class="w-12 h-1 bg-yellow-500 rounded-full mt-4"></div>
+                        <p class="text-[10px] sm:text-sm font-bold text-gray-500 uppercase tracking-wide mb-0.5 sm:mb-1">Pending</p>
+                        <h3 class="text-2xl sm:text-4xl font-extrabold text-gray-900">{{ $pendingApplications }}</h3>
+                        <div class="w-8 sm:w-12 h-0.5 sm:h-1 bg-yellow-500 rounded-full mt-2 sm:mt-4"></div>
                     </div>
                 </div>
 
                 <!-- Approved -->
-                <div class="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fas fa-check-circle text-6xl text-green-600"></i>
+                <div class="bg-white/80 backdrop-blur-md rounded-xl sm:rounded-2xl p-3.5 sm:p-6 border border-white/60 shadow-md sm:shadow-lg relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
+                    <div class="absolute top-0 right-0 p-2 sm:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fas fa-check-circle text-3xl sm:text-6xl text-green-600"></i>
                     </div>
                     <div class="relative z-10">
-                        <p class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-1">Approved</p>
-                        <h3 class="text-4xl font-extrabold text-gray-900">{{ $approvedApplications }}</h3>
-                        <div class="w-12 h-1 bg-green-500 rounded-full mt-4"></div>
+                        <p class="text-[10px] sm:text-sm font-bold text-gray-500 uppercase tracking-wide mb-0.5 sm:mb-1">Approved</p>
+                        <h3 class="text-2xl sm:text-4xl font-extrabold text-gray-900">{{ $approvedApplications }}</h3>
+                        <div class="w-8 sm:w-12 h-0.5 sm:h-1 bg-green-500 rounded-full mt-2 sm:mt-4"></div>
                     </div>
                 </div>
 
                 <!-- Rejected -->
-                <div class="bg-white/80 backdrop-blur-md rounded-2xl p-6 border border-white/60 shadow-lg relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300">
-                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fas fa-times-circle text-6xl text-red-600"></i>
+                <div class="bg-white/80 backdrop-blur-md rounded-xl sm:rounded-2xl p-3.5 sm:p-6 border border-white/60 shadow-md sm:shadow-lg relative overflow-hidden group hover:-translate-y-0.5 transition-transform">
+                    <div class="absolute top-0 right-0 p-2 sm:p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fas fa-times-circle text-3xl sm:text-6xl text-red-600"></i>
                     </div>
                     <div class="relative z-10">
-                        <p class="text-sm font-bold text-gray-500 uppercase tracking-wide mb-1">Rejected</p>
-                        <h3 class="text-4xl font-extrabold text-gray-900">{{ $rejectedApplications }}</h3>
-                        <div class="w-12 h-1 bg-red-500 rounded-full mt-4"></div>
+                        <p class="text-[10px] sm:text-sm font-bold text-gray-500 uppercase tracking-wide mb-0.5 sm:mb-1">Rejected</p>
+                        <h3 class="text-2xl sm:text-4xl font-extrabold text-gray-900">{{ $rejectedApplications }}</h3>
+                        <div class="w-8 sm:w-12 h-0.5 sm:h-1 bg-red-500 rounded-full mt-2 sm:mt-4"></div>
                     </div>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8">
                 <!-- Recent Applications -->
-                <div class="bg-white/70 backdrop-blur-xl rounded-3xl border border-white/60 shadow-xl overflow-hidden">
-                    <div class="px-8 py-6 border-b border-gray-100/50 flex justify-between items-center bg-white/40">
-                        <h3 class="text-xl font-bold text-gray-900">Recent Activity</h3>
-                        <a href="{{ route('customer.applications') }}" class="text-sm font-bold text-red-600 hover:text-red-700 transition-colors">
+                <div class="bg-white/70 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/60 shadow-lg sm:shadow-xl overflow-hidden">
+                    <div class="px-4 sm:px-8 py-3.5 sm:py-6 border-b border-gray-100 flex justify-between items-center bg-white/40">
+                        <h3 class="text-base sm:text-xl font-bold text-gray-900">Recent Activity</h3>
+                        <a href="{{ route('customer.applications') }}" class="text-xs sm:text-sm font-bold text-red-600 hover:text-red-700 transition-colors">
                             View All <i class="fas fa-arrow-right ml-1"></i>
                         </a>
                     </div>

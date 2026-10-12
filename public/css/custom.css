@@ -376,3 +376,10 @@ tbody tr {
 #flash-container .flash-message {
     pointer-events: auto;
 }
+
+/* Mobile Header Clearance for Settings and Profile */
+@media (max-width: 640px) {
+    .mobile-header-spacing {
+        padding-top: 150px !important;
+    }
+}

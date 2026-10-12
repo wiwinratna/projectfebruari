@@ -98,6 +98,11 @@
                                         <div class="ml-3">
                                             <p class="text-sm font-semibold text-gray-800">{{ $app->user->name }}</p>
                                             <p class="text-xs text-gray-500">{{ $app->user->email }}</p>
+                                            @if(optional($app->user->profile)->nik)
+                                                <p class="text-[11px] font-mono font-medium text-emerald-700 mt-0.5 flex items-center gap-1">
+                                                    <i class="fas fa-id-card text-[10px]"></i> NIK: {{ $app->user->profile->nik }}
+                                                </p>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>

@@ -14,35 +14,35 @@
 
 
     <!-- 2. Profile Header with Aurora Gradient -->
-    <div class="relative bg-white pt-24 pb-12 overflow-hidden">
+    <div class="relative bg-white pt-40 sm:pt-32 mobile-header-spacing pb-8 sm:pb-12 overflow-hidden">
 
         <!-- Aurora Background Effect -->
         <div class="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-red-50 via-white to-white z-0"></div>
         <div class="absolute top-[-100px] right-[-100px] w-[500px] h-[500px] bg-red-100/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
         <div class="absolute top-[-100px] left-[-100px] w-[400px] h-[400px] bg-blue-50/50 rounded-full blur-[100px] pointer-events-none mix-blend-multiply opacity-70"></div>
 
-        <div class="container mx-auto px-4 relative z-10 max-w-7xl">
+        <div class="w-full px-3 sm:px-6 lg:px-8 relative z-10">
 
             <!-- Notification Banner (Bar Style) -->
             @if($percentage < 50)
-            <div class="w-full bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg mb-8 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in-down">
-                <div class="flex items-center gap-3 text-center sm:text-left">
-                    <i class="fas fa-info-circle text-xl sm:text-lg opacity-90"></i>
-                    <p class="text-sm font-medium leading-tight">
+            <div class="w-full bg-red-600 text-white px-3 sm:px-6 py-2.5 sm:py-3 rounded-lg shadow-lg mb-6 sm:mb-8 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 animate-fade-in-down">
+                <div class="flex items-center gap-2 sm:gap-3 text-center sm:text-left">
+                    <i class="fas fa-info-circle text-base sm:text-lg opacity-90"></i>
+                    <p class="text-xs sm:text-sm font-medium leading-tight">
                         Get job offers by completing your profile (skills, portfolio, CV/Resume, and supporting documents).
                     </p>
                 </div>
-                <a href="{{ route('customer.settings') }}" class="whitespace-nowrap px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-md text-xs font-bold transition-colors border border-white/20">
+                <a href="{{ route('customer.settings') }}" class="whitespace-nowrap px-3 sm:px-4 py-1.5 bg-white/20 hover:bg-white/30 rounded-md text-[11px] sm:text-xs font-bold transition-colors border border-white/20">
                     Complete Now
                 </a>
             </div>
             @endif
 
-            <div class="flex flex-col lg:flex-row items-start gap-8 lg:gap-10">
+            <div class="flex flex-col lg:flex-row items-start gap-6 lg:gap-10">
 
                 <!-- Avatar Section -->
                 <div class="relative group flex-shrink-0 mx-auto lg:mx-0">
-                    <div class="w-32 h-32 lg:w-40 lg:h-40 rounded-full p-1 bg-white ring-4 ring-gray-50 shadow-lg relative z-10">
+                    <div class="w-24 h-24 sm:w-32 sm:h-32 lg:w-40 lg:h-40 rounded-full p-1 bg-white ring-4 ring-gray-50 shadow-lg relative z-10">
                         <div class="w-full h-full rounded-full overflow-hidden relative group-hover:ring-4 ring-red-100 transition-all">
                             @if($user->profile && $user->profile->profile_photo)
                                 @php
@@ -57,13 +57,13 @@
                                 @endphp
                                 <img src="{{ $profilePhotoUrl }}" alt="Profile" class="w-full h-full object-cover">
                             @else
-                                <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold text-4xl">
+                                <div class="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400 font-bold text-2xl sm:text-4xl">
                                     {{ strtoupper(substr($user->name ?? $user->username ?? 'U', 0, 2)) }}
                                 </div>
                             @endif
                         </div>
-                        <a href="{{ route('customer.settings') }}" class="absolute bottom-1 right-1 w-8 h-8 bg-gray-900 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-md z-20" title="Edit Photo">
-                            <i class="fas fa-pen text-xs"></i>
+                        <a href="{{ route('customer.settings') }}" class="absolute bottom-0 right-0 sm:bottom-1 sm:right-1 w-7 h-7 sm:w-8 sm:h-8 bg-gray-900 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors shadow-md z-20" title="Edit Photo">
+                            <i class="fas fa-pen text-[10px] sm:text-xs"></i>
                         </a>
                     </div>
                 </div>
@@ -72,15 +72,15 @@
                 <div class="flex-1 w-full text-center lg:text-left">
 
                     <!-- Name & Role -->
-                    <div class="mb-6 flex flex-col lg:flex-row justify-between items-center lg:items-start gap-4">
+                    <div class="mb-4 sm:mb-6 flex flex-col lg:flex-row justify-between items-center lg:items-start gap-3 sm:gap-4">
                         <div>
                             <div class="flex items-center justify-center lg:justify-start gap-2 mb-1">
-                                <h1 class="text-3xl font-bold text-gray-900 tracking-tight">
+                                <h1 class="text-xl sm:text-3xl font-bold text-gray-900 tracking-tight">
                                     {{ $user->name ?? $user->username }}
                                 </h1>
                                 <a href="{{ route('customer.settings') }}" class="text-gray-400 hover:text-red-500 transition-colors"><i class="fas fa-pen text-xs"></i></a>
                             </div>
-                            <p class="text-gray-500 font-medium text-lg">{{ $user->profile->professional_headline ?? 'Job Seeker / Candidate' }}</p>
+                            <p class="text-gray-500 font-medium text-xs sm:text-lg">{{ $user->profile->professional_headline ?? 'Job Seeker / Candidate' }}</p>
                         </div>
 
                         <!-- Percentage Badge (Minimal) -->
@@ -100,7 +100,7 @@
                     </div>
 
                     <!-- Details Grid -->
-                    <div class="grid lg:grid-cols-12 gap-8 border-t border-gray-100 pt-6">
+                    <div class="grid lg:grid-cols-12 gap-8 border-t border-gray-100 pt-6 text-left">
 
                         <!-- Summary (Left 8 cols) -->
                         <div class="lg:col-span-8 space-y-3">
@@ -156,30 +156,30 @@
     </div> <!-- End of Header Wrapper -->
 
     <!-- 3. Body Content (Full Width) -->
-    <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <div class="w-full px-3 sm:px-6 lg:px-8 py-6 sm:py-8 pb-24 sm:pb-12">
         <!-- CV/Resume Section -->
-        <section class="mb-12">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">My CV/Resume</h2>
-                <button onclick="triggerCvUpload()" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all" id="topUploadBtn">
+        <section class="mb-10 sm:mb-12 scroll-mt-24">
+            <div class="flex justify-between items-center mb-4 sm:mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-gray-900">My CV/Resume</h2>
+                <button onclick="triggerCvUpload()" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-300 rounded-lg text-xs sm:text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm" id="topUploadBtn">
                     @if($user->profile && $user->profile->cv_file)
-                        <i class="fas fa-sync-alt"></i> Update CV
+                        <i class="fas fa-sync-alt text-xs"></i> Update CV
                     @else
-                        <i class="fas fa-upload"></i> Upload
+                        <i class="fas fa-upload text-xs"></i> Upload
                     @endif
                 </button>
             </div>
 
             @if($user->profile && $user->profile->cv_file)
-                <div class="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 h-[600px] relative group">
+                <div class="bg-gray-100 rounded-xl overflow-hidden border border-gray-200 h-[450px] sm:h-[600px] relative group">
                     <iframe src="{{ asset('storage/' . $user->profile->cv_file) }}" class="w-full h-full" frameborder="0"></iframe>
 
-                    <div class="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity p-2 bg-black/50 rounded-lg backdrop-blur-sm">
-                        <a href="{{ asset('storage/' . $user->profile->cv_file) }}" target="_blank" class="p-2 text-white hover:text-red-400 transition-colors" title="Open in New Tab">
-                            <i class="fas fa-external-link-alt"></i>
+                    <div class="absolute top-3 right-3 sm:top-4 sm:right-4 flex gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity p-1.5 sm:p-2 bg-black/60 rounded-lg backdrop-blur-sm">
+                        <a href="{{ asset('storage/' . $user->profile->cv_file) }}" target="_blank" class="p-1.5 sm:p-2 text-white hover:text-red-400 transition-colors" title="Open in New Tab">
+                            <i class="fas fa-external-link-alt text-xs sm:text-sm"></i>
                         </a>
-                        <a href="{{ asset('storage/' . $user->profile->cv_file) }}" download class="p-2 text-white hover:text-green-400 transition-colors" title="Download">
-                            <i class="fas fa-download"></i>
+                        <a href="{{ asset('storage/' . $user->profile->cv_file) }}" download class="p-1.5 sm:p-2 text-white hover:text-green-400 transition-colors" title="Download">
+                            <i class="fas fa-download text-xs sm:text-sm"></i>
                         </a>
                     </div>
                 </div>
@@ -197,25 +197,25 @@
             @endif
 
         </section>
-                    {{-- =========================
+            {{-- =========================
             Certificates Section
             ========================= --}}
-            <section class="mb-12 border-t border-gray-200 pt-12">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-bold text-gray-900">Certificates</h2>
+            <section class="mb-10 sm:mb-12 border-t border-gray-200 pt-8 sm:pt-12 scroll-mt-24">
+                <div class="flex justify-between items-center mb-4 sm:mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Certificates</h2>
                 </div>
 
                 {{-- Form Upload Multi Sertifikat --}}
                 <form id="certificateForm" class="space-y-4">
                     <div id="certificateRows" class="space-y-4"></div>
 
-                    <div class="flex items-center gap-3">
+                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                         <button type="button" onclick="submitCertificates()"
-                            class="px-6 py-2 bg-red-600 text-white rounded-lg font-bold hover:bg-red-700 shadow-lg shadow-red-500/30 transition-all">
+                            class="w-full sm:w-auto px-6 py-2.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-700 shadow-md shadow-red-500/20 transition-all text-sm active:scale-95 text-center">
                             Save Certificates
                         </button>
 
-                        <p class="text-xs text-gray-500">
+                        <p class="text-xs text-gray-500 leading-relaxed">
                             Allowed: PDF/JPG/PNG (max 2MB). You can upload more than one certificate.
                         </p>
                     </div>
@@ -228,7 +228,53 @@
                     </h3>
 
                     @if($user->certificates && $user->certificates->count())
-                    <div class="overflow-x-auto bg-white border border-gray-200 rounded-xl">
+                    <!-- Mobile Card View (md:hidden) -->
+                    <div class="block md:hidden space-y-3">
+                        @foreach($user->certificates as $cert)
+                        @php
+                            $ext = pathinfo($cert->original_name ?? $cert->file_path, PATHINFO_EXTENSION);
+                            $displayName = ($cert->title ? \Illuminate\Support\Str::slug($cert->title, '-') : 'certificate') . ($ext ? '.'.$ext : '');
+                        @endphp
+                        <div class="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:border-gray-300 transition-colors">
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <div class="min-w-0 flex-1">
+                                    <h4 class="font-bold text-gray-900 text-sm leading-tight truncate">{{ $cert->title ?? '-' }}</h4>
+                                    <p class="text-xs text-gray-500 mt-1 flex items-center gap-1.5">
+                                        <i class="far fa-calendar-alt text-gray-400"></i>
+                                        <span>{{ $cert->event_date ? \Carbon\Carbon::parse($cert->event_date)->format('d M Y') : '-' }}</span>
+                                    </p>
+                                </div>
+                                <span class="inline-flex text-[10px] font-bold px-2 py-0.5 rounded bg-gray-100 text-gray-700 uppercase shrink-0">
+                                    {{ strtoupper(str_replace('_',' ', $cert->stage)) }}
+                                </span>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-3 border-t border-gray-100 gap-2">
+                                <a href="{{ asset('storage/' . $cert->file_path) }}" target="_blank"
+                                    class="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-700 hover:text-red-600 min-w-0 flex-1 truncate">
+                                    <i class="fas fa-file-pdf text-red-500 shrink-0"></i>
+                                    <span class="truncate">{{ $displayName }}</span>
+                                </a>
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    <a href="{{ asset('storage/' . $cert->file_path) }}" download
+                                        class="w-8 h-8 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 flex items-center justify-center transition-colors text-xs"
+                                        title="Download">
+                                        <i class="fas fa-download"></i>
+                                    </a>
+                                    <button type="button"
+                                            onclick="deleteCertificate({{ $cert->id }})"
+                                            class="w-8 h-8 rounded-lg bg-red-50 hover:bg-red-100 text-red-600 flex items-center justify-center transition-colors text-xs"
+                                            title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Desktop Table View (hidden md:block) -->
+                    <div class="hidden md:block overflow-x-auto bg-white border border-gray-200 rounded-xl">
                         <table class="min-w-full text-sm">
                         <thead class="bg-gray-50 text-gray-600">
                             <tr>
@@ -357,42 +403,61 @@
         </script>
 
         <!-- Social Media Section -->
-        <section class="border-t border-gray-200 pt-12">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-900">Social Accounts</h2>
-                <button onclick="openSocialMediaModal()" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all">
+        <section class="border-t border-gray-200 pt-8 sm:pt-12 mb-8 sm:mb-12 scroll-mt-24">
+            <div class="flex justify-between items-center mb-4 sm:mb-6">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-gray-900">Social Accounts</h2>
+                </div>
+                <button onclick="openSocialMediaModal()" class="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-1.5 sm:py-2 bg-white border border-gray-300 rounded-lg text-xs sm:text-sm font-bold text-gray-700 hover:bg-gray-50 hover:border-gray-400 transition-all shadow-sm">
                     <i class="fas fa-plus"></i> Add
                 </button>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 @php
                     $socials = [
-                        ['key' => 'linkedin', 'icon' => 'fab fa-linkedin', 'color' => 'text-gray-900', 'bg' => 'bg-gray-100', 'label' => 'LinkedIn'],
-                        ['key' => 'instagram', 'icon' => 'fab fa-instagram', 'color' => 'text-gray-900', 'bg' => 'bg-gray-100', 'label' => 'Instagram'],
+                        ['key' => 'linkedin', 'icon' => 'fab fa-linkedin', 'color' => 'text-blue-600', 'bg' => 'bg-blue-50', 'label' => 'LinkedIn'],
+                        ['key' => 'instagram', 'icon' => 'fab fa-instagram', 'color' => 'text-pink-600', 'bg' => 'bg-pink-50', 'label' => 'Instagram'],
                         ['key' => 'tiktok', 'icon' => 'fab fa-tiktok', 'color' => 'text-gray-900', 'bg' => 'bg-gray-100', 'label' => 'TikTok'],
-                        ['key' => 'twitter', 'icon' => 'fab fa-twitter', 'color' => 'text-gray-900', 'bg' => 'bg-gray-100', 'label' => 'Twitter/X'],
-                        ['key' => 'website', 'icon' => 'fas fa-globe', 'color' => 'text-gray-900', 'bg' => 'bg-gray-100', 'label' => 'Website']
+                        ['key' => 'twitter', 'icon' => 'fab fa-twitter', 'color' => 'text-sky-500', 'bg' => 'bg-sky-50', 'label' => 'Twitter/X'],
+                        ['key' => 'website', 'icon' => 'fas fa-globe', 'color' => 'text-emerald-600', 'bg' => 'bg-emerald-50', 'label' => 'Website']
                     ];
                     $hasSocial = false;
                 @endphp
 
                 @foreach($socials as $social)
-                    @if($user->profile && $user->profile->{$social['key']})
-                        @php $hasSocial = true; @endphp
-                        <div class="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md transition-shadow group">
-                            <div class="flex items-center gap-4">
-                                <div class="w-10 h-10 {{ $social['bg'] }} rounded-lg flex items-center justify-center group-hover:bg-red-50 transition-colors">
-                                    <i class="{{ $social['icon'] }} {{ $social['color'] }} text-xl group-hover:text-red-600 transition-colors"></i>
+                    @if($user->profile && !empty($user->profile->{$social['key']}))
+                        @php 
+                            $hasSocial = true; 
+                            $rawUrl = $user->profile->{$social['key']};
+                            $targetUrl = str_starts_with($rawUrl, 'http://') || str_starts_with($rawUrl, 'https://') ? $rawUrl : 'https://' . $rawUrl;
+                        @endphp
+                        <div class="flex items-center justify-between p-3.5 sm:p-4 bg-white border border-gray-200 rounded-xl hover:shadow-md hover:border-gray-300 transition-all group">
+                            <div class="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1 mr-2">
+                                <div class="w-10 h-10 {{ $social['bg'] }} rounded-xl flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                                    <i class="{{ $social['icon'] }} {{ $social['color'] }} text-lg"></i>
                                 </div>
-                                <div>
-                                    <p class="text-xs font-bold text-gray-400 uppercase">{{ $social['label'] }}</p>
-                                    <p class="font-bold text-gray-900 truncate max-w-[150px]">{{ $user->profile->{$social['key']} }}</p>
+                                <div class="min-w-0 flex-1">
+                                    <p class="text-[10px] sm:text-xs font-bold text-gray-400 uppercase tracking-wide">{{ $social['label'] }}</p>
+                                    <a href="{{ $targetUrl }}" target="_blank" rel="noopener noreferrer" 
+                                       class="font-semibold text-gray-900 hover:text-red-600 text-xs sm:text-sm truncate block transition-colors mt-0.5"
+                                       title="{{ $rawUrl }}">
+                                        {{ $rawUrl }}
+                                    </a>
                                 </div>
                             </div>
-                            <button class="text-gray-300 hover:text-red-600 transition-colors opacity-0 group-hover:opacity-100">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <a href="{{ $targetUrl }}" target="_blank" rel="noopener noreferrer"
+                                   class="w-8 h-8 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-500 hover:text-gray-900 flex items-center justify-center transition-colors text-xs"
+                                   title="Open Link">
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                                <button type="button" onclick="openSocialMediaModal()"
+                                        class="w-8 h-8 rounded-lg bg-gray-50 hover:bg-red-50 text-gray-500 hover:text-red-600 flex items-center justify-center transition-colors text-xs"
+                                        title="Edit Link">
+                                    <i class="fas fa-pen"></i>
+                                </button>
+                            </div>
                         </div>
                     @endif
                 @endforeach
@@ -551,16 +616,13 @@ function addCertificateRow() {
         </select>
       </div>
 
-      <div class="md:col-span-3">
+      <div class="md:col-span-4">
         <label class="block text-xs font-bold text-gray-500 mb-1">Certificate File</label>
         <input type="file"
           name="certificates[${certIndex}][file]"
           accept=".pdf,.jpg,.jpeg,.png"
-          class="w-full border border-gray-300 rounded-lg p-2 text-sm"
+          class="w-full border border-gray-300 rounded-lg p-2 text-xs sm:text-sm bg-white file:mr-2 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200"
           required>
-      </div>
-
-      <div class="md:col-span-1 flex md:justify-end">
       </div>
     </div>
   `);
@@ -597,53 +659,6 @@ function deleteCertificate(id){
   .then(d => {
     if(d.success) location.reload();
     else alert(d.message || 'Delete failed');
-  });
-}
-</script>
-<script>
-window.submitCertificates = function () {
-  const form = document.getElementById('certificateForm');
-  if (!form) return alert('certificateForm not found');
-
-  const fileInputs = form.querySelectorAll('input[type="file"]');
-  if (!fileInputs.length) return alert('Add at least one certificate first.');
-
-  const formData = new FormData(form);
-  formData.append('_token', '{{ csrf_token() }}');
-
-  // DEBUG (biar keliatan kirim apa)
-  console.log('Submitting certificates...');
-  for (const [k, v] of formData.entries()) {
-    console.log(k, v instanceof File ? v.name : v);
-  }
-
-  fetch('{{ route("customer.profile.upload-certificates") }}', {
-    method: 'POST',
-    body: formData,
-    headers: { 'Accept': 'application/json' }
-  })
-  .then(async (res) => {
-    const text = await res.text();
-    console.log('STATUS', res.status);
-    console.log('RAW', text);
-
-    let data = {};
-    try { data = JSON.parse(text); } catch(e) {}
-
-    if (!res.ok) {
-      if (data?.errors) {
-        const firstKey = Object.keys(data.errors)[0];
-        return alert(data.errors[firstKey][0]);
-      }
-      return alert(data.message || 'Upload failed');
-    }
-
-    if (data.success) window.location.reload();
-    else alert(data.message || 'Upload failed');
-  })
-  .catch(err => {
-    console.error(err);
-    alert('An error occurred during upload.');
   });
 }
 </script>

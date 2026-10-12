@@ -13,26 +13,26 @@
 
     <!-- Main Content Wrapper with Top Padding -->
     <div class="relative z-10 pt-32 pb-16">
-        <div class="container mx-auto px-4 lg:px-6 max-w-7xl">
+        <div class="w-full px-4 sm:px-6 lg:px-8">
             
             <!-- Page Header -->
-            <div class="mb-10">
-                <h1 class="text-4xl font-bold text-gray-900 mb-2 tracking-tight">My Certificates</h1>
-                <p class="text-gray-600 text-lg">View and manage your event participation certificates.</p>
+            <div class="mb-6 sm:mb-10">
+                <h1 class="text-2xl sm:text-4xl font-bold text-gray-900 mb-1.5 sm:mb-2 tracking-tight">My Certificates</h1>
+                <p class="text-xs sm:text-lg text-gray-600">View and manage your event participation certificates.</p>
             </div>
 
-            <!-- Navigation Tabs -->
-            <div class="bg-white/60 backdrop-blur-xl rounded-2xl p-2 border border-white/50 shadow-sm mb-10 inline-flex flex-wrap gap-2">
-                <a href="{{ route('customer.dashboard') }}" class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all">
+            <!-- Navigation Tabs (Hidden on mobile) -->
+            <div class="hidden md:inline-flex bg-white/60 backdrop-blur-xl rounded-2xl p-2 border border-white/50 shadow-sm mb-8 sm:mb-10 flex-wrap gap-2">
+                <a href="{{ route('customer.dashboard') }}" class="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all">
                     <i class="fas fa-th-large mr-2"></i> Dashboard
                 </a>
-                <a href="{{ route('customer.applications') }}" class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all">
+                <a href="{{ route('customer.applications') }}" class="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all">
                     <i class="fas fa-file-alt mr-2"></i> My Applications
                 </a>
-                <a href="{{ route('customer.saved-jobs') }}" class="px-6 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all">
+                <a href="{{ route('customer.saved-jobs') }}" class="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-white/50 transition-all">
                     <i class="fas fa-bookmark mr-2"></i> Saved Jobs
                 </a>
-                <a href="{{ route('customer.certificates') }}" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-white text-red-600 shadow-md transition-all">
+                <a href="{{ route('customer.certificates') }}" class="px-5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-xs sm:text-sm font-bold bg-white text-red-600 shadow-md transition-all">
                     <i class="fas fa-certificate mr-2"></i> My Certificates
                 </a>
             </div>
