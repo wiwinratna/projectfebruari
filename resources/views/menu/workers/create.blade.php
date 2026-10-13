@@ -1,25 +1,37 @@
 @extends('layouts.app')
 
-@section('title', 'Create Worker Opening - NOCIS')
+@section('title', 'Create Worker Opening - ARISE')
 @section('page-title')
     Create Worker Opening
 @endsection
 
 @section('content')
 <div class="space-y-6">
-    <div class="bg-white p-6 rounded-lg shadow">
+    {{-- Header with Back Button --}}
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Create Worker Opening</h2>
+            <p class="text-sm text-gray-500 mt-1">Add a new volunteer or staff opening for an event</p>
+        </div>
+        <a href="{{ route('admin.workers.index') }}"
+           class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors shadow-xs">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Openings
+        </a>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
         <form method="POST" action="{{ route('admin.workers.store') }}" class="space-y-6">
             @csrf
             @include('menu.workers.partials.form-fields')
 
-            <div class="flex items-center justify-end gap-3">
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
                 <a href="{{ route('admin.workers.index') }}"
-                   class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+                   class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition-colors">
                     Cancel
                 </a>
                 <button type="submit"
-                        class="px-5 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600">
-                    Save Opening
+                        class="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors flex items-center shadow-xs">
+                    <i class="fas fa-save mr-2"></i> Save Opening
                 </button>
             </div>
         </form>

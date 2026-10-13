@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Hero Slide - NOCIS')
+@section('title', 'Edit Hero Slide - ARISE')
 @section('page-title')
     Edit Hero Slide <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Super Admin</span>
 @endsection

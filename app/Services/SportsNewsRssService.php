@@ -15,7 +15,7 @@ class SportsNewsRssService
             $res = Http::timeout(6) // kecilin biar ga bikin landing lama
                 ->retry(2, 200)     // coba 2x kalau gagal (200ms jeda)
                 ->withHeaders([
-                    'User-Agent' => 'Mozilla/5.0 (NOCIS; Laravel RSS Fetch)',
+                    'User-Agent' => 'Mozilla/5.0 (ARISE; Laravel RSS Fetch)',
                     'Accept' => 'application/rss+xml, application/xml;q=0.9, */*;q=0.8',
                 ])
                 ->get($url);

@@ -95,6 +95,10 @@ class AccreditationMappingController extends Controller
             ->toArray();
 
         $jobCategories = JobCategory::with('workerType')
+            ->where(function ($query) use ($eventId) {
+                $query->where('event_id', $eventId)
+                      ->orWhereNull('event_id');
+            })
             ->whereNotIn('id', $used)
             ->orderBy('name')
             ->get();
@@ -173,6 +177,10 @@ class AccreditationMappingController extends Controller
             ->toArray();
 
         $jobCategories = JobCategory::with('workerType')
+            ->where(function ($query) use ($eventId) {
+                $query->where('event_id', $eventId)
+                      ->orWhereNull('event_id');
+            })
             ->whereNotIn('id', $usedByOthers)
             ->orderBy('name')
             ->get();

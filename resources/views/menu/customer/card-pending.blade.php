@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Card Not Available Yet - NOCIS')
+@section('title', 'Card Not Available Yet - ARISE')
 
 @section('content')
 <div class="min-h-screen bg-gray-50 relative overflow-hidden">

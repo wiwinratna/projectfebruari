@@ -43,7 +43,7 @@ class NewsPostController extends Controller
         }
 
         // default values (jangan nimpuk kalau user isi)
-        $data['source_name']  = $data['source_name'] ?? 'NOCIS';
+        $data['source_name']  = $data['source_name'] ?? 'ARISE';
         $data['is_published'] = (bool)($data['is_published'] ?? false);
 
         // kalau dipublish tapi published_at kosong -> auto isi
@@ -141,7 +141,7 @@ public function publicIndex(SportsNewsRssService $rss)
                     'excerpt' => $post->excerpt,
                     'image' => $post->cover_image ? asset('storage/' . $post->cover_image) : 'https://via.placeholder.com/400x300?text=News',
                     'date' => $post->published_at->format('M d, Y'),
-                    'source' => $post->source_name ?? 'NOCIS',
+                    'source' => $post->source_name ?? 'ARISE',
                     'category' => 'News Update',
                 ];
             });
@@ -174,7 +174,7 @@ public function publicIndex(SportsNewsRssService $rss)
                 'content' => $news->content,
                 'image' => $news->cover_image ? asset('storage/' . $news->cover_image) : 'https://via.placeholder.com/400x300?text=News',
                 'date' => $news->published_at->format('M d, Y'),
-                'source' => $news->source_name ?? 'NOCIS',
+                'source' => $news->source_name ?? 'ARISE',
                 'source_url' => $news->source_url,
                 'category' => 'News Update',
             ]

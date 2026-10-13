@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'My Certificates - NOCIS')
+@section('title', 'My Certificates - ARISE')
 
 @section('content')
 <!-- Modern Web3 Customer Certificates -->

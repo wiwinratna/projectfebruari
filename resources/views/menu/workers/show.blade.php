@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Worker Details - NOCIS Admin')
+@section('title', 'Worker Details - ARISE Admin')
 @section('page-title')
     <div class="flex items-center">
         <a href="{{ route('admin.workers.index') }}" class="mr-4 text-gray-500 hover:text-gray-700 transition-colors">

@@ -1,7 +1,7 @@
 <header class="bg-white shadow-md h-16 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-50">
     <div class="flex items-center">
-        <!-- Mobile hamburger menu -->
-        <button id="sidebar-toggle" class="lg:hidden mr-4 text-gray-600 hover:text-gray-800 focus:outline-none">
+        <!-- Sidebar Toggle (Mobile & Desktop) -->
+        <button id="sidebar-toggle" type="button" class="mr-3 text-gray-600 hover:text-gray-900 focus:outline-none p-1.5 rounded-lg hover:bg-gray-100 transition cursor-pointer" title="Buka / Tutup Sidebar">
             <i class="fas fa-bars text-xl"></i>
         </button>
         <h2 class="text-lg lg:text-xl font-semibold text-gray-800">
@@ -12,7 +12,7 @@
             @elseif(request()->is('super-admin*'))
                 Super Admin Dashboard
             @else
-                @yield('page-title', 'NOCIS')
+                @yield('page-title', 'ARISE')
             @endif
         </h2>
     </div>
@@ -20,7 +20,7 @@
     <div class="flex items-center space-x-2 lg:space-x-4">
         <!-- Search - hidden on small screens -->
         <div class="relative hidden md:block">
-            <input type="text" placeholder="Search..." class="border border-gray-300 rounded-lg py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-red-500 w-48 lg:w-64">
+            <input type="text" placeholder="Search..." class="border border-gray-300 rounded-lg py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-blue-500 w-48 lg:w-64">
             <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
         </div>
 
@@ -118,7 +118,7 @@
                     <div class="py-2">
                         <div class="px-4 py-2 border-b border-gray-100">
                             <p class="text-sm font-semibold text-gray-800">Super Admin</p>
-                            <p class="text-xs text-gray-500">{{ session('super_admin_username') ?? 'admin@nocis.id' }}</p>
+                            <p class="text-xs text-gray-500">{{ session('super_admin_username') ?? 'admin@arise.id' }}</p>
                         </div>
                         <a href="{{ route('super-admin.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <i class="fas fa-user mr-2"></i>Profile
@@ -151,7 +151,7 @@
                     <div class="py-2">
                         <div class="px-4 py-2 border-b border-gray-100">
                             <p class="text-sm font-semibold text-gray-800">Admin</p>
-                            <p class="text-xs text-gray-500">{{ session('admin_username') ?? 'admin@nocis.id' }}</p>
+                            <p class="text-xs text-gray-500">{{ session('admin_username') ?? 'admin@arise.id' }}</p>
                         </div>
                         <a href="{{ route('admin.profile') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <i class="fas fa-user mr-2"></i>Profile

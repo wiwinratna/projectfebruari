@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Super Admin Login - NOCIS</title>
+    <title>Super Admin Login - ARISE</title>
     <link rel="icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2" type="image/png">
     <link rel="shortcut icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2" type="image/png">
     <link rel="apple-touch-icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2">

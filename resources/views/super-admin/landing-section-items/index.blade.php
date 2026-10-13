@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Landing Section Content - NOCIS')
+@section('title', 'Landing Section Content - ARISE')
 @section('page-title')
     Landing Section Content <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Landing Page</span>
 @endsection

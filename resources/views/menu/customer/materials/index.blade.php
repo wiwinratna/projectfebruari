@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Training Materials - NOCIS')
+@section('title', 'Training Materials - ARISE')
 
 @push('styles')
 <style>

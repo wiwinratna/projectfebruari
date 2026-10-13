@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Profile - NOCIS')
+@section('title', 'Admin Profile - ARISE')
 @section('page-title')
     Profile
 @endsection

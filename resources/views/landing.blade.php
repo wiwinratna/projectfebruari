@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'NOCIS - Sport Workforce Information System')
+@section('title', 'ARISE - Sport Workforce Information System')
 
 @section('content')
 <div class="landing-scope">

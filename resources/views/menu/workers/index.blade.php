@@ -1,6 +1,6 @@
 ﻿@extends('layouts.app')
 
-@section('title', 'Worker Job Openings - NOCIS')
+@section('title', 'Worker Job Openings - ARISE')
 @section('page-title')
     Workers <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2">Admin</span>
 @endsection

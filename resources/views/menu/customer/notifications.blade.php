@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Notifications - NOCIS')
+@section('title', 'Notifications - ARISE')
 
 @section('content')
 <div class="min-h-screen bg-gray-50 relative overflow-hidden">

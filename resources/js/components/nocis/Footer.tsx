@@ -53,7 +53,7 @@ export function Footer() {
           >
             <h3 className="text-lg font-bold mb-4">Quick Links</h3>
             <ul className="space-y-3">
-              {['Job Openings', 'About NOCIS', 'Our Partners', 'Events', 'Contact Us'].map((item) => (
+              {['Job Openings', 'About ARISE', 'Our Partners', 'Events', 'Contact Us'].map((item) => (
                 <li key={item}>
                   <motion.a
                     href="#"

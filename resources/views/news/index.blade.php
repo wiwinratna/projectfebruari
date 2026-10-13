@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'NOCIS - News')
+@section('title', 'ARISE - News')
 
 @section('content')
 <section class="bg-white">
@@ -14,17 +14,17 @@
       </div>
 
       <h1 class="mt-6 text-3xl md:text-5xl font-extrabold tracking-tight text-gray-900">
-        NOCIS <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400">News</span>
+        ARISE <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-600 to-red-400">News</span>
       </h1>
       <p class="mt-3 text-gray-600">
         Informasi terbaru seputar event, workforce, serta berita olahraga dari sumber eksternal.
       </p>
     </div>
 
-    {{-- SECTION: INTERNAL (NOCIS) --}}
+    {{-- SECTION: INTERNAL (ARISE) --}}
     <div class="mt-12">
       <div class="flex items-center justify-between gap-4">
-        <h2 class="text-xl md:text-2xl font-extrabold text-gray-900">NOCIS Updates</h2>
+        <h2 class="text-xl md:text-2xl font-extrabold text-gray-900">ARISE Updates</h2>
         <span class="text-sm text-gray-500">
           {{ $posts->total() }} berita
         </span>
@@ -57,7 +57,7 @@
                 <span class="inline-flex items-center gap-2 text-[11px] font-extrabold uppercase tracking-wide
                              px-3 py-1 rounded-full bg-white/90 border border-gray-200 text-gray-700">
                   <span class="w-1.5 h-1.5 rounded-full bg-red-500"></span>
-                  {{ $post->source_name ?? 'NOCIS' }}
+                  {{ $post->source_name ?? 'ARISE' }}
                 </span>
               </div>
             </div>
@@ -88,7 +88,7 @@
               <div class="mx-auto w-16 h-16 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center">
                 <i class="fas fa-search text-2xl"></i>
               </div>
-              <h3 class="mt-4 text-xl font-bold text-gray-900">Belum ada berita NOCIS</h3>
+              <h3 class="mt-4 text-xl font-bold text-gray-900">Belum ada berita ARISE</h3>
               <p class="mt-2 text-gray-600">Nanti kalau admin publish, bakal muncul di sini.</p>
               <a href="{{ route('landing') }}"
                  class="inline-flex mt-6 items-center gap-2 px-6 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition">

@@ -71,9 +71,9 @@
         </label>
         <input type="text"
                name="source_name"
-               value="{{ old('source_name', $post->source_name ?? 'NOCIS') }}"
+               value="{{ old('source_name', $post->source_name ?? 'ARISE') }}"
                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent @error('source_name') border-red-500 @enderror"
-               placeholder="e.g., NOCIS / Admin">
+               placeholder="e.g., ARISE / Admin">
         @error('source_name') <p class="text-red-500 text-sm mt-1">{{ $message }}</p> @enderror
         <p class="text-gray-500 text-sm mt-1">Nama sumber untuk badge.</p>
     </div>

@@ -96,7 +96,10 @@ class WorkerController extends Controller
             ->orderBy('application_deadline')
             ->get();
 
-        $categories = JobCategory::orderBy('name')->get();
+        $categories = JobCategory::where(function ($query) use ($adminEventId) {
+                $query->where('event_id', $adminEventId)
+                      ->orWhereNull('event_id');
+            })->orderBy('name')->get();
         // Only show admin's assigned event
         $event = Event::findOrFail($adminEventId);
         $events = collect([$event]);

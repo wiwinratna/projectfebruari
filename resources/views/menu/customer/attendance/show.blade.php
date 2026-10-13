@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Absensi: ' . $event->title . ' - NOCIS')
+@section('title', 'Absensi: ' . $event->title . ' - ARISE')
 
 @push('styles')
 <style>
@@ -515,7 +515,7 @@
         // Right side of Time Row: Official Brand Seal
         ctx.font = `600 ${Math.max(11, Math.round(cardHeight * 0.085))}px system-ui, -apple-system, sans-serif`;
         ctx.fillStyle = '#64748b';
-        const sealText = 'NOCIS ATTENDANCE VERIFIED';
+        const sealText = 'ARISE ATTENDANCE VERIFIED';
         const sealWidth = ctx.measureText(sealText).width;
         ctx.fillText(sealText, contentRightX - sealWidth, timeRowY);
 

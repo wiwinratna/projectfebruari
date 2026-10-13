@@ -108,8 +108,54 @@ class ReviewController extends Controller
         return Excel::download(new ApplicationsExport($adminEventId, $search), $filename);
     }
 
-public function update(Request $request, Application $application)
-{
+    public function downloadPhotos(Request $request, \App\Services\ApplicantPhotoDownloadService $service)
+    {
+        if (!session('admin_authenticated')) {
+            return redirect('/admin/login');
+        }
+
+        $adminEventId = session('admin_event_id');
+        if (!$adminEventId) {
+            return back()->with('error', 'Akun admin belum ditugaskan ke event manapun.');
+        }
+
+        $event = Event::find($adminEventId);
+        $eventTitle = $event?->title ?? 'Event';
+
+        $query = Application::with(['user.profile', 'opening'])
+            ->whereHas('opening', fn($q) => $q->where('event_id', $adminEventId))
+            ->whereIn('status', ['approved', 'accepted']);
+
+        if (!$request->boolean('all')) {
+            $validated = $request->validate([
+                'application_ids' => 'required|array|min:1',
+                'application_ids.*' => 'integer|exists:applications,id',
+            ]);
+
+            $query->whereIn('id', $validated['application_ids']);
+        }
+
+        $applications = $query->get();
+
+        return $service->downloadZip($applications, 'Foto_Diterima_' . $eventTitle);
+    }
+
+    public function downloadSinglePhoto(Application $application, \App\Services\ApplicantPhotoDownloadService $service)
+    {
+        if (!session('admin_authenticated')) {
+            return redirect('/admin/login');
+        }
+
+        $adminEventId = session('admin_event_id');
+        if ($application->opening->event_id !== $adminEventId) {
+            return back()->with('error', 'Anda tidak memiliki hak akses untuk pelamar event ini.');
+        }
+
+        return $service->downloadSinglePhoto($application);
+    }
+
+    public function update(Request $request, Application $application)
+    {
     \Log::info('REVIEWS UPDATE HIT', [
         'app_id' => $application->id,
         'incoming' => $request->all(),

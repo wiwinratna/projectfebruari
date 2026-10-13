@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Analytics Dashboard - NOCIS')
+@section('title', 'Analytics Dashboard - ARISE')
 @section('page-title')
     Analytics Dashboard <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full ml-2">Admin</span>
 @endsection

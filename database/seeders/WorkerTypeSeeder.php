@@ -16,7 +16,7 @@ class WorkerTypeSeeder extends Seeder
         $workerTypes = [
             [
                 'name' => 'VO',
-                'description' => 'Volunteer Officer',
+                'description' => 'Volunteer',
             ],
             [
                 'name' => 'LO',

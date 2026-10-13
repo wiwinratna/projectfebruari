@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', $job->title . ' - NOCIS')
+@section('title', $job->title . ' - ARISE')
 
 @section('content')
 <!-- Aurora Header Background -->
@@ -154,7 +154,7 @@
         <div class="lg:col-span-4">
             <div id="action-card" class="bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-lg sm:shadow-xl shadow-gray-200/50 sticky top-24 lg:-mt-32 relative z-20">
                 <h3 class="font-bold text-gray-900 mb-1.5 sm:mb-2 text-base sm:text-lg">Interested?</h3>
-                <p class="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6 leading-relaxed">Don't miss out on this opportunity to be part of the NOCIS team for {{ $job->event?->title ?? 'this event' }}.</p>
+                <p class="text-xs sm:text-sm text-gray-500 mb-4 sm:mb-6 leading-relaxed">Don't miss out on this opportunity to be part of the ARISE team for {{ $job->event?->title ?? 'this event' }}.</p>
 
                 @php
                     $isCustomerAuthenticated = session('customer_authenticated');
@@ -202,7 +202,7 @@
                 <!-- Support Text -->
                 <div class="mt-6 pt-6 border-t border-gray-100 text-center">
                     <p class="text-xs text-gray-400">
-                        Need help? Contact <a href="#" class="text-red-600 hover:underline">support@nocis.id</a>
+                        Need help? Contact <a href="#" class="text-blue-600 hover:underline">support@arise.id</a>
                     </p>
                 </div>
             </div>

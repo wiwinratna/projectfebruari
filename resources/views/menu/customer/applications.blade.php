@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'My Applications - NOCIS')
+@section('title', 'My Applications - ARISE')
 
 @section('content')
 <!-- Modern Web3 Customer Applications -->

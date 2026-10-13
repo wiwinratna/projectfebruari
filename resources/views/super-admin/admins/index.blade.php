@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Manage Admins - NOCIS')
+@section('title', 'Manage Admins - ARISE')
 @section('page-title')
     Manage Admins <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Super Admin</span>
 @endsection

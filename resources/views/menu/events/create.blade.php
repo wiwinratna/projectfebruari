@@ -1,25 +1,37 @@
 @extends('layouts.app')
 
-@section('title', 'Create Event - KOI')
+@section('title', 'Create Event - ARISE')
 @section('page-title')
     Create Event
 @endsection
 
 @section('content')
 <div class="space-y-6">
-    <div class="bg-white p-6 rounded-lg shadow">
+    {{-- Header with Back Button --}}
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-800">Create New Event</h2>
+            <p class="text-sm text-gray-500 mt-1">Fill in the details below to add a new event</p>
+        </div>
+        <a href="{{ route('admin.events.index') }}"
+           class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors shadow-xs">
+            <i class="fas fa-arrow-left mr-2"></i> Back to Events
+        </a>
+    </div>
+
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-xs">
         <form method="POST" action="{{ route('admin.events.store') }}" class="space-y-6">
             @csrf
             @include('menu.events.partials.form-fields')
 
-            <div class="flex items-center justify-end gap-3">
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-gray-100">
                 <a href="{{ route('admin.events.index') }}"
-                   class="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50">
+                   class="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 font-medium transition-colors">
                     Cancel
                 </a>
                 <button type="submit"
-                        class="px-5 py-2 rounded-lg bg-red-500 text-white font-semibold hover:bg-red-600">
-                    Save Event
+                        class="px-6 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors flex items-center shadow-xs">
+                    <i class="fas fa-save mr-2"></i> Save Event
                 </button>
             </div>
         </form>

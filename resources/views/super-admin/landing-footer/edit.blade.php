@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Footer Content - NOCIS')
+@section('title', 'Footer Content - ARISE')
 @section('page-title')
     Footer Content <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Landing Page</span>
 @endsection

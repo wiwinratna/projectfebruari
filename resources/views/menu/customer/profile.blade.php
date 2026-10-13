@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Profile Saya - NOCIS')
+@section('title', 'Profile Saya - ARISE')
 
 @section('content')
 <!-- Modern Profile Page -->

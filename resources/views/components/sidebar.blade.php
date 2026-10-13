@@ -17,7 +17,7 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
 <div class="main-sidebar sidebar-style-2 bg-white text-gray-700 shadow-lg" id="sidebar">
     <aside id="sidebar-wrapper" class="h-screen flex flex-col overflow-hidden">
 
-        <div class="sidebar-brand sticky top-0 z-20 bg-white p-4 border-b border-gray-200 relative">
+        <div class="sidebar-brand sticky top-0 z-20 bg-white py-3 px-4 border-b border-gray-200 relative">
             <div class="flex items-center justify-center">
                 @if(session('admin_authenticated'))
                 <a href="{{ route('admin.dashboard') }}" class="flex items-center justify-center">
@@ -45,11 +45,11 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
             </button>
         </div>
         <div class="flex-1 overflow-y-auto">
-            <ul class="sidebar-menu mt-8">
+            <ul class="sidebar-menu mt-2">
 
                 @if(session('super_admin_authenticated'))
                 {{-- Dashboard Section --}}
-                <li class="px-6 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
+                <li class="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
 
                 <li class="menu-item {{ Request::is('super-admin/dashboard') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('super-admin.dashboard') }}">
@@ -59,7 +59,7 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                 </li>
 
                 {{-- System Management Section --}}
-                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">System Management</li>
+                <li class="px-4 py-1 mt-2.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">System Management</li>
 
                 <li class="menu-item {{ Request::is('super-admin/admins*') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('super-admin.admins.index') }}">
@@ -89,8 +89,15 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                     </a>
                 </li>
 
+                <li class="menu-item {{ Request::is('super-admin/worker-types*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('super-admin.worker-types.index') }}">
+                        <i class="fas fa-id-badge mr-3"></i>
+                        <span>Worker Types</span>
+                    </a>
+                </li>
+
                 {{-- Content Section --}}
-                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Content</li>
+                <li class="px-4 py-1 mt-2.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Content</li>
 
                 <li class="menu-item {{ Request::is('super-admin/news*') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('super-admin.news.index') }}">
@@ -142,7 +149,7 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                 </li>
 
                 {{-- Account Section --}}
-                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
+                <li class="px-4 py-1 mt-2.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Account</li>
 
                 <li class="menu-item {{ Request::is('super-admin/profile*') ? 'active' : '' }}">
                     <a class="nav-link text-blue-600 font-bold hover:bg-blue-50" href="{{ route('super-admin.profile') }}">
@@ -153,7 +160,7 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
 
                 @elseif(session('admin_authenticated'))
                 {{-- Dashboard Section --}}
-                <li class="px-6 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
+                <li class="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Dashboard</li>
 
                 <li class="menu-item {{ Request::is('admin/dashboard') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('admin.dashboard') }}">
@@ -179,7 +186,7 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                 @endif
 
                 {{-- Event Management Section --}}
-                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Event Management</li>
+                <li class="px-4 py-1 mt-2.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Event Management</li>
 
                 <li class="menu-item {{ Request::is('admin/events*') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('admin.events.index') }}">
@@ -275,11 +282,18 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                 @endif
 
                 {{-- Recruitment Section --}}
-                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Recruitment</li>
+                <li class="px-4 py-1 mt-2.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Recruitment</li>
+
+                <li class="menu-item {{ Request::is('admin/job-categories*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.job-categories.index') }}">
+                        <i class="fas fa-tags mr-3"></i>
+                        <span>Job Categories</span>
+                    </a>
+                </li>
 
                 <li class="menu-item {{ Request::is('admin/workers*') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('admin.workers.index') }}">
-                        <i class="fas fa-users mr-3"></i>
+                        <i class="fas fa-briefcase mr-3"></i>
                         <span>Job Openings</span>
                     </a>
                 </li>
@@ -304,7 +318,7 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                 </li>
 
                 {{-- Certificates --}}
-                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Certificates</li>
+                <li class="px-4 py-1 mt-2.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Certificates</li>
 
                 <li class="menu-item {{ Request::is('admin/certificate-layouts*') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ route('admin.certificate-layouts.builder') }}">
@@ -321,7 +335,7 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                 </li>
 
                 {{-- Account Section --}}
-                <li class="px-6 py-2 mt-4 text-xs font-bold text-gray-400 uppercase tracking-wider">Account</li>
+                <li class="px-4 py-1 mt-2.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Account</li>
 
                 <li class="menu-item {{ Request::is('admin/profile*') ? 'active' : '' }}">
                     <a class="nav-link text-red-600 font-bold hover:bg-red-50" href="{{ route('admin.profile') }}">
@@ -375,3 +389,58 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
 
     </aside>
 </div>
+
+<script>
+    (function() {
+        // Run immediately to restore desktop collapsed state without layout shift
+        if (window.innerWidth >= 1024 && localStorage.getItem('sidebar_collapsed') === '1') {
+            document.body.classList.add('sidebar-collapsed');
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('sidebar-toggle');
+            const closeBtn = document.getElementById('sidebar-close');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (window.innerWidth < 1024) {
+                        // Mobile Off-canvas Drawer
+                        if (sidebar.classList.contains('show')) {
+                            sidebar.classList.remove('show');
+                            if (overlay) overlay.classList.remove('show');
+                            document.body.style.overflow = '';
+                        } else {
+                            if (overlay) overlay.classList.add('show');
+                            sidebar.classList.add('show');
+                            document.body.style.overflow = 'hidden';
+                        }
+                    } else {
+                        // Desktop Collapse / Expand Toggle
+                        const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
+                        localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+                    }
+                });
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    if (sidebar) sidebar.classList.remove('show');
+                    if (overlay) overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+            }
+
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    if (sidebar) sidebar.classList.remove('show');
+                    overlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+            }
+        });
+    })();
+</script>

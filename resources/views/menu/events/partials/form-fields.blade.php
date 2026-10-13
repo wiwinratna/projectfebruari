@@ -19,7 +19,7 @@
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Event Title *</label>
         <input type="text" name="title" value="{{ old('title', $event->title) }}"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
         @error('title')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
@@ -28,7 +28,7 @@
         <label class="block text-sm font-semibold text-gray-700 mb-1">Organizer *</label>
         <input type="text" name="penyelenggara" value="{{ old('penyelenggara', $event->penyelenggara) }}"
                placeholder="e.g., PBSI, PSSI, KONI"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
         @error('penyelenggara')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
@@ -38,7 +38,7 @@
 <div>
     <label class="block text-sm font-semibold text-gray-700 mb-1">Description</label>
     <textarea name="description" rows="4"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">{{ old('description', $event->description) }}</textarea>
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">{{ old('description', $event->description) }}</textarea>
     @error('description')
         <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
     @enderror
@@ -48,7 +48,7 @@
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Start Date & Time *</label>
         <input type="datetime-local" name="start_at" value="{{ $startValue }}"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
         @error('start_at')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
@@ -56,7 +56,7 @@
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">End Date & Time</label>
         <input type="datetime-local" name="end_at" value="{{ $endValue }}"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         @error('end_at')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
@@ -64,7 +64,7 @@
 </div>
 
 <div class="mt-8 mb-4 border-t border-gray-100 pt-6">
-    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-map-marker-alt text-red-500 mr-2"></i> Event Location</h3>
+    <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center"><i class="fas fa-map-marker-alt text-blue-600 mr-2"></i> Event Location</h3>
     
     <input type="hidden" name="latitude" id="latitude" value="{{ old('latitude', $event->latitude) }}">
     <input type="hidden" name="longitude" id="longitude" value="{{ old('longitude', $event->longitude) }}">
@@ -115,14 +115,14 @@
                            value="{{ $currentCountry }}"
                            placeholder="Search country..."
                            autocomplete="off"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm">
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                     <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                         <i class="fas fa-chevron-down text-xs"></i>
                     </span>
                 </div>
                 <ul id="country-list" class="hidden absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg" style="max-height: 200px; overflow-y: auto;">
                     @foreach($countries as $c)
-                        <li data-value="{{ $c }}" class="country-option px-3 py-2 text-sm cursor-pointer hover:bg-red-50 hover:text-red-700 transition-colors {{ $currentCountry === $c ? 'bg-red-50 text-red-700 font-semibold' : 'text-gray-700' }}">
+                        <li data-value="{{ $c }}" class="country-option px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 hover:text-blue-700 transition-colors {{ $currentCountry === $c ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-700' }}">
                             {{ $c }}
                         </li>
                     @endforeach
@@ -137,7 +137,7 @@
             <div class="relative" id="province-dropdown-wrapper">
                 <div class="relative">
                     <input type="text" id="province-search" placeholder="Search province..." autocomplete="off"
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm">
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
                     <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                         <i class="fas fa-chevron-down text-xs"></i>
                     </span>
@@ -153,7 +153,7 @@
             <div class="relative" id="city-dropdown-wrapper">
                 <div class="relative">
                     <input type="text" id="city-search" placeholder="Select province first..." autocomplete="off" disabled
-                           class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-red-500 text-sm disabled:bg-gray-50 disabled:text-gray-400">
+                           class="w-full border border-gray-300 rounded-lg px-3 py-2 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm disabled:bg-gray-50 disabled:text-gray-400">
                     <span class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
                         <i class="fas fa-chevron-down text-xs"></i>
                     </span>
@@ -166,17 +166,17 @@
         {{-- INTERNATIONAL FIELDS --}}
         <div class="intl-field lg:col-span-1 {{ $isIndo ? 'hidden' : '' }}">
             <label class="block text-sm font-semibold text-gray-700 mb-1">State / Province / Region</label>
-            <input type="text" id="intl_province_name" value="{{ !$isIndo ? old('province_name', $event->province_name) : '' }}" placeholder="e.g. Selangor, Texas" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+            <input type="text" id="intl_province_name" value="{{ !$isIndo ? old('province_name', $event->province_name) : '' }}" placeholder="e.g. Selangor, Texas" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
         
         <div class="intl-field lg:col-span-1 {{ $isIndo ? 'hidden' : '' }}">
             <label class="block text-sm font-semibold text-gray-700 mb-1">City</label>
-            <input type="text" id="intl_city_name" value="{{ !$isIndo ? old('city_name', $event->city_name) : '' }}" placeholder="e.g. Kuala Lumpur, Paris" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+            <input type="text" id="intl_city_name" value="{{ !$isIndo ? old('city_name', $event->city_name) : '' }}" placeholder="e.g. Kuala Lumpur, Paris" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         </div>
 
         <div class="lg:col-span-2">
             <label class="block text-sm font-semibold text-gray-700 mb-1">Venue Name / Detail</label>
-            <input type="text" name="venue" id="venue_input" value="{{ old('venue', $event->venue) }}" placeholder="e.g. National Stadium, Convention Center" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+            <input type="text" name="venue" id="venue_input" value="{{ old('venue', $event->venue) }}" placeholder="e.g. National Stadium, Convention Center" class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             @error('venue')
                 <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
             @enderror
@@ -188,7 +188,7 @@
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Status *</label>
         <select name="status"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
             @foreach ($statuses as $status)
                 <option value="{{ $status }}" @selected(old('status', $event->status) === $status)>
                     {{ ucfirst($status) }}
@@ -202,14 +202,14 @@
     <div>
         <label class="block text-sm font-semibold text-gray-700 mb-1">Stage *</label>
         <select name="stage"
-                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500" required>
+                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
             @foreach ($stages as $stage)
                 <option value="{{ $stage }}" @selected(old('stage', $event->stage) === $stage)>
                     @if($stage === 'province') Regional / Inter-City
                     @elseif($stage === 'national') National Championship
                     @elseif($stage === 'asean/sea') Southeast Asia (SEA Games)
-                    @elseif($stage === 'asia') Asian Games
-                    @elseif($stage === 'world') World Championship / Olympic
+                    @elseif($stage === 'asia') Asian Championship
+                    @elseif($stage === 'world') World Championship
                     @else {{ ucfirst($stage) }} @endif
                 </option>
             @endforeach
@@ -225,7 +225,7 @@
         <label class="block text-sm font-semibold text-gray-700 mb-1">Instagram</label>
         <input type="text" name="instagram" value="{{ old('instagram', $event->instagram) }}"
                placeholder="@username or full URL"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         @error('instagram')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
@@ -234,7 +234,7 @@
         <label class="block text-sm font-semibold text-gray-700 mb-1">Email</label>
         <input type="email" name="email" value="{{ old('email', $event->email) }}"
                placeholder="contact@example.com"
-               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-red-500">
+               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
         @error('email')
             <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
         @enderror
@@ -250,7 +250,7 @@
                        name="sports[]"
                        value="{{ $sport->id }}"
                        @checked(in_array($sport->id, $selectedSports))
-                       class="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded">
+                       class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                 <div class="flex-1">
                     <span class="text-sm font-medium text-gray-700">{{ $sport->name }}</span>
                     @if($sport->code)
@@ -343,8 +343,8 @@
             // Update highlight
             countryItems.forEach(li => {
                 const isActive = li.dataset.value === value;
-                li.classList.toggle('bg-red-50', isActive);
-                li.classList.toggle('text-red-700', isActive);
+                li.classList.toggle('bg-blue-50', isActive);
+                li.classList.toggle('text-blue-700', isActive);
                 li.classList.toggle('font-semibold', isActive);
             });
             closeDropdown();
@@ -415,8 +415,8 @@
                 // Highlight
                 listEl.querySelectorAll('li').forEach(li => {
                     const active = li.dataset.value === value;
-                    li.classList.toggle('bg-red-50', active);
-                    li.classList.toggle('text-red-700', active);
+                    li.classList.toggle('bg-blue-50', active);
+                    li.classList.toggle('text-blue-700', active);
                     li.classList.toggle('font-semibold', active);
                 });
                 close();
@@ -428,8 +428,8 @@
                     const li = document.createElement('li');
                     li.dataset.value = item.value;
                     li.textContent = item.label;
-                    li.className = 'px-3 py-2 text-sm cursor-pointer hover:bg-red-50 hover:text-red-700 transition-colors ' +
-                        (item.value === selectedValue ? 'bg-red-50 text-red-700 font-semibold' : 'text-gray-700');
+                    li.className = 'px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 hover:text-blue-700 transition-colors ' +
+                        (item.value === selectedValue ? 'bg-blue-50 text-blue-700 font-semibold' : 'text-gray-700');
                     li.addEventListener('mousedown', (e) => { e.preventDefault(); select(item.value, item.label); });
                     listEl.appendChild(li);
                 });

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $user->name . ' - Volunteer Profile - NOCIS')
+@section('title', $user->name . ' - Volunteer Profile - ARISE')
 @section('page-title')
     Volunteer Profile <span class="bg-emerald-500 text-white text-sm px-2 py-1 rounded-full ml-2">{{ $user->name }}</span>
 @endsection

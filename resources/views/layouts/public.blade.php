@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>@yield('title', 'NOCIS - National Olympic Academy of Indonesia')</title>
+    <title>@yield('title', 'ARISE - National Olympic Academy of Indonesia')</title>
 
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -23,9 +23,9 @@
 
 
     <!-- Meta Tags -->
-    <meta name="description" content="NOCIS Job Opportunities - Find exciting career opportunities at major sporting events">
-    <meta name="keywords" content="NOCIS, jobs, career, sports, olympics, Indonesia">
-    <meta name="author" content="NOCIS">
+    <meta name="description" content="ARISE Job Opportunities - Find exciting career opportunities at major sporting events">
+    <meta name="keywords" content="ARISE, jobs, career, sports, olympics, Indonesia">
+    <meta name="author" content="ARISE">
 
     <!-- Favicon -->
     <link rel="icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2" type="image/png">
@@ -33,7 +33,7 @@
     <link rel="apple-touch-icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2">
 
     <!-- Open Graph / Social Media Meta Tags -->
-    <meta property="og:title" content="NOCIS Job Opportunities">
+    <meta property="og:title" content="ARISE Job Opportunities">
     <meta property="og:description" content="Find exciting career opportunities at major sporting events">
     <meta property="og:url" content="{{ url()->current() }}">
     <meta property="og:type" content="website">
@@ -372,7 +372,7 @@
                     <h3 class="font-bold text-lg text-gray-900 mb-4">Quick Links</h3>
                     <ul class="space-y-3">
                         <li><a href="{{ route('jobs.index') }}" class="text-gray-600 hover:text-red-600 transition-colors">Job Openings</a></li>
-                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition-colors">About NOCIS</a></li>
+                        <li><a href="#" class="text-gray-600 hover:text-red-600 transition-colors">About ARISE</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-red-600 transition-colors">Events Calendar</a></li>
                         <li><a href="#" class="text-gray-600 hover:text-red-600 transition-colors">Career Tips</a></li>
                     </ul>

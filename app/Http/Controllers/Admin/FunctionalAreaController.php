@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\Jabatan;
 use App\Models\JobCategory;
+use App\Models\WorkerType;
 use Illuminate\Http\Request;
 
 class FunctionalAreaController extends Controller
@@ -24,7 +25,7 @@ class FunctionalAreaController extends Controller
         // Fetch only Job Categories created as Functional Areas for this event
         $functionalAreas = JobCategory::where('event_id', $event->id)
             ->whereNotNull('jabatan_id')
-            ->with('jabatan')
+            ->with(['jabatan', 'workerType'])
             ->orderBy('name')
             ->get();
 
@@ -35,10 +36,11 @@ class FunctionalAreaController extends Controller
     {
         $event = $this->getEvent();
         
-        // Need to provide jabatans for the dropdown
+        // Need to provide jabatans and worker types for the dropdowns
         $jabatans = $event->jabatan()->orderBy('nama_jabatan')->get();
+        $workerTypes = WorkerType::orderBy('name')->get();
         
-        return view('menu.events.functional-areas.create', compact('event', 'jabatans'));
+        return view('menu.events.functional-areas.create', compact('event', 'jabatans', 'workerTypes'));
     }
 
     public function store(Request $request)
@@ -48,6 +50,7 @@ class FunctionalAreaController extends Controller
         $validated = $request->validate([
             'jabatan_id' => 'required|exists:jabatan,id',
             'fa_name' => 'required|string|max:200',
+            'worker_type_id' => 'nullable|exists:worker_types,id',
         ]);
 
         $jabatan = Jabatan::findOrFail($validated['jabatan_id']);
@@ -58,15 +61,16 @@ class FunctionalAreaController extends Controller
         // The magic: Concatenate Jabatan Name and FA Name to form the standard JobCategory Name
         $jobCategoryName = $jabatan->nama_jabatan . ' - ' . trim($validated['fa_name']);
 
-        // Check if name already exists globally to avoid unique constraint error
-        if (JobCategory::where('name', $jobCategoryName)->exists()) {
-            return back()->withErrors(['fa_name' => 'Kategori Pekerjaan (FA) dengan kombinasi ini sudah ada di sistem.'])->withInput();
+        // Check if name already exists in this event
+        if (JobCategory::where('event_id', $event->id)->where('name', $jobCategoryName)->exists()) {
+            return back()->withErrors(['fa_name' => 'Kategori Pekerjaan (FA) dengan kombinasi ini sudah ada di event ini.'])->withInput();
         }
 
         JobCategory::create([
             'event_id' => $event->id,
             'jabatan_id' => $jabatan->id,
             'fa_name' => trim($validated['fa_name']),
+            'worker_type_id' => $validated['worker_type_id'] ?? null,
             'name' => $jobCategoryName,
             'is_active' => true,
         ]);
@@ -80,13 +84,20 @@ class FunctionalAreaController extends Controller
     {
         $event = $this->getEvent();
         
-        $functionalArea = JobCategory::where('event_id', $event->id)
+        $jobCategory = JobCategory::where('event_id', $event->id)
             ->whereNotNull('jabatan_id')
             ->findOrFail($id);
 
         $jabatans = $event->jabatan()->orderBy('nama_jabatan')->get();
+        $workerTypes = WorkerType::orderBy('name')->get();
 
-        return view('menu.events.functional-areas.edit', compact('event', 'functionalArea', 'jabatans'));
+        return view('menu.events.functional-areas.edit', [
+            'event' => $event,
+            'jobCategory' => $jobCategory,
+            'functionalArea' => $jobCategory,
+            'jabatans' => $jabatans,
+            'workerTypes' => $workerTypes,
+        ]);
     }
 
     public function update(Request $request, $id)
@@ -100,6 +111,7 @@ class FunctionalAreaController extends Controller
         $validated = $request->validate([
             'jabatan_id' => 'required|exists:jabatan,id',
             'fa_name' => 'required|string|max:200',
+            'worker_type_id' => 'nullable|exists:worker_types,id',
         ]);
 
         $jabatan = Jabatan::findOrFail($validated['jabatan_id']);
@@ -107,14 +119,15 @@ class FunctionalAreaController extends Controller
 
         $jobCategoryName = $jabatan->nama_jabatan . ' - ' . trim($validated['fa_name']);
 
-        // Check if name already exists (excluding itself)
-        if (JobCategory::where('name', $jobCategoryName)->where('id', '!=', $functionalArea->id)->exists()) {
-            return back()->withErrors(['fa_name' => 'Kategori Pekerjaan (FA) dengan kombinasi ini sudah ada di sistem.'])->withInput();
+        // Check if name already exists in this event (excluding itself)
+        if (JobCategory::where('event_id', $event->id)->where('name', $jobCategoryName)->where('id', '!=', $functionalArea->id)->exists()) {
+            return back()->withErrors(['fa_name' => 'Kategori Pekerjaan (FA) dengan kombinasi ini sudah ada di event ini.'])->withInput();
         }
 
         $functionalArea->update([
             'jabatan_id' => $jabatan->id,
             'fa_name' => trim($validated['fa_name']),
+            'worker_type_id' => $validated['worker_type_id'] ?? null,
             'name' => $jobCategoryName,
         ]);
 

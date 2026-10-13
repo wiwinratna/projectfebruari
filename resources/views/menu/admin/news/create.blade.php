@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Create News - NOCIS')
+@section('title', 'Create News - ARISE')
 @section('page-title')
     Create News <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Super Admin</span>
 @endsection

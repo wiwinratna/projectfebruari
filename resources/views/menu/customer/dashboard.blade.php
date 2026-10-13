@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Dashboard - NOCIS')
+@section('title', 'Dashboard - ARISE')
 
 @section('content')
 <!-- Modern Web3 Customer Dashboard -->

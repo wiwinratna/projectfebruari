@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Add Client - NOCIS')
+@section('title', 'Add Client - ARISE')
 @section('page-title')
     Add Client <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Landing Page</span>
 @endsection
