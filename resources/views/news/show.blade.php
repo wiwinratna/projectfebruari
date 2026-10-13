@@ -2,7 +2,7 @@
 
 @php($hideSidebar = true)
 
-@section('title', ($post->title ?? 'News') . ' - NOCIS')
+@section('title', ($post->title ?? 'News') . ' - ARISE')
 
 @section('page-title')
   News
@@ -16,7 +16,7 @@
     <div>
       <h2 class="text-2xl font-bold text-gray-800">{{ $post->title }}</h2>
       <p class="text-gray-600 mt-1">
-        {{ $post->source_name ?? 'NOCIS' }}
+        {{ $post->source_name ?? 'ARISE' }}
         @if($post->published_at)
           • {{ \Carbon\Carbon::parse($post->published_at)->format('d M Y, H:i') }}
         @endif

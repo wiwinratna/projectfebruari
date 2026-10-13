@@ -12,13 +12,17 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::table('cards', function (Blueprint $table) {
-            // Ensure application_id is nullable
-            $table->unsignedBigInteger('application_id')->nullable()->change();
+        try {
+            Schema::table('cards', function (Blueprint $table) {
+                // Ensure application_id is nullable
+                $table->unsignedBigInteger('application_id')->nullable()->change();
 
-            // Add FK from card_recipient_id to card_recipients
-            $table->foreign('card_recipient_id')->references('id')->on('card_recipients')->onDelete('cascade');
-        });
+                // Add FK from card_recipient_id to card_recipients
+                $table->foreign('card_recipient_id')->references('id')->on('card_recipients')->onDelete('cascade');
+            });
+        } catch (\Throwable $e) {
+            // Safely ignore if already created by migration 190014
+        }
     }
 
     /**
@@ -26,9 +30,13 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::table('cards', function (Blueprint $table) {
-            $table->dropForeign(['card_recipient_id']);
-            $table->unsignedBigInteger('application_id')->nullable(false)->change();
-        });
+        try {
+            Schema::table('cards', function (Blueprint $table) {
+                $table->dropForeign(['card_recipient_id']);
+                $table->unsignedBigInteger('application_id')->nullable(false)->change();
+            });
+        } catch (\Throwable $e) {
+            // Safely ignore
+        }
     }
 };

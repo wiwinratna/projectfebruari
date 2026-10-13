@@ -193,7 +193,7 @@ Route::post('/register', function () {
             'customer_profile_photo' => null
         ]);
 
-        return redirect('/jobs')->with('success', 'Registration successful! Welcome to NOCIS.');
+        return redirect('/jobs')->with('success', 'Registration successful! Welcome to ARISE.');
     } catch (\Exception $e) {
         return back()->with('error', 'We couldn\'t create your account right now. Please try again.')->withInput(request()->except(['password', 'password_confirmation']));
     }
@@ -413,6 +413,9 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_ad
     Route::get('/events/{event}/edit', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventEdit'])->name('events.edit');
     Route::put('/events/{event}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventUpdate'])->name('events.update');
     Route::delete('/events/{event}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'eventDelete'])->name('events.delete');
+    Route::post('/events/{event}/applicant-photos/download', [\App\Http\Controllers\SuperAdminDashboardController::class, 'downloadApplicantPhotos'])->name('events.applicant-photos.download');
+    Route::get('/events/{event}/applications/export', [\App\Http\Controllers\SuperAdminDashboardController::class, 'exportApplications'])->name('events.applications.export');
+    Route::get('/applications/{application}/photo/download', [\App\Http\Controllers\SuperAdminDashboardController::class, 'downloadSingleApplicantPhoto'])->name('applications.photo.download');
 
     // Volunteers Management
     Route::get('/volunteers', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteers'])->name('volunteers.index');
@@ -431,6 +434,8 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_ad
     Route::post('/profile/password', [\App\Http\Controllers\SuperAdminDashboardController::class, 'updatePassword'])->name('profile.password');
     Route::resource('job-categories', \App\Http\Controllers\JobCategoryController::class)
         ->names('job-categories');
+    Route::resource('worker-types', \App\Http\Controllers\WorkerTypeController::class)
+        ->names('worker-types');
 
     // Our Clients Management (Landing Page)
     Route::resource('clients', ClientController::class)->names('clients');
@@ -493,8 +498,9 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     // Workers Management - Protected
     Route::resource('workers', WorkerController::class);
 
-    // Job Categories CRUD - Protected
-    //Route::resource('categories', JobCategoryController::class);
+    // Job Categories CRUD - Protected (Admin Event)
+    Route::resource('job-categories', \App\Http\Controllers\Admin\JobCategoryController::class)
+        ->names('job-categories');
 
     // Sports CRUD - Protected
     Route::resource('sports', SportController::class);
@@ -502,6 +508,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     // Reviews Management - Protected
     Route::get('/reviews', [\App\Http\Controllers\ReviewController::class, 'index'])->name('reviews.index');
     Route::get('/reviews/export', [\App\Http\Controllers\ReviewController::class, 'export'])->name('reviews.export');
+    Route::post('/reviews/photos/download', [\App\Http\Controllers\ReviewController::class, 'downloadPhotos'])->name('reviews.photos.download');
     Route::post('/reviews/{application}', [\App\Http\Controllers\ReviewController::class, 'update'])->name('reviews.update');
 
 
@@ -509,6 +516,7 @@ Route::prefix('admin')->name('admin.')->middleware(['web', 'admin'])->group(func
     Route::prefix('applications')->name('applications.')->group(function () {
         Route::get('/{application}', [\App\Http\Controllers\ApplicationController::class, 'show'])->name('show');
         Route::post('/{application}', [\App\Http\Controllers\ApplicationController::class, 'update'])->name('update');
+        Route::get('/{application}/photo/download', [\App\Http\Controllers\ReviewController::class, 'downloadSinglePhoto'])->name('photo.download');
     });
 
     // Admin Profile & Settings

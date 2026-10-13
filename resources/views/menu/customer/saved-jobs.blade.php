@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Saved Jobs - NOCIS')
+@section('title', 'Saved Jobs - ARISE')
 
 @section('content')
 <!-- Modern Web3 Saved Jobs -->

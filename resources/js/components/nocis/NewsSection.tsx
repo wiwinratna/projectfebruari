@@ -188,7 +188,7 @@ export function NewsSection() {
           <div className="text-xs leading-relaxed text-gray-800 font-serif">
             <div className="font-black text-lg mb-2">BREAKING NEWS</div>
             <div className="space-y-1">
-              <p>"NOCIS successfully deployed 500 Liaison Officers..."</p>
+              <p>"ARISE successfully deployed 500 Liaison Officers..."</p>
               <p>"Training program receives international recognition..."</p>
               <p>"New recruitment opens for SEA Games 2027..."</p>
             </div>

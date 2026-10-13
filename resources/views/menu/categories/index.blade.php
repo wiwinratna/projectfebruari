@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Job Categories - NOCIS Super Admin')
+@section('title', 'Job Categories - ARISE Super Admin')
 @section('page-title')
     Job Categories <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Super Admin</span>
 @endsection
@@ -20,15 +20,35 @@
     </div>
 
     <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-200">
-            <h3 class="text-lg font-semibold text-gray-800">All Categories</h3>
+        <div class="px-6 py-4 border-b border-gray-200 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-800">All Categories</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Filter berdasarkan event atau cari kategori</p>
+            </div>
+
+            {{-- Filter by Event & Search --}}
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="relative">
+                    <select id="filter-event" class="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-gray-700">
+                        <option value="">Semua Event & Global</option>
+                        <option value="__global__">Hanya Global (Master)</option>
+                        @foreach($events as $ev)
+                            <option value="{{ $ev->id }}">{{ $ev->title }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <input type="text" id="search-category" placeholder="Cari nama kategori..." class="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full" id="categories-table">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Openings</th>
@@ -38,9 +58,34 @@
 
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse ($categories as $category)
-                        <tr class="hover:bg-gray-50">
+                        @php
+                            $openingsData = $category->workerOpenings->map(function($op) {
+                                return [
+                                    'title' => $op->title,
+                                    'event_title' => $op->event?->title ?? 'N/A',
+                                    'slots' => ($op->slots_filled ?? 0) . ' / ' . ($op->slots_available ?? 0),
+                                    'deadline' => $op->application_deadline ? \Carbon\Carbon::parse($op->application_deadline)->format('d M Y') : '-',
+                                    'status' => ucfirst($op->status ?? 'planned'),
+                                ];
+                            });
+                        @endphp
+                        <tr class="category-row hover:bg-gray-50"
+                            data-event-id="{{ $category->event_id ?? '__global__' }}"
+                            data-name="{{ strtolower($category->name) }}">
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm font-medium text-gray-900">{{ $category->name }}</div>
+                                <div class="text-sm font-bold text-gray-900">{{ $category->name }}</div>
+                            </td>
+
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($category->event)
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
+                                        <i class="fas fa-calendar-alt mr-1"></i> {{ $category->event->title }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                                        <i class="fas fa-globe mr-1"></i> Global / Master
+                                    </span>
+                                @endif
                             </td>
 
                             <td class="px-6 py-4">
@@ -51,7 +96,7 @@
                                 @if($category->workerType)
                                     <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full
                                         {{ $category->workerType->name === 'VO' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600' }}">
-                                        {{ $category->workerType->name }}
+                                        {{ $category->workerType->name }} - {{ $category->workerType->description }}
                                     </span>
                                 @else
                                     <span class="inline-flex px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-600">
@@ -61,10 +106,20 @@
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
-                                    {{ $category->workerOpenings->count() > 0 ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800' }}">
-                                    {{ $category->workerOpenings->count() }} openings
-                                </span>
+                                @if($category->workerOpenings->count() > 0)
+                                    <button type="button"
+                                            onclick='showOpeningsModal(@json($category->name), @json($category->event?->title ?? "Global / Master"), @json($openingsData))'
+                                            class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 hover:bg-blue-200 transition cursor-pointer"
+                                            title="Klik untuk melihat detail lowongan">
+                                        <i class="fas fa-briefcase"></i>
+                                        <span>{{ $category->workerOpenings->count() }} openings</span>
+                                        <i class="fas fa-eye text-[10px] ml-1"></i>
+                                    </button>
+                                @else
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-500">
+                                        0 openings
+                                    </span>
+                                @endif
                             </td>
 
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -88,7 +143,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center">
+                            <td colspan="6" class="px-6 py-12 text-center">
                                 <div class="text-gray-500">
                                     <i class="fas fa-tags text-4xl mb-3"></i>
                                     <p class="text-lg font-medium">No categories found</p>
@@ -97,8 +152,56 @@
                             </td>
                         </tr>
                     @endforelse
+                    <tr id="no-filter-match" class="hidden">
+                        <td colspan="6" class="px-6 py-10 text-center text-gray-500">
+                            <i class="fas fa-search text-3xl mb-2 text-gray-400"></i>
+                            <p class="font-medium">Tidak ada kategori yang sesuai dengan filter.</p>
+                        </td>
+                    </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+{{-- Modal Detail Lowongan --}}
+<div id="openings-modal" class="fixed inset-0 z-50 overflow-y-auto hidden" aria-labelledby="openings-modal-title" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onclick="hideOpeningsModal()"></div>
+
+        <div class="relative inline-block w-full max-w-2xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
+            <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900" id="openings-modal-title">Daftar Lowongan Pekerjaan</h3>
+                    <p class="text-xs text-gray-500 mt-0.5" id="openings-modal-event">-</p>
+                </div>
+                <button type="button" onclick="hideOpeningsModal()" class="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg">
+                    <i class="fas fa-times text-lg"></i>
+                </button>
+            </div>
+
+            <div class="mt-4 max-h-96 overflow-y-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="text-xs uppercase bg-gray-50 text-gray-600">
+                        <tr>
+                            <th class="px-4 py-3">Posisi / Judul</th>
+                            <th class="px-4 py-3">Event</th>
+                            <th class="px-4 py-3 text-center">Terisi / Kuota</th>
+                            <th class="px-4 py-3">Deadline</th>
+                            <th class="px-4 py-3">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="openings-table-body" class="divide-y divide-gray-100">
+                        {{-- Populated by JS --}}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button type="button" onclick="hideOpeningsModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm font-semibold transition">
+                    Tutup
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -253,15 +356,119 @@
         });
     }
 
+    // Openings Modal Functions
+    function showOpeningsModal(categoryName, eventTitle, openings) {
+        document.getElementById('openings-modal-title').textContent = 'Lowongan: ' + categoryName;
+        document.getElementById('openings-modal-event').textContent = 'Kategori pada: ' + (eventTitle || 'Global / Master');
+        
+        const tbody = document.getElementById('openings-table-body');
+        tbody.innerHTML = '';
+
+        if (!openings || openings.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="px-4 py-8 text-center text-gray-500">
+                        <i class="fas fa-inbox text-3xl mb-2 text-gray-300"></i>
+                        <p class="font-medium">Belum ada lowongan pekerjaan untuk kategori ini.</p>
+                    </td>
+                </tr>
+            `;
+        } else {
+            openings.forEach(op => {
+                const statusColor = op.status === 'Open' 
+                    ? 'bg-green-100 text-green-700' 
+                    : (op.status === 'Closed' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700');
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="px-4 py-3 font-semibold text-gray-900">${op.title}</td>
+                    <td class="px-4 py-3 text-gray-600">${op.event_title}</td>
+                    <td class="px-4 py-3 text-center font-medium text-gray-700">${op.slots}</td>
+                    <td class="px-4 py-3 text-gray-500">${op.deadline}</td>
+                    <td class="px-4 py-3">
+                        <span class="inline-flex px-2 py-0.5 rounded-full text-xs font-semibold ${statusColor}">
+                            ${op.status}
+                        </span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        document.getElementById('openings-modal').classList.remove('hidden');
+    }
+
+    function hideOpeningsModal() {
+        document.getElementById('openings-modal').classList.add('hidden');
+    }
+
+    // Client-side Filter by Event & Search
+    document.addEventListener('DOMContentLoaded', function() {
+        const eventSelect = document.getElementById('filter-event');
+        const searchInput = document.getElementById('search-category');
+        const rows = document.querySelectorAll('.category-row');
+        const noMatchRow = document.getElementById('no-filter-match');
+
+        function applyFilter() {
+            const selectedEvent = eventSelect ? eventSelect.value : '';
+            const searchVal = searchInput ? searchInput.value.toLowerCase().trim() : '';
+
+            let visibleCount = 0;
+
+            rows.forEach(row => {
+                const rowEvent = row.getAttribute('data-event-id');
+                const rowName = row.getAttribute('data-name');
+
+                let matchEvent = false;
+                if (!selectedEvent) {
+                    matchEvent = true;
+                } else if (selectedEvent === '__global__') {
+                    matchEvent = (rowEvent === '__global__');
+                } else {
+                    matchEvent = (rowEvent === selectedEvent);
+                }
+
+                const matchSearch = !searchVal || rowName.includes(searchVal);
+
+                if (matchEvent && matchSearch) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            if (noMatchRow) {
+                if (visibleCount === 0 && rows.length > 0) {
+                    noMatchRow.classList.remove('hidden');
+                } else {
+                    noMatchRow.classList.add('hidden');
+                }
+            }
+        }
+
+        if (eventSelect) eventSelect.addEventListener('change', applyFilter);
+        if (searchInput) searchInput.addEventListener('input', applyFilter);
+    });
+
     document.addEventListener('click', function(e) {
         const modal = document.getElementById('confirm-modal');
-        if (e.target === modal && !modal.classList.contains('hidden')) {
+        if (modal && e.target === modal && !modal.classList.contains('hidden')) {
             hideConfirmModal();
+        }
+
+        const openingsModal = document.getElementById('openings-modal');
+        if (openingsModal && e.target === openingsModal && !openingsModal.classList.contains('hidden')) {
+            hideOpeningsModal();
         }
     });
 
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') hideConfirmModal();
+        if (e.key === 'Escape') {
+            hideConfirmModal();
+            hideOpeningsModal();
+        }
     });
 </script>
 @endsection

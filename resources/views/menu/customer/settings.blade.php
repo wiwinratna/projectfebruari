@@ -1,5 +1,5 @@
 @extends('layouts.public')
-@section('title', 'Settings - NOCIS')
+@section('title', 'Settings - ARISE')
 @section('content')
 <div class="relative bg-white pt-40 sm:pt-32 mobile-header-spacing pb-24 sm:pb-12 overflow-hidden min-h-screen">
     <div class="absolute top-0 left-0 right-0 h-[500px] bg-gradient-to-b from-red-50 via-white to-white z-0"></div>

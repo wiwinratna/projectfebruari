@@ -11,6 +11,8 @@ use App\Services\EventStatusService;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use App\Exports\EventApplicationsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class SuperAdminDashboardController extends Controller
 {
@@ -291,28 +293,79 @@ class SuperAdminDashboardController extends Controller
         })->count();
         $acceptedApplications = \App\Models\Application::whereHas('opening', function ($q) use ($event) {
             $q->where('event_id', $event->id);
-        })->where('status', 'accepted')->count();
+        })->whereIn('status', ['approved', 'accepted'])->count();
         $rejectedApplications = \App\Models\Application::whereHas('opening', function ($q) use ($event) {
             $q->where('event_id', $event->id);
         })->where('status', 'rejected')->count();
+        $pendingApplications = max(0, $totalApplications - $acceptedApplications - $rejectedApplications);
 
-        // Get recent applications for this event
-        $recentApplications = \App\Models\Application::with(['user', 'opening'])
+        // Get all applications for this event (with user profile, opening, and reviewer details)
+        $applications = \App\Models\Application::with(['user.profile', 'opening.jobCategory', 'reviewer'])
             ->whereHas('opening', function ($q) use ($event) {
                 $q->where('event_id', $event->id);
             })
             ->latest()
-            ->take(5)
             ->get();
+
+        // Filter accepted applications for batch photo download
+        $acceptedApplicationsList = $applications->filter(fn($app) => in_array($app->status, ['approved', 'accepted']))->values();
+
+        // Get recent applications for this event
+        $recentApplications = $applications->take(5);
 
         return view('super-admin.events.show', compact(
             'event',
             'totalWorkerOpenings',
             'totalApplications',
             'acceptedApplications',
+            'acceptedApplicationsList',
             'rejectedApplications',
+            'pendingApplications',
+            'applications',
             'recentApplications'
         ));
+    }
+
+    public function exportApplications(Request $request, Event $event)
+    {
+        abort_unless(session('super_admin_authenticated'), 403);
+
+        $status = $request->query('status');
+        $filename = 'Data_Pelamar_' . Str::slug($event->title) . '_' . date('Ymd_His') . '.xlsx';
+
+        return Excel::download(
+            new EventApplicationsExport($event, $status),
+            $filename
+        );
+    }
+
+    public function downloadApplicantPhotos(Request $request, Event $event, \App\Services\ApplicantPhotoDownloadService $service)
+    {
+        abort_unless(session('super_admin_authenticated'), 403);
+
+        $query = \App\Models\Application::with(['user.profile', 'opening'])
+            ->whereHas('opening', fn($q) => $q->where('event_id', $event->id))
+            ->whereIn('status', ['approved', 'accepted']);
+
+        if (!$request->boolean('all')) {
+            $validated = $request->validate([
+                'application_ids' => 'required|array|min:1',
+                'application_ids.*' => 'integer|exists:applications,id',
+            ]);
+
+            $query->whereIn('id', $validated['application_ids']);
+        }
+
+        $applications = $query->get();
+
+        return $service->downloadZip($applications, 'Foto_Diterima_' . $event->title);
+    }
+
+    public function downloadSingleApplicantPhoto(\App\Models\Application $application, \App\Services\ApplicantPhotoDownloadService $service)
+    {
+        abort_unless(session('super_admin_authenticated'), 403);
+
+        return $service->downloadSinglePhoto($application);
     }
 
     public function profile()

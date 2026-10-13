@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'News - NOCIS Super Admin')
+@section('title', 'News - ARISE Super Admin')
 @section('page-title')
     News <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Super Admin</span>
 @endsection
@@ -91,7 +91,7 @@
                             </td>
 
                             <td class="px-6 py-4 text-gray-700">
-                                <div class="font-semibold">{{ $post->source_name ?? 'NOCIS' }}</div>
+                                <div class="font-semibold">{{ $post->source_name ?? 'ARISE' }}</div>
                                 <div class="text-xs text-gray-500 truncate max-w-[220px]">
                                     {{ $post->source_url ?? '-' }}
                                 </div>

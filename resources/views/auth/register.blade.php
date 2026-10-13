@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register - NOCIS</title>
+    <title>Register - ARISE</title>
     <link rel="icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2" type="image/png">
     <link rel="shortcut icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2" type="image/png">
     <link rel="apple-touch-icon" href="{{ asset('images/Logo ARISE PNG.png') }}?v=2">
@@ -22,7 +22,7 @@
                  alt="NOA Indonesia"
                  class="h-20 w-auto mx-auto mb-4">
             <h1 class="text-2xl font-bold text-gray-800 mb-2">Register Account</h1>
-            <p class="text-gray-600">Create your NOCIS account</p>
+            <p class="text-gray-600">Create your ARISE account</p>
         </div>
 
         {{-- General Flash Error --}}

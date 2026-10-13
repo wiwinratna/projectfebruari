@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Event;
 use App\Models\JobCategory;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class JobCategoryController extends Controller
 {
@@ -20,12 +22,14 @@ class JobCategoryController extends Controller
     {
         if ($r = $this->guard()) return $r;
 
-        $categories = JobCategory::with(['workerOpenings', 'workerType'])
+        $categories = JobCategory::with(['workerOpenings.event', 'workerType', 'event'])
             ->withCount('workerOpenings')
             ->orderBy('name')
             ->get();
 
-        return view('menu.categories.index', compact('categories'));
+        $events = Event::orderBy('title')->get();
+
+        return view('menu.categories.index', compact('categories', 'events'));
     }
 
     public function create()
@@ -33,7 +37,8 @@ class JobCategoryController extends Controller
         if ($r = $this->guard()) return $r;
 
         $category = new JobCategory();
-        return view('menu.categories.create', compact('category'));
+        $events = Event::orderBy('title')->get();
+        return view('menu.categories.create', compact('category', 'events'));
     }
 
     public function store(Request $request)
@@ -41,7 +46,17 @@ class JobCategoryController extends Controller
         if ($r = $this->guard()) return $r;
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:job_categories,name',
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('job_categories')->where(function ($query) use ($request) {
+                    return $request->filled('event_id')
+                        ? $query->where('event_id', $request->event_id)
+                        : $query->whereNull('event_id');
+                }),
+            ],
+            'event_id' => 'nullable|exists:events,id',
             'description' => 'nullable|string',
             'worker_type_id' => 'required|exists:worker_types,id',
             'requires_certification' => 'boolean',
@@ -63,10 +78,10 @@ class JobCategoryController extends Controller
     {
         if ($r = $this->guard()) return $r;
 
-        // supaya view yang sama tetap bisa dipakai:
         $category = $jobCategory;
+        $events = Event::orderBy('title')->get();
 
-        return view('menu.categories.edit', compact('category'));
+        return view('menu.categories.edit', compact('category', 'events'));
     }
 
     public function update(Request $request, JobCategory $jobCategory)
@@ -74,7 +89,17 @@ class JobCategoryController extends Controller
         if ($r = $this->guard()) return $r;
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:job_categories,name,' . $jobCategory->id,
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('job_categories')->ignore($jobCategory->id)->where(function ($query) use ($request) {
+                    return $request->filled('event_id')
+                        ? $query->where('event_id', $request->event_id)
+                        : $query->whereNull('event_id');
+                }),
+            ],
+            'event_id' => 'nullable|exists:events,id',
             'description' => 'nullable|string',
             'worker_type_id' => 'required|exists:worker_types,id',
             'requires_certification' => 'boolean',

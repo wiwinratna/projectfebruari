@@ -11,6 +11,7 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithColumnFormatting;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use Carbon\Carbon;
 
 class ApplicationsExport implements FromCollection, WithHeadings, WithMapping, WithStyles, ShouldAutoSize, WithColumnFormatting
 {
@@ -28,8 +29,12 @@ class ApplicationsExport implements FromCollection, WithHeadings, WithMapping, W
      */
     public function collection()
     {
-        $query = Application::with(['user.profile', 'opening.jobCategory', 'opening.event.city'])
-            ->orderBy('created_at', 'desc');
+        $query = Application::with([
+            'user.profile',
+            'opening.jobCategory',
+            'opening.event.city',
+            'reviewer'
+        ])->orderBy('created_at', 'desc');
 
         // Filter by event if specified
         if ($this->eventId) {
@@ -43,8 +48,13 @@ class ApplicationsExport implements FromCollection, WithHeadings, WithMapping, W
             $search = $this->search;
             $query->where(function($q) use ($search) {
                 $q->whereHas('user', function($uq) use ($search) {
-                    $uq->where('username', 'like', '%'.$search.'%')
+                    $uq->where('name', 'like', '%'.$search.'%')
+                       ->orWhere('username', 'like', '%'.$search.'%')
                        ->orWhere('email', 'like', '%'.$search.'%');
+                })
+                ->orWhereHas('user.profile', function($pq) use ($search) {
+                    $pq->where('nik', 'like', '%'.$search.'%')
+                       ->orWhere('phone', 'like', '%'.$search.'%');
                 })
                 ->orWhereHas('opening', function($oq) use ($search) {
                     $oq->where('title', 'like', '%'.$search.'%')
@@ -66,24 +76,51 @@ class ApplicationsExport implements FromCollection, WithHeadings, WithMapping, W
      */
     public function headings(): array
     {
-        return [\
-            'ID',
-            'Applicant Name',
+        return [
+            'ID Aplikasi',
+            'Nama Lengkap',
+            'Username',
+            'Email',
+            'No. Telepon / WA',
             'NIK',
             'Kewarganegaraan',
-            'Phone',
-            'Email',
-            'Date of Birth',
-            'Position',
-            'Category',
+            'Tanggal Lahir',
+            'Usia',
+            'Headline Profesional',
+            'Alamat Lengkap',
+            'Provinsi',
+            'Kota / Kabupaten',
+            'Kecamatan',
+            'Kelurahan / Desa',
+            'Kode Pos',
+            'RT / RW',
+            'Negara (WNA)',
+            'State / Wilayah (WNA)',
+            'Pendidikan Terakhir',
+            'Bidang Studi / Jurusan',
+            'Universitas / Sekolah',
+            'Tahun Kelulusan',
+            'Keahlian (Skills)',
+            'Bahasa',
             'Event',
-            'City',
-            'Address',
-            'Status',
-            'Applied Date',
-            'Applied Time',
-            'Review Notes',
-            'Reviewed At'
+            'Posisi Dilamar',
+            'Kategori Posisi',
+            'Kota Penyelenggaraan',
+            'Status Aplikasi',
+            'Tanggal Mendaftar',
+            'Waktu Mendaftar',
+            'Motivasi Pelamar',
+            'Pengalaman Pelamar',
+            'Catatan Review',
+            'Tanggal Review',
+            'Direview Oleh',
+            'Instagram',
+            'LinkedIn',
+            'TikTok',
+            'Twitter / X',
+            'Website',
+            'File CV',
+            'Status Foto Profil',
         ];
     }
 
@@ -93,32 +130,95 @@ class ApplicationsExport implements FromCollection, WithHeadings, WithMapping, W
      */
     public function map($application): array
     {
-        $profile = $application->user->profile ?? null;
+        $user = $application->user;
+        $profile = $user?->profile;
+
         $isWna = ($profile && $profile->nationality_type === 'wna');
         $kewarganegaraan = $profile ? ($isWna ? 'WNA' : 'WNI') : '-';
-        $nik = (!$isWna && $profile && $profile->nik) ? (string) $profile->nik : '-';
-        $phone = $profile && $profile->phone ? (string) $profile->phone : '-';
-        $dob = $profile && $profile->date_of_birth ? $profile->date_of_birth->format('d M Y') : '-';
-        $address = $profile && $profile->address ? $profile->address : '-';
+        $nik = ($profile && $profile->nik) ? (string) $profile->nik : '-';
+        $phone = ($profile && $profile->phone) ? (string) $profile->phone : '-';
+
+        $dob = '-';
+        $age = '-';
+        if ($profile && $profile->date_of_birth) {
+            $parsedDob = Carbon::parse($profile->date_of_birth);
+            $dob = $parsedDob->format('d M Y');
+            $age = $parsedDob->age . ' Tahun';
+        }
+
+        $address = $profile?->address ?: '-';
+        $province = $profile?->province ?: '-';
+        $cityRegency = $profile?->city_regency ?: '-';
+        $district = $profile?->district ?: '-';
+        $village = $profile?->village ?: '-';
+        $postalCode = $profile?->postal_code ? (string)$profile->postal_code : '-';
+
+        $rtRw = '-';
+        if ($profile && ($profile->rt || $profile->rw)) {
+            $rtRw = 'RT ' . ($profile->rt ?: '-') . ' / RW ' . ($profile->rw ?: '-');
+        }
+
+        $country = $isWna ? ($profile?->country ?: '-') : '-';
+        $stateRegion = $isWna ? ($profile?->state_region ?: '-') : '-';
+
+        $lastEducation = $profile?->last_education ?: '-';
+        $fieldOfStudy = $profile?->field_of_study ?: '-';
+        $university = $profile?->university ?: '-';
+        $gradYear = $profile?->graduation_year ? (string)$profile->graduation_year : '-';
+
+        $skills = $profile?->skills ?: '-';
+        $languages = $profile?->languages ?: '-';
+
+        $cvFile = $application->cv_path ?: ($profile?->cv_file ?: '-');
+        $hasPhoto = !empty($profile?->profile_photo) ? 'Tersedia' : 'Belum Ada';
+
+        $reviewerName = $application->reviewer?->name ?: '-';
 
         return [
             $application->id,
-            $application->user->name ?? $application->user->username ?? 'N/A',
+            $user?->name ?: ($profile?->name ?: ($user?->username ?: '-')),
+            $user?->username ?: '-',
+            $user?->email ?: '-',
+            $phone,
             $nik,
             $kewarganegaraan,
-            $phone,
-            $application->user->email ?? 'N/A',
             $dob,
-            $application->opening->title ?? 'N/A',
-            $application->opening->jobCategory->name ?? 'N/A',
-            $application->opening->event->title ?? 'N/A',
-            $application->opening->event->city->name ?? 'N/A',
+            $age,
+            $profile?->professional_headline ?: '-',
             $address,
+            $province,
+            $cityRegency,
+            $district,
+            $village,
+            $postalCode,
+            $rtRw,
+            $country,
+            $stateRegion,
+            $lastEducation,
+            $fieldOfStudy,
+            $university,
+            $gradYear,
+            $skills,
+            $languages,
+            $application->opening?->event?->title ?: '-',
+            $application->opening?->title ?: '-',
+            $application->opening?->jobCategory?->name ?: '-',
+            $application->opening?->event?->city?->name ?: '-',
             ucfirst($application->status),
             $application->created_at->format('d M Y'),
             $application->created_at->format('H:i:s'),
-            $application->review_notes ?? '-',
-            $application->reviewed_at ? $application->reviewed_at->format('d M Y H:i') : '-'
+            $application->motivation ?: '-',
+            $application->experience ?: '-',
+            $application->review_notes ?: '-',
+            $application->reviewed_at ? $application->reviewed_at->format('d M Y H:i') : '-',
+            $reviewerName,
+            $profile?->instagram ?: '-',
+            $profile?->linkedin ?: '-',
+            $profile?->tiktok ?: '-',
+            $profile?->twitter ?: '-',
+            $profile?->website ?: '-',
+            $cvFile,
+            $hasPhoto,
         ];
     }
 
@@ -128,8 +228,9 @@ class ApplicationsExport implements FromCollection, WithHeadings, WithMapping, W
     public function columnFormats(): array
     {
         return [
-            'C' => NumberFormat::FORMAT_TEXT,
-            'E' => NumberFormat::FORMAT_TEXT,
+            'E' => NumberFormat::FORMAT_TEXT, // Phone
+            'F' => NumberFormat::FORMAT_TEXT, // NIK
+            'P' => NumberFormat::FORMAT_TEXT, // Postal code
         ];
     }
 
@@ -140,14 +241,12 @@ class ApplicationsExport implements FromCollection, WithHeadings, WithMapping, W
     public function styles(Worksheet $sheet)
     {
         return [
-            // Style the first row as header
             1 => [
-                'font' => ['bold' => true, 'size' => 12],
+                'font' => ['bold' => true, 'size' => 11, 'color' => ['rgb' => 'FFFFFF']],
                 'fill' => [
                     'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'EF4444']
+                    'startColor' => ['rgb' => '1E40AF'], // Royal Navy Blue
                 ],
-                'font' => ['color' => ['rgb' => 'FFFFFF'], 'bold' => true]
             ],
         ];
     }

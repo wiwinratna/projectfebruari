@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Add Partner - NOCIS')
+@section('title', 'Add Partner - ARISE')
 @section('page-title')
     Add Partner <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">Super Admin</span>
 @endsection

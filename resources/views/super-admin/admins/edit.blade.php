@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Admin - NOCIS')
+@section('title', 'Edit Admin - ARISE')
 @section('page-title')
     Edit Admin <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full ml-2">{{ $user->name }}</span>
 @endsection

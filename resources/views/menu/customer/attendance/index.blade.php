@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Event Attendance - NOCIS')
+@section('title', 'Event Attendance - ARISE')
 
 @section('content')
 <!-- Modern Web3 Customer Dashboard Style -->
