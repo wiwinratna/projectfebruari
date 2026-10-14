@@ -11,23 +11,30 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('Sidebar elements:', { sidebarToggle, sidebarClose, sidebar, overlay });
 
     // Toggle sidebar on hamburger click
-    if (sidebarToggle && sidebar && overlay) {
+    if (sidebarToggle && sidebar && overlay && !sidebarToggle.dataset.sidebarBound) {
+        sidebarToggle.dataset.sidebarBound = 'true';
         sidebarToggle.addEventListener('click', function (e) {
             e.preventDefault();
             console.log('Hamburger clicked');
 
-            if (sidebar.classList.contains('show')) {
-                closeSidebar();
+            if (window.innerWidth < 1024) {
+                if (sidebar.classList.contains('show')) {
+                    closeSidebar();
+                } else {
+                    // Show overlay first
+                    overlay.classList.add('show');
+                    setTimeout(() => {
+                        sidebar.classList.add('show');
+                    }, 10);
+                    document.body.style.overflow = 'hidden';
+                }
             } else {
-                // Show overlay first
-                overlay.classList.add('show');
-
-                // Small delay to ensure overlay is rendered before sidebar animation
-                setTimeout(() => {
-                    sidebar.classList.add('show');
-                }, 10);
-
-                document.body.style.overflow = 'hidden';
+                // Desktop toggle
+                document.body.style.overflow = '';
+                const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
+                try {
+                    localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+                } catch (err) {}
             }
         });
     }

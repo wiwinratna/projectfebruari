@@ -131,10 +131,25 @@
                         </div>
                     </div>
 
+                    <!-- Banner Peringatan Browser WhatsApp / In-App Browser -->
+                    <div id="inapp-browser-banner" class="hidden mb-4 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-500/30 text-emerald-950 rounded-2xl p-3.5 flex items-start gap-3 text-xs shadow-sm">
+                        <div class="w-8 h-8 rounded-xl bg-emerald-600 text-white flex items-center justify-center flex-shrink-0 mt-0.5 text-sm shadow-sm">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <div class="flex-1">
+                            <p class="font-bold text-emerald-950">Membuka Halaman di Dalam WhatsApp?</p>
+                            <p class="text-emerald-800 mt-0.5 leading-relaxed">
+                                Browser bawaan WhatsApp sering membatasi akses streaming kamera. Agar kamera aktif lancar, klik <strong>titik 3 (⋮)</strong> di pojok kanan atas, lalu pilih <strong>"Buka di Browser"</strong> atau <strong>"Buka di Chrome"</strong>. Anda juga bisa langsung gunakan tombol <strong>Kamera Bawaan HP</strong> di bawah.
+                            </p>
+                        </div>
+                    </div>
+
                     <form id="attendance-form" action="{{ $formAction }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="photo_base64" id="photo_base64">
                         <input type="file" name="photo" id="photo_file" class="hidden" accept="image/*">
+                        <!-- Native Camera Fallback Input -->
+                        <input type="file" id="native-camera-input" accept="image/*" capture="user" class="hidden" onchange="handleNativeCameraCapture(event)">
 
                         <!-- LIVE CAMERA VIEWFINDER & PREVIEW BOX -->
                         <div class="relative w-full max-w-sm mx-auto rounded-3xl overflow-hidden shadow-2xl bg-slate-900 border-4 border-white/80 aspect-[3/4] mb-5 flex items-center justify-center">
@@ -143,7 +158,7 @@
                             <div id="shutter-flash" class="absolute inset-0 bg-white pointer-events-none opacity-0 z-30"></div>
 
                             <!-- Live Video Stream -->
-                            <video id="camera-stream" autoplay playsinline muted class="w-full h-full object-cover"></video>
+                            <video id="camera-stream" autoplay playsinline webkit-playsinline muted class="w-full h-full object-cover"></video>
 
                             <!-- Captured Photo Preview (Unobscured) -->
                             <img id="captured-preview" class="hidden w-full h-full object-cover z-10" alt="Hasil Foto">
@@ -186,10 +201,15 @@
                                     <i class="fas fa-circle-notch text-xl text-red-500"></i>
                                 </div>
                                 <p class="text-sm font-bold">Menghubungkan Kamera...</p>
-                                <p class="text-xs text-gray-400 mt-1 max-w-xs">Pastikan Anda telah mengizinkan akses kamera di browser Anda.</p>
-                                <button type="button" onclick="startCamera()" class="mt-4 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold text-white transition">
-                                    Izinkan / Coba Lagi
-                                </button>
+                                <p class="text-xs text-gray-400 mt-1 max-w-xs">Pastikan Anda telah mengizinkan akses kamera jika muncul permintaan izin.</p>
+                                <div class="flex items-center gap-2 mt-4">
+                                    <button type="button" onclick="startCamera()" class="px-3.5 py-2 bg-white/20 hover:bg-white/30 rounded-xl text-xs font-bold text-white transition">
+                                        Izinkan / Coba Lagi
+                                    </button>
+                                    <button type="button" onclick="triggerNativeCamera()" class="px-3.5 py-2 bg-red-600 hover:bg-red-700 rounded-xl text-xs font-bold text-white transition shadow-sm">
+                                        <i class="fas fa-camera mr-1"></i> Buka Kamera HP
+                                    </button>
+                                </div>
                             </div>
 
                             <!-- Hidden Canvas for Watermarking -->
@@ -212,6 +232,12 @@
                                         <span>Ambil Foto {{ $typeLabel }}</span>
                                     </button>
                                 </div>
+
+                                <!-- Native Camera Fallback Quick Link -->
+                                <button type="button" onclick="triggerNativeCamera()" class="text-[11px] sm:text-xs font-medium text-gray-500 hover:text-red-600 transition flex items-center gap-1.5 pt-1">
+                                    <i class="fas fa-mobile-alt text-gray-400"></i>
+                                    <span>Kamera web tidak nyala? <strong>Klik untuk gunakan Kamera Bawaan HP</strong></span>
+                                </button>
                             </div>
 
                             <!-- State 2: After Capture (Preview & Submit) -->
@@ -305,8 +331,27 @@
     const submitLabel = document.getElementById('btn-submit-label');
     const base64Input = document.getElementById('photo_base64');
     const fileInput = document.getElementById('photo_file');
+    const nativeInput = document.getElementById('native-camera-input');
 
-    // Helper: Draw Rounded Rectangle
+    // Detect In-App Browsers (WhatsApp, Instagram, Facebook, Line)
+    (function detectInAppBrowser() {
+        const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+        const isWhatsApp = /WhatsApp/i.test(ua);
+        const isInApp = /FBAN|FBAV|Instagram|Line/i.test(ua);
+        if (isWhatsApp || isInApp) {
+            const banner = document.getElementById('inapp-browser-banner');
+            if (banner) banner.classList.remove('hidden');
+        }
+    })();
+
+    // Trigger Native Camera Input
+    function triggerNativeCamera() {
+        if (nativeInput) {
+            nativeInput.click();
+        }
+    }
+
+    // Helper: Draw Rounded Rectangle on Canvas
     function drawRoundedRect(ctx, x, y, width, height, radius) {
         ctx.beginPath();
         if (ctx.roundRect) {
@@ -345,60 +390,150 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Start Live Camera Stream
+    // Display Friendly Camera Error with Native Camera Alternative
+    function showCameraError(title, message) {
+        if (!loadingEl) return;
+        loadingEl.classList.remove('hidden');
+        loadingEl.innerHTML = `
+            <div class="p-4 sm:p-5 text-center flex flex-col items-center justify-center max-w-sm">
+                <div class="w-12 h-12 rounded-2xl bg-red-500/20 text-red-500 flex items-center justify-center mb-3 text-2xl shadow-inner">
+                    <i class="fas fa-video-slash"></i>
+                </div>
+                <h4 class="text-sm font-bold text-white mb-1 leading-snug">${title}</h4>
+                <p class="text-xs text-gray-300 mb-4 leading-relaxed">${message}</p>
+                
+                <div class="flex flex-col w-full gap-2">
+                    <button type="button" onclick="triggerNativeCamera()" class="w-full py-2.5 px-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-2">
+                        <i class="fas fa-camera text-sm"></i>
+                        <span>Gunakan Kamera Bawaan HP</span>
+                    </button>
+                    <button type="button" onclick="startCamera()" class="w-full py-2 px-3 bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
+                        <i class="fas fa-sync-alt text-[10px]"></i>
+                        <span>Coba Hubungkan Ulang</span>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Handle Camera Failure Details
+    function handleCameraFailure(err) {
+        console.error('Camera stream initialization failed:', err);
+        const ua = navigator.userAgent || '';
+        const isWhatsApp = /WhatsApp/i.test(ua);
+        const isHttp = location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1';
+
+        let title = 'Akses Kamera Ditolak / Tidak Ditemukan';
+        let message = 'Harap izinkan akses kamera pada ikon gembok/kamera di address bar browser Anda.';
+
+        if (isHttp) {
+            title = 'Koneksi Belum Menggunakan HTTPS';
+            message = 'Browser HP mewajibkan koneksi aman (HTTPS) untuk kamera web. Silakan gunakan tombol Kamera Bawaan HP di bawah ini!';
+        } else if (isWhatsApp) {
+            title = 'Browser WhatsApp Membatasi Kamera';
+            message = 'Browser bawaan WhatsApp memblokir streaming kamera langsung. Silakan gunakan tombol Kamera Bawaan HP di bawah, atau buka link lewat Chrome.';
+        } else if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
+            title = 'Izin Kamera Belum Diberikan';
+            message = 'Akses kamera ditolak oleh browser atau sistem operasi HP. Silakan aktifkan izin kamera di setelan browser atau gunakan Kamera Bawaan HP.';
+        } else if (err && (err.name === 'NotReadableError' || err.name === 'TrackStartError')) {
+            title = 'Kamera Sedang Digunakan';
+            message = 'Kamera sedang dipakai oleh aplikasi lain (seperti WhatsApp/Instagram). Tutup aplikasi lain atau gunakan Kamera Bawaan HP.';
+        } else if (err && err.name === 'OverconstrainedError') {
+            title = 'Sensor Kamera Tidak Sesuai';
+            message = 'Resolusi kamera tidak didukung sensor HP. Silakan gunakan tombol Kamera Bawaan HP di bawah.';
+        }
+
+        showCameraError(title, message);
+    }
+
+    // Start Live Camera Stream with Progressive Fallbacks
     async function startCamera() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            if (loadingEl) {
-                loadingEl.innerHTML = `
-                    <div class="p-4 text-center">
-                        <i class="fas fa-exclamation-triangle text-amber-400 text-3xl mb-2"></i>
-                        <p class="text-sm font-bold">Kamera Web Tidak Didukung</p>
-                        <p class="text-xs text-gray-400 mt-1 mb-4">Gunakan browser modern (Chrome/Edge/Safari).</p>
-                    </div>
-                `;
-            }
+            const isHttp = location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1';
+            showCameraError(
+                isHttp ? 'Akses Kamera Memerlukan HTTPS' : 'Kamera Web Tidak Didukung',
+                isHttp 
+                    ? 'Browser HP mewajibkan koneksi aman (HTTPS). Karena halaman ini diakses via HTTP biasa, browser memblokir kamera. Silakan gunakan tombol Kamera Bawaan HP.'
+                    : 'Browser ini tidak mendukung streaming kamera. Silakan gunakan Chrome/Safari atau klik tombol Kamera Bawaan HP di bawah.'
+            );
             return;
         }
 
         if (currentStream) {
             currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
         }
 
-        try {
-            if (loadingEl) loadingEl.classList.remove('hidden');
+        if (loadingEl) {
+            loadingEl.classList.remove('hidden');
+            loadingEl.innerHTML = `
+                <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-3 animate-spin">
+                    <i class="fas fa-circle-notch text-xl text-red-500"></i>
+                </div>
+                <p class="text-sm font-bold">Menghubungkan Kamera...</p>
+                <p class="text-xs text-gray-400 mt-1 max-w-xs">Pastikan Anda telah mengizinkan akses kamera jika muncul permintaan izin.</p>
+            `;
+        }
 
-            const constraints = {
+        // Progressive constraint fallbacks for broad mobile compatibility
+        const constraintAttempts = [
+            // Attempt 1: Ideal facingMode and ideal 1280x720
+            {
                 video: {
-                    facingMode: currentFacingMode,
+                    facingMode: { ideal: currentFacingMode },
                     width: { ideal: 1280 },
                     height: { ideal: 720 }
                 },
                 audio: false
-            };
+            },
+            // Attempt 2: FacingMode only (unconstrained dimensions)
+            {
+                video: {
+                    facingMode: { ideal: currentFacingMode }
+                },
+                audio: false
+            },
+            // Attempt 3: Any video track
+            {
+                video: true,
+                audio: false
+            }
+        ];
 
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            currentStream = stream;
-            videoEl.srcObject = stream;
+        let stream = null;
+        let lastError = null;
 
-            videoEl.onloadedmetadata = () => {
-                videoEl.play();
-                if (loadingEl) loadingEl.classList.add('hidden');
-            };
-        } catch (err) {
-            console.error('Camera error:', err);
-            if (loadingEl) {
-                loadingEl.innerHTML = `
-                    <div class="p-4 text-center">
-                        <i class="fas fa-video-slash text-red-400 text-3xl mb-2"></i>
-                        <p class="text-sm font-bold">Akses Kamera Ditolak / Tidak Ditemukan</p>
-                        <p class="text-xs text-gray-400 mt-1 mb-4">Harap izinkan akses kamera pada ikon gembok/kamera di address bar browser Anda.</p>
-                        <button type="button" onclick="startCamera()" class="px-4 py-2 bg-red-600 rounded-xl text-xs font-bold text-white shadow">
-                            Coba Lagi
-                        </button>
-                    </div>
-                `;
+        for (const constraints of constraintAttempts) {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                if (stream) break;
+            } catch (err) {
+                lastError = err;
+                console.warn('Constraint attempt failed, trying fallback...', constraints, err);
             }
         }
+
+        if (!stream) {
+            handleCameraFailure(lastError);
+            return;
+        }
+
+        currentStream = stream;
+        videoEl.srcObject = stream;
+
+        videoEl.onloadedmetadata = () => {
+            const playPromise = videoEl.play();
+            if (playPromise !== undefined) {
+                playPromise.then(() => {
+                    if (loadingEl) loadingEl.classList.add('hidden');
+                }).catch(playErr => {
+                    console.warn('Video play caught:', playErr);
+                    if (loadingEl) loadingEl.classList.add('hidden');
+                });
+            } else {
+                if (loadingEl) loadingEl.classList.add('hidden');
+            }
+        };
     }
 
     // Toggle Front / Back Camera
@@ -407,10 +542,56 @@
         startCamera();
     }
 
-    // Take Snapshot and Burn Clean, Ultra-Elegant Corporate Glass Badge
+    // Handle Native Camera Fallback File Selection
+    function handleNativeCameraCapture(event) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        if (loadingEl) {
+            loadingEl.classList.remove('hidden');
+            loadingEl.innerHTML = `
+                <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-3 animate-spin">
+                    <i class="fas fa-circle-notch text-xl text-red-500"></i>
+                </div>
+                <p class="text-sm font-bold">Memproses Foto & Watermark...</p>
+                <p class="text-xs text-gray-400 mt-1">Membubuhkan tanggal dan jam resmi kehadiran.</p>
+            `;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                // Scale down large camera photos proportionally to keep payload lean
+                let w = img.naturalWidth || 1280;
+                let h = img.naturalHeight || 720;
+                const maxDim = 1280;
+                if (w > maxDim || h > maxDim) {
+                    if (w > h) {
+                        h = Math.round((h * maxDim) / w);
+                        w = maxDim;
+                    } else {
+                        w = Math.round((w * maxDim) / h);
+                        h = maxDim;
+                    }
+                }
+
+                renderWatermarkedPhoto(img, w, h);
+                if (loadingEl) loadingEl.classList.add('hidden');
+            };
+            img.onerror = function() {
+                alert('Gagal memproses file foto. Silakan coba lagi.');
+                if (loadingEl) loadingEl.classList.add('hidden');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Take Snapshot from Live Video
     function takeSnapshot() {
         if (!videoEl || !videoEl.videoWidth) {
-            alert('Kamera belum siap. Harap tunggu sebentar.');
+            alert('Kamera belum siap. Harap tunggu sebentar atau gunakan tombol Kamera Bawaan HP.');
             return;
         }
 
@@ -422,13 +603,17 @@
 
         const width = videoEl.videoWidth || 1280;
         const height = videoEl.videoHeight || 720;
+        renderWatermarkedPhoto(videoEl, width, height);
+    }
 
+    // Burn Official Attendance Watermark Card and Setup Submission
+    function renderWatermarkedPhoto(sourceElement, width, height) {
         canvasEl.width = width;
         canvasEl.height = height;
         const ctx = canvasEl.getContext('2d');
 
-        // 1. Draw raw camera frame
-        ctx.drawImage(videoEl, 0, 0, width, height);
+        // 1. Draw raw photo frame
+        ctx.drawImage(sourceElement, 0, 0, width, height);
 
         // 2. Format Date and Time
         const now = new Date();
@@ -446,11 +631,11 @@
         const eventTitle = "{{ $event->title }}";
         const statusType = "{{ $typeLabel }}".toUpperCase();
 
-        // 3. Floating Modern Frosted Glass Card Geometry
+        // 3. Floating Frosted Glass Card Geometry (Responsive to aspect ratio)
         const paddingX = Math.round(width * 0.035);
         const paddingY = Math.round(height * 0.035);
         const cardWidth = width - (paddingX * 2);
-        const cardHeight = Math.min(Math.round(height * 0.24), 160);
+        const cardHeight = Math.max(140, Math.min(Math.round(height * 0.22), 200));
         const cardX = paddingX;
         const cardY = height - cardHeight - paddingY;
         const radius = Math.round(cardHeight * 0.12);
@@ -472,7 +657,7 @@
         ctx.stroke();
         ctx.restore();
 
-        // 5. Card Inner Contents (Clean Typography, No Emojis)
+        // 5. Card Inner Contents
         const innerPadding = Math.round(cardHeight * 0.12);
         const contentX = cardX + innerPadding;
         const contentRightX = cardX + cardWidth - innerPadding;
@@ -561,7 +746,7 @@
         previewEl.classList.remove('hidden');
         videoEl.classList.add('hidden');
 
-        // CRITICAL: Hide live HTML overlays so they never overlap the captured photo!
+        // Hide live HTML overlays
         if (topOverlay) topOverlay.classList.add('hidden');
         if (bottomOverlay) bottomOverlay.classList.add('hidden');
         if (capturedTag) capturedTag.classList.remove('hidden');
@@ -587,6 +772,7 @@
         videoEl.classList.remove('hidden');
         if (base64Input) base64Input.value = '';
         if (fileInput) fileInput.value = '';
+        if (nativeInput) nativeInput.value = '';
 
         // Restore live overlays
         if (topOverlay) topOverlay.classList.remove('hidden');

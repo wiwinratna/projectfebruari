@@ -4,14 +4,24 @@
     {{-- Left: Quick Info --}}
     <div class="space-y-4">
         <div class="text-center p-6 bg-gray-50 rounded-2xl border border-gray-100">
-            <div class="w-24 h-24 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3 overflow-hidden">
+            <div class="relative group w-24 h-24 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3 overflow-hidden shadow-inner">
                 @if($user->profile?->profile_photo)
                     <img src="{{ asset('storage/' . $user->profile->profile_photo) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                    <a href="{{ route('super-admin.volunteers.download-photo', $user) }}" class="absolute inset-0 bg-black/40 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity" title="Download Foto: {{ $user->name }}">
+                        <i class="fas fa-download text-xl"></i>
+                    </a>
                 @else
                     <span class="text-emerald-700 text-3xl font-bold">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
                 @endif
             </div>
-            <h3 class="font-bold text-gray-900 text-lg">{{ $user->name }}</h3>
+            <div class="flex items-center justify-center gap-2">
+                <h3 class="font-bold text-gray-900 text-lg">{{ $user->name }}</h3>
+                @if($user->profile?->profile_photo)
+                    <a href="{{ route('super-admin.volunteers.download-photo', $user) }}" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-600 flex items-center justify-center transition-colors border border-emerald-200 shadow-sm" title="Download Foto: {{ $user->name }}">
+                        <i class="fas fa-download text-xs"></i>
+                    </a>
+                @endif
+            </div>
             <p class="text-sm text-gray-500">{{ $user->profile?->professional_headline ?? '—' }}</p>
             <div class="mt-3 flex items-center justify-center gap-2">
                 <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $completion >= 80 ? 'bg-emerald-100 text-emerald-700' : ($completion >= 50 ? 'bg-yellow-100 text-yellow-700' : 'bg-red-100 text-red-700') }}">

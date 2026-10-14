@@ -81,8 +81,8 @@ class CustomerAttendanceController extends Controller
 
         $path = null;
 
-        // Handle direct camera capture (base64)
-        if ($request->filled('photo_base64') && !$request->hasFile('photo')) {
+        // Handle direct camera capture (base64 with official watermark badge)
+        if ($request->filled('photo_base64')) {
             $base64Data = $request->input('photo_base64');
             if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
                 $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
@@ -165,8 +165,8 @@ class CustomerAttendanceController extends Controller
 
         $path = null;
 
-        // Handle direct camera capture (base64)
-        if ($request->filled('photo_base64') && !$request->hasFile('photo')) {
+        // Handle direct camera capture (base64 with official watermark badge)
+        if ($request->filled('photo_base64')) {
             $base64Data = $request->input('photo_base64');
             if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
                 $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);

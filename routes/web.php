@@ -420,6 +420,7 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_ad
     // Volunteers Management
     Route::get('/volunteers', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteers'])->name('volunteers.index');
     Route::get('/volunteers/{user}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteerShow'])->name('volunteers.show');
+    Route::get('/volunteers/{user}/download-photo', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteerDownloadPhoto'])->name('volunteers.download-photo');
     Route::get('/volunteers/{user}/edit', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteerEdit'])->name('volunteers.edit');
     Route::put('/volunteers/{user}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteerUpdate'])->name('volunteers.update');
     Route::delete('/volunteers/{user}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteerDelete'])->name('volunteers.delete');

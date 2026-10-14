@@ -277,6 +277,11 @@ span.bg-red-600:contains("High Priority") {
     body.sidebar-collapsed .main-content {
         margin-left: 0 !important;
     }
+
+    body.sidebar-collapsed {
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
+    }
     
     #sidebar-overlay {
         display: none !important;
