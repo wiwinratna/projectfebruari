@@ -27,6 +27,11 @@ return Application::configure(basePath: dirname(__DIR__))
         // Configure session for mobile browsers
         $middleware->encryptCookies();
 
+        // Allow camera access via Permissions-Policy header (fixes NotAllowedError on Hostinger/Nginx)
+        $middleware->web(append: [
+            \App\Http\Middleware\PermissionsPolicyMiddleware::class,
+        ]);
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
