@@ -391,29 +391,45 @@
     updateClock();
 
     // Display Friendly Camera Error with Native Camera Alternative
-    function showCameraError(title, message) {
+    function showCameraError(title, message, errCode) {
         if (!loadingEl) return;
         loadingEl.classList.remove('hidden');
+        const debugLine = errCode ? `<p class="text-[10px] text-gray-500 mt-2 font-mono">Error: ${errCode}</p>` : '';
         loadingEl.innerHTML = `
             <div class="p-4 sm:p-5 text-center flex flex-col items-center justify-center max-w-sm">
                 <div class="w-12 h-12 rounded-2xl bg-red-500/20 text-red-500 flex items-center justify-center mb-3 text-2xl shadow-inner">
                     <i class="fas fa-video-slash"></i>
                 </div>
                 <h4 class="text-sm font-bold text-white mb-1 leading-snug">${title}</h4>
-                <p class="text-xs text-gray-300 mb-4 leading-relaxed">${message}</p>
-                
-                <div class="flex flex-col w-full gap-2">
+                <p class="text-xs text-gray-300 mb-3 leading-relaxed">${message}</p>
+                ${debugLine}
+                <div class="flex flex-col w-full gap-2 mt-3">
+                    <button type="button" onclick="requestCameraWithGesture()" class="w-full py-2.5 px-4 bg-white/15 hover:bg-white/25 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2">
+                        <i class="fas fa-video text-sm"></i>
+                        <span>Izinkan & Nyalakan Kamera</span>
+                    </button>
                     <button type="button" onclick="triggerNativeCamera()" class="w-full py-2.5 px-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-xs font-bold shadow-md transition flex items-center justify-center gap-2">
                         <i class="fas fa-camera text-sm"></i>
                         <span>Gunakan Kamera Bawaan HP</span>
                     </button>
-                    <button type="button" onclick="startCamera()" class="w-full py-2 px-3 bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white rounded-xl text-xs font-semibold transition flex items-center justify-center gap-1.5">
-                        <i class="fas fa-sync-alt text-[10px]"></i>
-                        <span>Coba Hubungkan Ulang</span>
-                    </button>
                 </div>
             </div>
         `;
+    }
+
+    // Request camera with explicit user gesture (fixes permission prompt suppression)
+    async function requestCameraWithGesture() {
+        if (loadingEl) {
+            loadingEl.classList.remove('hidden');
+            loadingEl.innerHTML = `
+                <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center mb-3 animate-spin">
+                    <i class="fas fa-circle-notch text-xl text-red-500"></i>
+                </div>
+                <p class="text-sm font-bold">Meminta Izin Kamera...</p>
+                <p class="text-xs text-gray-400 mt-1 max-w-xs">Jika muncul pop-up, klik "Izinkan".</p>
+            `;
+        }
+        await startCamera();
     }
 
     // Handle Camera Failure Details
@@ -422,28 +438,32 @@
         const ua = navigator.userAgent || '';
         const isWhatsApp = /WhatsApp/i.test(ua);
         const isHttp = location.protocol !== 'https:' && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1';
+        const errCode = err ? (err.name || 'UnknownError') : 'NoError';
 
         let title = 'Akses Kamera Ditolak / Tidak Ditemukan';
-        let message = 'Harap izinkan akses kamera pada ikon gembok/kamera di address bar browser Anda.';
+        let message = 'Tap tombol "Izinkan & Nyalakan Kamera" di bawah. Jika pop-up muncul, pilih Izinkan.';
 
         if (isHttp) {
             title = 'Koneksi Belum Menggunakan HTTPS';
             message = 'Browser HP mewajibkan koneksi aman (HTTPS) untuk kamera web. Silakan gunakan tombol Kamera Bawaan HP di bawah ini!';
         } else if (isWhatsApp) {
             title = 'Browser WhatsApp Membatasi Kamera';
-            message = 'Browser bawaan WhatsApp memblokir streaming kamera langsung. Silakan gunakan tombol Kamera Bawaan HP di bawah, atau buka link lewat Chrome.';
+            message = 'Browser bawaan WhatsApp memblokir streaming kamera langsung. Silakan buka di Chrome.';
         } else if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
-            title = 'Izin Kamera Belum Diberikan';
-            message = 'Akses kamera ditolak oleh browser atau sistem operasi HP. Silakan aktifkan izin kamera di setelan browser atau gunakan Kamera Bawaan HP.';
+            title = 'Izin Kamera Ditolak';
+            message = 'Klik "Izinkan & Nyalakan Kamera" lalu tap "Izinkan" saat pop-up muncul. Jika tidak muncul, buka Settings browser → Kamera → Izinkan.';
         } else if (err && (err.name === 'NotReadableError' || err.name === 'TrackStartError')) {
             title = 'Kamera Sedang Digunakan';
-            message = 'Kamera sedang dipakai oleh aplikasi lain (seperti WhatsApp/Instagram). Tutup aplikasi lain atau gunakan Kamera Bawaan HP.';
+            message = 'Kamera sedang dipakai oleh aplikasi lain. Tutup semua aplikasi lain lalu tap "Izinkan & Nyalakan Kamera".';
+        } else if (err && err.name === 'NotFoundError') {
+            title = 'Kamera Tidak Ditemukan';
+            message = 'Tidak ada kamera yang terdeteksi di perangkat ini. Gunakan Kamera Bawaan HP.';
         } else if (err && err.name === 'OverconstrainedError') {
             title = 'Sensor Kamera Tidak Sesuai';
             message = 'Resolusi kamera tidak didukung sensor HP. Silakan gunakan tombol Kamera Bawaan HP di bawah.';
         }
 
-        showCameraError(title, message);
+        showCameraError(title, message, errCode);
     }
 
     // Start Live Camera Stream with Progressive Fallbacks
@@ -785,10 +805,30 @@
         startCamera();
     }
 
-    // Initialize camera on page load if form exists
+    // Show tap-to-start UI on page load (user gesture approach — fixes permission prompt suppression on some browsers)
     document.addEventListener('DOMContentLoaded', () => {
-        if (videoEl) {
-            startCamera();
+        if (!videoEl) return;
+
+        // Try auto-start first; if it fails immediately without an error (permission prompt suppressed),
+        // the error handler will show the retry button anyway.
+        if (loadingEl) {
+            loadingEl.classList.remove('hidden');
+            loadingEl.innerHTML = `
+                <div class="flex flex-col items-center justify-center gap-3 p-4 text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-white/10 text-white flex items-center justify-center text-2xl">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <p class="text-sm font-bold text-white">Tap untuk Nyalakan Kamera</p>
+                    <p class="text-xs text-gray-400 max-w-xs leading-relaxed">Browser memerlukan konfirmasi Anda. Jika pop-up izin muncul, pilih <strong>Izinkan</strong>.</p>
+                    <button type="button" onclick="requestCameraWithGesture()" class="mt-1 w-full py-3 px-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/25 transition flex items-center justify-center gap-2">
+                        <i class="fas fa-video"></i>
+                        <span>Nyalakan Kamera</span>
+                    </button>
+                    <button type="button" onclick="triggerNativeCamera()" class="text-xs text-gray-500 hover:text-gray-300 transition">
+                        Atau gunakan Kamera Bawaan HP
+                    </button>
+                </div>
+            `;
         }
     });
 
