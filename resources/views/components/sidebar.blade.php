@@ -403,7 +403,8 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebar-overlay');
 
-            if (toggleBtn) {
+            if (toggleBtn && !toggleBtn.dataset.sidebarBound) {
+                toggleBtn.dataset.sidebarBound = 'true';
                 toggleBtn.addEventListener('click', function(e) {
                     e.preventDefault();
                     if (window.innerWidth < 1024) {
@@ -421,6 +422,7 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                         // Desktop Collapse / Expand Toggle
                         const isCollapsed = document.body.classList.toggle('sidebar-collapsed');
                         localStorage.setItem('sidebar_collapsed', isCollapsed ? '1' : '0');
+                        document.body.style.overflow = ''; // Ensure body is ALWAYS scrollable on desktop
                     }
                 });
             }
@@ -441,6 +443,14 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                     document.body.style.overflow = '';
                 });
             }
+
+            window.addEventListener('resize', function() {
+                if (window.innerWidth >= 1024) {
+                    document.body.style.overflow = '';
+                    if (sidebar) sidebar.classList.remove('show');
+                    if (overlay) overlay.classList.remove('show');
+                }
+            });
         });
     })();
 </script>

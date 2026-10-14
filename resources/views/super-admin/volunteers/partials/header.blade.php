@@ -3,9 +3,12 @@
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
     <div class="bg-gradient-to-r from-emerald-500 to-teal-600 px-6 py-8">
         <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div class="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden border-2 border-white/30 flex-shrink-0">
+            <div class="relative group w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden border-2 border-white/30 flex-shrink-0">
                 @if($user->profile?->profile_photo)
                     <img src="{{ asset('storage/' . $user->profile->profile_photo) }}" alt="{{ $user->name }}" class="w-full h-full object-cover">
+                    <a href="{{ route('super-admin.volunteers.download-photo', $user) }}" class="absolute inset-0 bg-black/40 text-white opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity" title="Download Foto: {{ $user->name }}">
+                        <i class="fas fa-download text-lg"></i>
+                    </a>
                 @else
                     <span class="text-white text-2xl font-bold">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
                 @endif
@@ -21,7 +24,13 @@
                     @endif
                 </div>
             </div>
-            <div class="flex gap-2 flex-shrink-0">
+            <div class="flex items-center gap-2 flex-shrink-0">
+                @if($user->profile?->profile_photo)
+                    <a href="{{ route('super-admin.volunteers.download-photo', $user) }}" class="px-3.5 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl text-sm font-semibold hover:bg-white/30 transition-colors border border-white/20 inline-flex items-center gap-1.5" title="Download Foto: {{ $user->name }}">
+                        <i class="fas fa-download"></i>
+                        <span>Foto</span>
+                    </a>
+                @endif
                 <a href="{{ route('super-admin.volunteers.edit', $user) }}" class="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl text-sm font-semibold hover:bg-white/30 transition-colors border border-white/20"><i class="fas fa-edit mr-1"></i> Edit</a>
                 <form method="POST" action="{{ route('super-admin.volunteers.delete', $user) }}" class="inline-block" onsubmit="return confirm('Are you sure?');">@csrf @method('DELETE')
                     <button type="submit" class="px-4 py-2 bg-red-500/80 text-white rounded-xl text-sm font-semibold hover:bg-red-600 transition-colors"><i class="fas fa-trash mr-1"></i> Delete</button>

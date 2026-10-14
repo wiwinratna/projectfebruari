@@ -689,6 +689,38 @@ class SuperAdminDashboardController extends Controller
         return view('super-admin.volunteers.show', compact('user'));
     }
 
+    public function volunteerDownloadPhoto(User $user, \App\Services\ApplicantPhotoDownloadService $service)
+    {
+        abort_unless($user->role === 'customer', 404);
+
+        $user->loadMissing('profile');
+        $photoRaw = $user->profile?->profile_photo;
+
+        if (!$photoRaw) {
+            return back()->with('error', 'Volunteer ini belum mengunggah foto profil.');
+        }
+
+        $targetPath = $service->resolvePhotoPath($photoRaw);
+
+        if (!$targetPath || !file_exists($targetPath)) {
+            return back()->with('error', 'File foto profil volunteer tidak ditemukan di server.');
+        }
+
+        $ext = strtolower(pathinfo($targetPath, PATHINFO_EXTENSION)) ?: 'jpg';
+
+        // Format nama file: nama_nik.ext
+        $cleanName = preg_replace('[/\\\\:*?"<>|]', '', trim((string)$user->name));
+        $cleanName = preg_replace('/\s+/', '_', trim($cleanName));
+        if (empty($cleanName)) {
+            $cleanName = 'Volunteer_' . $user->id;
+        }
+
+        $rawNik = $user->profile?->nik ? preg_replace('/[^0-9a-zA-Z]/', '', (string)$user->profile->nik) : '';
+        $filename = !empty($rawNik) ? "{$cleanName}_{$rawNik}.{$ext}" : "{$cleanName}.{$ext}";
+
+        return response()->download($targetPath, $filename);
+    }
+
     public function volunteerEdit(User $user)
     {
         abort_unless($user->role === 'customer', 404);
