@@ -805,55 +805,13 @@
         startCamera();
     }
 
-    // Detect mobile device
+    // Detect mobile device (kept for future use)
     const isMobileDevice = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
-    // Show startup UI based on device type
+    // Auto-start live camera viewfinder on page load
     document.addEventListener('DOMContentLoaded', () => {
         if (!videoEl) return;
-
-        if (loadingEl) {
-            loadingEl.classList.remove('hidden');
-
-            if (isMobileDevice) {
-                // Mobile: Show native camera as PRIMARY (no browser permission needed)
-                loadingEl.innerHTML = `
-                    <div class="flex flex-col items-center justify-center gap-3 p-4 text-center">
-                        <div class="w-14 h-14 rounded-2xl bg-red-500/20 text-red-400 flex items-center justify-center text-3xl">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                        <p class="text-sm font-bold text-white">Ambil Foto Absensi</p>
-                        <p class="text-xs text-gray-400 max-w-xs leading-relaxed">Kamera HP akan terbuka langsung. Ambil foto selfie yang jelas di lokasi event.</p>
-                        <button type="button" onclick="triggerNativeCamera()" class="mt-1 w-full py-3 px-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/25 transition flex items-center justify-center gap-2">
-                            <i class="fas fa-camera"></i>
-                            <span>Buka Kamera HP</span>
-                        </button>
-                        <button type="button" onclick="requestCameraWithGesture()" class="text-xs text-gray-500 hover:text-gray-300 transition flex items-center gap-1.5">
-                            <i class="fas fa-video text-[10px]"></i>
-                            <span>Gunakan kamera live di browser</span>
-                        </button>
-                    </div>
-                `;
-            } else {
-                // Desktop: Try live camera stream (getUserMedia)
-                loadingEl.innerHTML = `
-                    <div class="flex flex-col items-center justify-center gap-3 p-4 text-center">
-                        <div class="w-14 h-14 rounded-2xl bg-white/10 text-white flex items-center justify-center text-2xl">
-                            <i class="fas fa-video"></i>
-                        </div>
-                        <p class="text-sm font-bold text-white">Nyalakan Kamera</p>
-                        <p class="text-xs text-gray-400 max-w-xs leading-relaxed">Klik di bawah lalu izinkan akses kamera jika muncul permintaan.</p>
-                        <button type="button" onclick="requestCameraWithGesture()" class="mt-1 w-full py-3 px-4 bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-red-500/25 transition flex items-center justify-center gap-2">
-                            <i class="fas fa-video"></i>
-                            <span>Nyalakan Kamera Web</span>
-                        </button>
-                        <button type="button" onclick="triggerNativeCamera()" class="text-xs text-gray-500 hover:text-gray-300 transition">
-                            Atau upload foto dari file
-                        </button>
-                    </div>
-                `;
-            }
-        }
+        startCamera();
     });
 
     // Cleanup camera when leaving page
