@@ -12,6 +12,7 @@ class EventAttendance extends Model
     protected $fillable = [
         'event_id',
         'user_id',
+        'attendance_date',
         'check_in_at',
         'check_in_photo_path',
         'check_out_at',
@@ -21,6 +22,7 @@ class EventAttendance extends Model
     protected function casts(): array
     {
         return [
+            'attendance_date' => 'date',
             'check_in_at' => 'datetime',
             'check_out_at' => 'datetime',
         ];

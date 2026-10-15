@@ -31,12 +31,13 @@ class CustomerAttendanceController extends Controller
 
         // Cari event yang:
         // 1. Status active
-        // 2. start_at <= now <= end_at (end_at tidak boleh null)
+        // 2. start_at <= now, dan jika end_at diatur maka end_at >= now
         // 3. User punya application approved di event ini
         $events = Event::where('status', 'active')
-            ->whereNotNull('end_at')
             ->where('start_at', '<=', $now)
-            ->where('end_at', '>=', $now)
+            ->where(function($q) use ($now) {
+                $q->whereNull('end_at')->orWhere('end_at', '>=', $now);
+            })
             ->whereHas('workerOpenings.applications', function ($query) use ($userId) {
                 $query->where('user_id', $userId)
                       ->where('status', 'approved');
@@ -58,11 +59,28 @@ class CustomerAttendanceController extends Controller
         EventAttendance::autoCheckOutExpired();
 
         $userId = session('customer_id');
+        $todayDate = now($event->timezone)->toDateString();
+
+        // Cari absensi khusus hari ini
         $attendance = EventAttendance::where('event_id', $event->id)
             ->where('user_id', $userId)
+            ->where(function($q) use ($todayDate) {
+                $q->whereDate('attendance_date', $todayDate)
+                  ->orWhere(function($sub) use ($todayDate) {
+                      $sub->whereNull('attendance_date')->whereDate('check_in_at', $todayDate);
+                  });
+            })
+            ->latest()
             ->first();
 
-        return view('menu.customer.attendance.show', compact('event', 'attendance'));
+        // Ambil seluruh riwayat absensi volunteer untuk event ini (semua hari yang pernah dihadiri)
+        $attendanceHistory = EventAttendance::where('event_id', $event->id)
+            ->where('user_id', $userId)
+            ->orderByDesc('attendance_date')
+            ->orderByDesc('check_in_at')
+            ->get();
+
+        return view('menu.customer.attendance.show', compact('event', 'attendance', 'attendanceHistory', 'todayDate'));
     }
 
     /**
@@ -73,10 +91,21 @@ class CustomerAttendanceController extends Controller
         $this->verifyEligibility($event);
         $userId = session('customer_id');
         $isRetake = $request->boolean('is_retake');
+        $todayDate = now($event->timezone)->toDateString();
 
-        $existing = EventAttendance::where('event_id', $event->id)->where('user_id', $userId)->first();
+        // Cari absensi hari ini
+        $existing = EventAttendance::where('event_id', $event->id)
+            ->where('user_id', $userId)
+            ->where(function($q) use ($todayDate) {
+                $q->whereDate('attendance_date', $todayDate)
+                  ->orWhere(function($sub) use ($todayDate) {
+                      $sub->whereNull('attendance_date')->whereDate('check_in_at', $todayDate);
+                  });
+            })
+            ->first();
+
         if ($existing && !$isRetake) {
-            return back()->with('error', 'Anda sudah melakukan check-in.');
+            return back()->with('error', 'Anda sudah melakukan check-in untuk hari ini.');
         }
 
         $path = null;
@@ -118,31 +147,33 @@ class CustomerAttendanceController extends Controller
                 Storage::disk('local')->delete($existing->check_in_photo_path);
             }
             $existing->update([
+                'attendance_date' => $todayDate,
                 'check_in_at' => Carbon::now($event->timezone),
                 'check_in_photo_path' => $path,
             ]);
 
             return redirect()->route('customer.attendance.show', $event->id)
-                ->with('success', 'Foto Check-in berhasil diperbarui!');
+                ->with('success', 'Foto Check-in hari ini berhasil diperbarui!');
         }
 
         try {
             EventAttendance::create([
                 'event_id' => $event->id,
                 'user_id' => $userId,
+                'attendance_date' => $todayDate,
                 'check_in_at' => Carbon::now($event->timezone),
                 'check_in_photo_path' => $path,
             ]);
         } catch (QueryException $e) {
             if ($e->errorInfo[1] == 1062 || $e->getCode() == '23000') {
                 Storage::disk('local')->delete($path);
-                return back()->with('error', 'Anda sudah melakukan check-in.');
+                return back()->with('error', 'Anda sudah melakukan check-in hari ini.');
             }
             throw $e;
         }
 
         return redirect()->route('customer.attendance.show', $event->id)
-            ->with('success', 'Check-in berhasil dicatat.');
+            ->with('success', 'Check-in hari ini berhasil dicatat.');
     }
 
     /**
@@ -153,14 +184,23 @@ class CustomerAttendanceController extends Controller
         $this->verifyEligibility($event);
         $userId = session('customer_id');
         $isRetake = $request->boolean('is_retake');
+        $todayDate = now($event->timezone)->toDateString();
         
-        $attendance = EventAttendance::where('event_id', $event->id)->where('user_id', $userId)->first();
+        $attendance = EventAttendance::where('event_id', $event->id)
+            ->where('user_id', $userId)
+            ->where(function($q) use ($todayDate) {
+                $q->whereDate('attendance_date', $todayDate)
+                  ->orWhere(function($sub) use ($todayDate) {
+                      $sub->whereNull('attendance_date')->whereDate('check_in_at', $todayDate);
+                  });
+            })
+            ->first();
         
         if (!$attendance) {
-            return back()->with('error', 'Anda belum melakukan check-in.');
+            return back()->with('error', 'Anda belum melakukan check-in untuk hari ini.');
         }
         if ($attendance->check_out_at && !$isRetake) {
-            return back()->with('error', 'Anda sudah melakukan check-out.');
+            return back()->with('error', 'Anda sudah melakukan check-out hari ini.');
         }
 
         $path = null;
@@ -205,20 +245,27 @@ class CustomerAttendanceController extends Controller
             'check_out_photo_path' => $path,
         ]);
 
-        $msg = $isRetake ? 'Foto Check-out berhasil diperbarui!' : 'Check-out berhasil dicatat.';
+        $msg = $isRetake ? 'Foto Check-out hari ini berhasil diperbarui!' : 'Check-out hari ini berhasil dicatat.';
         return redirect()->route('customer.attendance.show', $event->id)->with('success', $msg);
     }
 
     /**
-     * Reset absensi event agar bisa mengambil foto check-in dari awal lagi.
+     * Reset absensi event agar bisa mengambil foto check-in dari awal lagi (hanya mereset hari ini).
      */
     public function reset(Event $event)
     {
         $this->verifyEligibility($event);
         $userId = session('customer_id');
+        $todayDate = now($event->timezone)->toDateString();
 
         $attendance = EventAttendance::where('event_id', $event->id)
             ->where('user_id', $userId)
+            ->where(function($q) use ($todayDate) {
+                $q->whereDate('attendance_date', $todayDate)
+                  ->orWhere(function($sub) use ($todayDate) {
+                      $sub->whereNull('attendance_date')->whereDate('check_in_at', $todayDate);
+                  });
+            })
             ->first();
 
         if ($attendance) {
@@ -232,20 +279,25 @@ class CustomerAttendanceController extends Controller
         }
 
         return redirect()->route('customer.attendance.show', $event->id)
-            ->with('success', 'Data absensi berhasil di-reset. Anda dapat mengambil foto check-in baru sekarang!');
+            ->with('success', 'Absensi hari ini berhasil di-reset. Anda dapat mengambil foto check-in baru sekarang!');
     }
 
     /**
      * Melihat file foto absensi milik customer yang sedang login.
      */
-    public function photo(Event $event, $type)
+    public function photo(Request $request, Event $event, $type)
     {
         $this->verifyEligibility($event);
         $userId = session('customer_id');
 
-        $attendance = EventAttendance::where('event_id', $event->id)
-            ->where('user_id', $userId)
-            ->firstOrFail();
+        $query = EventAttendance::where('event_id', $event->id)
+            ->where('user_id', $userId);
+
+        if ($request->has('attendance_id')) {
+            $query->where('id', $request->query('attendance_id'));
+        }
+
+        $attendance = $query->latest()->firstOrFail();
 
         $path = ($type === 'check-out') ? $attendance->check_out_photo_path : $attendance->check_in_photo_path;
 
@@ -273,17 +325,12 @@ class CustomerAttendanceController extends Controller
             abort(403, 'Event tidak dalam status aktif.');
         }
 
-        // 2. end_at tidak boleh null
-        if (is_null($event->end_at)) {
-            abort(403, 'Event ini tidak memiliki batas waktu selesai yang valid.');
-        }
-
-        // 3. Waktu harus di dalam rentang start_at dan end_at
+        // 2. Waktu harus di dalam rentang start_at dan end_at (jika end_at diatur)
         if ($now < $event->start_at) {
-            abort(403, 'Waktu absensi belum dimulai.');
+            abort(403, 'Waktu pelaksanaan event belum dimulai.');
         }
-        if ($now > $event->end_at) {
-            abort(403, 'Waktu absensi sudah berakhir.');
+        if ($event->end_at && $now > $event->end_at) {
+            abort(403, 'Waktu pelaksanaan event ini sudah berakhir.');
         }
 
         // 4. User harus punya aplikasi berstatus approved di event ini

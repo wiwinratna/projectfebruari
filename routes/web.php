@@ -416,6 +416,7 @@ Route::prefix('super-admin')->name('super-admin.')->middleware(['web', 'super_ad
     Route::post('/events/{event}/applicant-photos/download', [\App\Http\Controllers\SuperAdminDashboardController::class, 'downloadApplicantPhotos'])->name('events.applicant-photos.download');
     Route::get('/events/{event}/applications/export', [\App\Http\Controllers\SuperAdminDashboardController::class, 'exportApplications'])->name('events.applications.export');
     Route::get('/applications/{application}/photo/download', [\App\Http\Controllers\SuperAdminDashboardController::class, 'downloadSingleApplicantPhoto'])->name('applications.photo.download');
+    Route::get('/events/{event}/attendance/{attendance}/photo/{type}', [\App\Http\Controllers\SuperAdminDashboardController::class, 'attendancePhoto'])->name('events.attendance.photo');
 
     // Volunteers Management
     Route::get('/volunteers', [\App\Http\Controllers\SuperAdminDashboardController::class, 'volunteers'])->name('volunteers.index');
