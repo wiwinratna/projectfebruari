@@ -73,6 +73,102 @@ class Event extends Model
         return null;
     }
 
+    /**
+     * Dapatkan nama zona waktu IANA untuk event ini (Asia/Jakarta, Asia/Makassar, Asia/Jayapura).
+     */
+    public function getTimezoneAttribute(): string
+    {
+        $province = $this->province_name ?: ($this->city ? $this->city->province : null);
+
+        if (!$province) {
+            return 'Asia/Jakarta';
+        }
+
+        $provinceUpper = strtoupper(trim($province));
+
+        // WITA (Waktu Indonesia Tengah - UTC+8)
+        $witaProvinces = [
+            'BALI',
+            'NUSA TENGGARA BARAT',
+            'NUSA TENGGARA TIMUR',
+            'KALIMANTAN SELATAN',
+            'KALIMANTAN TIMUR',
+            'KALIMANTAN UTARA',
+            'SULAWESI UTARA',
+            'GORONTALO',
+            'SULAWESI TENGAH',
+            'SULAWESI BARAT',
+            'SULAWESI SELATAN',
+            'SULAWESI TENGGARA',
+        ];
+
+        foreach ($witaProvinces as $wita) {
+            if (str_contains($provinceUpper, $wita)) {
+                return 'Asia/Makassar';
+            }
+        }
+
+        // WIT (Waktu Indonesia Timur - UTC+9)
+        $witProvinces = [
+            'MALUKU',
+            'MALUKU UTARA',
+            'PAPUA',
+        ];
+
+        foreach ($witProvinces as $wit) {
+            if (str_contains($provinceUpper, $wit)) {
+                return 'Asia/Jayapura';
+            }
+        }
+
+        // Default: WIB (Waktu Indonesia Barat - UTC+7)
+        return 'Asia/Jakarta';
+    }
+
+    /**
+     * Dapatkan singkatan zona waktu Indonesia (WIB, WITA, WIT).
+     */
+    public function getTimezoneLabelAttribute(): string
+    {
+        return match ($this->timezone) {
+            'Asia/Makassar' => 'WITA',
+            'Asia/Jayapura' => 'WIT',
+            default => 'WIB',
+        };
+    }
+
+    /**
+     * Dapatkan representasi teks lokasi event yang rapi (Venue, Kota, Provinsi).
+     */
+    public function getLocationDisplayAttribute(): string
+    {
+        $venue = trim($this->venue ?? '');
+        $cityName = trim($this->city_name ?: ($this->city ? $this->city->name : ''));
+        $provinceName = trim($this->province_name ?: ($this->city ? $this->city->province : ''));
+
+        if ($venue && $cityName) {
+            return "{$venue}, {$cityName}";
+        }
+
+        if ($venue) {
+            return $venue;
+        }
+
+        if ($cityName && $provinceName) {
+            return "{$cityName}, {$provinceName}";
+        }
+
+        if ($cityName) {
+            return $cityName;
+        }
+
+        if ($provinceName) {
+            return $provinceName;
+        }
+
+        return 'Lokasi Resmi Event';
+    }
+
     public function sports()
     {
         return $this->belongsToMany(Sport::class)

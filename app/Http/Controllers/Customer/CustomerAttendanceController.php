@@ -118,7 +118,7 @@ class CustomerAttendanceController extends Controller
                 Storage::disk('local')->delete($existing->check_in_photo_path);
             }
             $existing->update([
-                'check_in_at' => Carbon::now(),
+                'check_in_at' => Carbon::now($event->timezone),
                 'check_in_photo_path' => $path,
             ]);
 
@@ -130,7 +130,7 @@ class CustomerAttendanceController extends Controller
             EventAttendance::create([
                 'event_id' => $event->id,
                 'user_id' => $userId,
-                'check_in_at' => Carbon::now(),
+                'check_in_at' => Carbon::now($event->timezone),
                 'check_in_photo_path' => $path,
             ]);
         } catch (QueryException $e) {
@@ -201,7 +201,7 @@ class CustomerAttendanceController extends Controller
         }
 
         $attendance->update([
-            'check_out_at' => Carbon::now(),
+            'check_out_at' => Carbon::now($event->timezone),
             'check_out_photo_path' => $path,
         ]);
 
