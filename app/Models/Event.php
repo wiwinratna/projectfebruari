@@ -73,6 +73,236 @@ class Event extends Model
         return null;
     }
 
+    /**
+     * Dapatkan nama zona waktu IANA untuk event ini (Mendukung Seluruh Indonesia & Luar Negeri).
+     */
+    public function getTimezoneAttribute(): string
+    {
+        $country = trim($this->country ?? '');
+        $isAbroad = $country && !in_array(strtoupper($country), ['INDONESIA', 'ID', 'INA']);
+
+        // Jika Event Diselenggarakan di Luar Negeri
+        if ($isAbroad) {
+            $countryUpper = strtoupper($country);
+
+            $countryTimezones = [
+                // ASEAN / Asia Tenggara
+                'SINGAPORE' => 'Asia/Singapore',
+                'SINGAPURA' => 'Asia/Singapore',
+                'MALAYSIA' => 'Asia/Kuala_Lumpur',
+                'THAILAND' => 'Asia/Bangkok',
+                'VIETNAM' => 'Asia/Ho_Chi_Minh',
+                'PHILIPPINES' => 'Asia/Manila',
+                'FILIPINA' => 'Asia/Manila',
+                'CAMBODIA' => 'Asia/Phnom_Penh',
+                'KAMBOJA' => 'Asia/Phnom_Penh',
+                'LAOS' => 'Asia/Vientiane',
+                'MYANMAR' => 'Asia/Yangon',
+                'BRUNEI' => 'Asia/Brunei',
+                'TIMOR LESTE' => 'Asia/Dili',
+                'TIMOR-LESTE' => 'Asia/Dili',
+
+                // Asia Timur & Selatan
+                'JAPAN' => 'Asia/Tokyo',
+                'JEPANG' => 'Asia/Tokyo',
+                'SOUTH KOREA' => 'Asia/Seoul',
+                'KOREA SELATAN' => 'Asia/Seoul',
+                'KOREA' => 'Asia/Seoul',
+                'CHINA' => 'Asia/Shanghai',
+                'TIONGKOK' => 'Asia/Shanghai',
+                'HONG KONG' => 'Asia/Hong_Kong',
+                'HONGKONG' => 'Asia/Hong_Kong',
+                'TAIWAN' => 'Asia/Taipei',
+                'INDIA' => 'Asia/Kolkata',
+
+                // Timur Tengah
+                'QATAR' => 'Asia/Qatar',
+                'UNITED ARAB EMIRATES' => 'Asia/Dubai',
+                'UAE' => 'Asia/Dubai',
+                'EMIRAT ARAB' => 'Asia/Dubai',
+                'SAUDI ARABIA' => 'Asia/Riyadh',
+                'ARAB SAUDI' => 'Asia/Riyadh',
+
+                // Eropa
+                'FRANCE' => 'Europe/Paris',
+                'PRANCIS' => 'Europe/Paris',
+                'UNITED KINGDOM' => 'Europe/London',
+                'UK' => 'Europe/London',
+                'INGGRIS' => 'Europe/London',
+                'GERMANY' => 'Europe/Berlin',
+                'JERMAN' => 'Europe/Berlin',
+                'ITALY' => 'Europe/Rome',
+                'ITALIA' => 'Europe/Rome',
+                'SPAIN' => 'Europe/Madrid',
+                'SPANYOL' => 'Europe/Madrid',
+                'NETHERLANDS' => 'Europe/Amsterdam',
+                'BELANDA' => 'Europe/Amsterdam',
+                'SWITZERLAND' => 'Europe/Zurich',
+                'SWISS' => 'Europe/Zurich',
+
+                // Australia & Oseania
+                'AUSTRALIA' => 'Australia/Sydney',
+                'NEW ZEALAND' => 'Pacific/Auckland',
+                'SELANDIA BARU' => 'Pacific/Auckland',
+
+                // Amerika
+                'UNITED STATES' => 'America/New_York',
+                'USA' => 'America/New_York',
+                'AMERIKA SERIKAT' => 'America/New_York',
+                'CANADA' => 'America/Toronto',
+                'KANADA' => 'America/Toronto',
+                'BRAZIL' => 'America/Sao_Paulo',
+                'BRASIL' => 'America/Sao_Paulo',
+            ];
+
+            foreach ($countryTimezones as $key => $tz) {
+                if (str_contains($countryUpper, $key) || $countryUpper === $key) {
+                    return $tz;
+                }
+            }
+
+            // Estimasi dari koordinat longitude jika tersedia
+            if ($this->longitude !== null) {
+                $offsetHours = (int) round($this->longitude / 15);
+                return "Etc/GMT" . ($offsetHours >= 0 ? "-{$offsetHours}" : "+{$offsetHours}");
+            }
+
+            return 'UTC';
+        }
+
+        // Jika Event di Indonesia: Deteksi berdasarkan Provinsi
+        $province = $this->province_name ?: ($this->city ? $this->city->province : null);
+
+        if (!$province) {
+            return 'Asia/Jakarta';
+        }
+
+        $provinceUpper = strtoupper(trim($province));
+
+        // WITA (Waktu Indonesia Tengah - UTC+8)
+        $witaProvinces = [
+            'BALI',
+            'NUSA TENGGARA BARAT',
+            'NUSA TENGGARA TIMUR',
+            'KALIMANTAN SELATAN',
+            'KALIMANTAN TIMUR',
+            'KALIMANTAN UTARA',
+            'SULAWESI UTARA',
+            'GORONTALO',
+            'SULAWESI TENGAH',
+            'SULAWESI BARAT',
+            'SULAWESI SELATAN',
+            'SULAWESI TENGGARA',
+        ];
+
+        foreach ($witaProvinces as $wita) {
+            if (str_contains($provinceUpper, $wita)) {
+                return 'Asia/Makassar';
+            }
+        }
+
+        // WIT (Waktu Indonesia Timur - UTC+9)
+        $witProvinces = [
+            'MALUKU',
+            'MALUKU UTARA',
+            'PAPUA',
+        ];
+
+        foreach ($witProvinces as $wit) {
+            if (str_contains($provinceUpper, $wit)) {
+                return 'Asia/Jayapura';
+            }
+        }
+
+        // Default: WIB (Waktu Indonesia Barat - UTC+7)
+        return 'Asia/Jakarta';
+    }
+
+    /**
+     * Dapatkan singkatan zona waktu (WIB, WITA, WIT untuk Indonesia, atau singkatan resmi negara luar).
+     */
+    public function getTimezoneLabelAttribute(): string
+    {
+        $tz = $this->timezone;
+
+        return match ($tz) {
+            'Asia/Jakarta' => 'WIB',
+            'Asia/Makassar' => 'WITA',
+            'Asia/Jayapura' => 'WIT',
+            'Asia/Singapore', 'Asia/Kuala_Lumpur', 'Asia/Brunei' => 'SGT',
+            'Asia/Bangkok', 'Asia/Ho_Chi_Minh', 'Asia/Phnom_Penh', 'Asia/Vientiane' => 'ICT',
+            'Asia/Tokyo' => 'JST',
+            'Asia/Seoul' => 'KST',
+            'Asia/Manila' => 'PST',
+            'Asia/Shanghai', 'Asia/Hong_Kong', 'Asia/Taipei' => 'CST',
+            'Europe/London' => 'GMT',
+            'Europe/Paris', 'Europe/Berlin', 'Europe/Rome', 'Europe/Madrid', 'Europe/Amsterdam' => 'CET',
+            'Asia/Dubai' => 'GST',
+            'Asia/Qatar', 'Asia/Riyadh' => 'AST',
+            default => (function() use ($tz) {
+                try {
+                    $abbr = now($tz)->format('T');
+                    if (preg_match('/^[+-]\d+$/', $abbr)) {
+                        $hours = (int) $abbr;
+                        return 'UTC' . ($hours >= 0 ? "+{$hours}" : "{$hours}");
+                    }
+                    return $abbr ?: 'UTC';
+                } catch (\Throwable $e) {
+                    return 'UTC';
+                }
+            })(),
+        };
+    }
+
+    /**
+     * Dapatkan representasi teks lokasi event yang rapi (Mendukung Event Dalam & Luar Negeri).
+     */
+    public function getLocationDisplayAttribute(): string
+    {
+        $venue = trim($this->venue ?? '');
+        $cityName = trim($this->city_name ?: ($this->city ? $this->city->name : ''));
+        $provinceName = trim($this->province_name ?: ($this->city ? $this->city->province : ''));
+        $country = trim($this->country ?? '');
+        $isAbroad = $country && !in_array(strtoupper($country), ['INDONESIA', 'ID', 'INA']);
+
+        // Jika Event di Luar Negeri
+        if ($isAbroad) {
+            if ($venue && $cityName) {
+                return "{$venue}, {$cityName}, {$country}";
+            }
+            if ($venue) {
+                return "{$venue}, {$country}";
+            }
+            if ($cityName) {
+                return "{$cityName}, {$country}";
+            }
+            return $country;
+        }
+
+        // Jika Event di Dalam Negeri (Indonesia)
+        if ($venue && $cityName) {
+            return "{$venue}, {$cityName}";
+        }
+
+        if ($venue) {
+            return $venue;
+        }
+
+        if ($cityName && $provinceName) {
+            return "{$cityName}, {$provinceName}";
+        }
+
+        if ($cityName) {
+            return $cityName;
+        }
+
+        if ($provinceName) {
+            return $provinceName;
+        }
+
+        return 'Lokasi Resmi Event';
+    }
+
     public function sports()
     {
         return $this->belongsToMany(Sport::class)

@@ -79,8 +79,8 @@
                                 </td>
                                 <td class="px-4 py-4">
                                     @if($attendance && $attendance->check_in_at)
-                                        <div class="text-sm text-gray-900 font-semibold">{{ $attendance->check_in_at->format('H:i') }}</div>
-                                        <div class="text-xs text-gray-500 mb-1">{{ $attendance->check_in_at->format('d M Y') }}</div>
+                                        <div class="text-sm text-gray-900 font-semibold">{{ $attendance->check_in_at->timezone($event->timezone)->format('H:i') }} <span class="text-[10px] text-gray-500 font-normal">{{ $event->timezone_label }}</span></div>
+                                        <div class="text-xs text-gray-500 mb-1">{{ $attendance->check_in_at->timezone($event->timezone)->format('d M Y') }}</div>
                                         @if($attendance->check_in_photo_path)
                                             <a href="{{ route('admin.attendance.photo', ['attendance' => $attendance->id, 'type' => 'check-in']) }}" target="_blank" class="inline-flex items-center text-xs font-bold text-blue-600 hover:text-blue-800">
                                                 <i class="fas fa-image mr-1"></i> Lihat Foto
@@ -92,8 +92,8 @@
                                 </td>
                                 <td class="px-4 py-4">
                                     @if($attendance && $attendance->check_out_at)
-                                        <div class="text-sm text-gray-900 font-semibold">{{ $attendance->check_out_at->format('H:i') }}</div>
-                                        <div class="text-xs text-gray-500 mb-1">{{ $attendance->check_out_at->format('d M Y') }}</div>
+                                        <div class="text-sm text-gray-900 font-semibold">{{ $attendance->check_out_at->timezone($event->timezone)->format('H:i') }} <span class="text-[10px] text-gray-500 font-normal">{{ $event->timezone_label }}</span></div>
+                                        <div class="text-xs text-gray-500 mb-1">{{ $attendance->check_out_at->timezone($event->timezone)->format('d M Y') }}</div>
                                         @if($attendance->check_out_photo_path)
                                             <a href="{{ route('admin.attendance.photo', ['attendance' => $attendance->id, 'type' => 'check-out']) }}" target="_blank" class="inline-flex items-center text-xs font-bold text-blue-600 hover:text-blue-800">
                                                 <i class="fas fa-image mr-1"></i> Lihat Foto

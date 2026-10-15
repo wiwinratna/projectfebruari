@@ -75,9 +75,9 @@
                         @if($attendance && $attendance->check_in_at)
                             <div class="flex items-center gap-1.5">
                                 <i class="fas fa-check-circle text-emerald-500 text-sm"></i>
-                                <span class="text-base font-bold text-gray-900">{{ $attendance->check_in_at->format('H:i:s') }} WIB</span>
+                                <span class="text-base font-bold text-gray-900">{{ $attendance->check_in_at->timezone($event->timezone)->format('H:i:s') }} {{ $event->timezone_label }}</span>
                             </div>
-                            <p class="text-[11px] text-gray-500 mt-0.5">{{ $attendance->check_in_at->format('d M Y') }}</p>
+                            <p class="text-[11px] text-gray-500 mt-0.5">{{ $attendance->check_in_at->timezone($event->timezone)->format('d M Y') }}</p>
                         @else
                             <div class="flex items-center gap-1.5">
                                 <i class="fas fa-clock text-amber-500 text-sm"></i>
@@ -90,9 +90,9 @@
                         @if($attendance && $attendance->check_out_at)
                             <div class="flex items-center gap-1.5">
                                 <i class="fas fa-check-circle text-emerald-500 text-sm"></i>
-                                <span class="text-base font-bold text-gray-900">{{ $attendance->check_out_at->format('H:i:s') }} WIB</span>
+                                <span class="text-base font-bold text-gray-900">{{ $attendance->check_out_at->timezone($event->timezone)->format('H:i:s') }} {{ $event->timezone_label }}</span>
                             </div>
-                            <p class="text-[11px] text-gray-500 mt-0.5">{{ $attendance->check_out_at->format('d M Y') }}</p>
+                            <p class="text-[11px] text-gray-500 mt-0.5">{{ $attendance->check_out_at->timezone($event->timezone)->format('d M Y') }}</p>
                         @else
                             <div class="flex items-center gap-1.5">
                                 <i class="fas fa-clock text-gray-400 text-sm"></i>
@@ -172,7 +172,7 @@
                                 <!-- Digital Clock with Hours, Minutes, Seconds -->
                                 <div class="px-3 py-1 rounded-xl bg-black/60 backdrop-blur-md text-white font-mono text-xs font-bold shadow-md tracking-wider border border-white/10 flex items-center gap-1.5">
                                     <i class="fas fa-clock text-amber-400 text-[10px]"></i>
-                                    <span id="live-clock-text">--:--:-- WIB</span>
+                                    <span id="live-clock-text">--:--:-- {{ $event->timezone_label }}</span>
                                 </div>
                             </div>
 
@@ -189,7 +189,11 @@
                             <!-- Bottom Overlay: Live Preview Guidance (Active only during live stream) -->
                             <div id="camera-bottom-overlay" class="absolute bottom-3 inset-x-3 p-3 rounded-2xl bg-black/60 backdrop-blur-md text-white border border-white/10 z-20 pointer-events-none text-left">
                                 <div class="text-xs font-bold truncate leading-tight">{{ $event->title }}</div>
-                                <div class="text-[11px] text-gray-300 flex items-center justify-between mt-1">
+                                <div class="text-[10px] text-gray-300 flex items-center gap-1 mt-0.5 truncate">
+                                    <i class="fas fa-map-marker-alt text-red-400 text-[9px] shrink-0"></i>
+                                    <span class="truncate">{{ $event->location_display }}</span>
+                                </div>
+                                <div class="text-[11px] text-gray-300 flex items-center justify-between mt-1 pt-1 border-t border-white/10">
                                     <span class="truncate"><i class="fas fa-user-check text-emerald-400 mr-1"></i>{{ session('customer_username', 'Volunteer') }}</span>
                                     <span id="live-date-text" class="text-amber-300 font-semibold flex-shrink-0 ml-2">-- --- ----</span>
                                 </div>
@@ -275,14 +279,14 @@
                                     <i class="fas fa-camera text-emerald-500"></i> Bukti Foto Check-in
                                 </p>
                                 <img src="{{ route('customer.attendance.photo', ['event' => $event->id, 'type' => 'check-in']) }}" alt="Foto Check-in" class="w-full h-40 object-cover rounded-xl shadow-sm bg-gray-100">
-                                <p class="text-[11px] text-gray-500 mt-2 text-center">{{ $attendance->check_in_at?->format('d M Y, H:i:s') }} WIB</p>
+                                <p class="text-[11px] text-gray-500 mt-2 text-center">{{ $attendance->check_in_at?->timezone($event->timezone)->format('d M Y, H:i:s') }} {{ $event->timezone_label }}</p>
                             </div>
                             <div class="bg-gray-50 rounded-2xl p-3 border border-gray-200">
                                 <p class="text-xs font-bold text-gray-700 mb-2 flex items-center gap-1.5">
                                     <i class="fas fa-camera text-blue-500"></i> Bukti Foto Check-out
                                 </p>
                                 <img src="{{ route('customer.attendance.photo', ['event' => $event->id, 'type' => 'check-out']) }}" alt="Foto Check-out" class="w-full h-40 object-cover rounded-xl shadow-sm bg-gray-100">
-                                <p class="text-[11px] text-gray-500 mt-2 text-center">{{ $attendance->check_out_at?->format('d M Y, H:i:s') }} WIB</p>
+                                <p class="text-[11px] text-gray-500 mt-2 text-center">{{ $attendance->check_out_at?->timezone($event->timezone)->format('d M Y, H:i:s') }} {{ $event->timezone_label }}</p>
                             </div>
                         </div>
 
@@ -370,21 +374,76 @@
         ctx.closePath();
     }
 
+    // Event Timezone & Location Synchronization
+    const eventTimezone = @json($event->timezone);
+    const eventTimezoneLabel = @json($event->timezone_label);
+    const eventLocationDisplay = @json($event->location_display);
+    const serverTimestampMs = {{ now($event->timezone)->timestamp * 1000 }};
+    const clientTimestampAtLoad = Date.now();
+    const serverTimeOffset = serverTimestampMs - clientTimestampAtLoad;
+
+    // Helper: Ambil waktu tersinkronisasi server dan diformat akurat sesuai zona waktu lokasi event
+    function getEventNow() {
+        const syncedEpochMs = Date.now() + serverTimeOffset;
+        const syncedDate = new Date(syncedEpochMs);
+
+        let timeFormatted = '--:--:--';
+        let dateFormatted = '';
+        let shortDateFormatted = '';
+
+        try {
+            const timeFormatter = new Intl.DateTimeFormat('id-ID', {
+                timeZone: eventTimezone,
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+            timeFormatted = timeFormatter.format(syncedDate).replace(/\./g, ':');
+
+            const dateFormatter = new Intl.DateTimeFormat('id-ID', {
+                timeZone: eventTimezone,
+                weekday: 'long',
+                day: 'numeric',
+                month: 'long',
+                year: 'numeric'
+            });
+            dateFormatted = dateFormatter.format(syncedDate);
+
+            const shortDateFormatter = new Intl.DateTimeFormat('id-ID', {
+                timeZone: eventTimezone,
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+            shortDateFormatted = shortDateFormatter.format(syncedDate);
+        } catch (e) {
+            const h = String(syncedDate.getHours()).padStart(2, '0');
+            const m = String(syncedDate.getMinutes()).padStart(2, '0');
+            const s = String(syncedDate.getSeconds()).padStart(2, '0');
+            timeFormatted = `${h}:${m}:${s}`;
+            shortDateFormatted = `${syncedDate.getDate()} ${syncedDate.getMonth()+1} ${syncedDate.getFullYear()}`;
+            dateFormatted = shortDateFormatted;
+        }
+
+        return {
+            timeFormatted,
+            dateFormatted,
+            shortDateFormatted,
+            timezoneLabel: eventTimezoneLabel,
+            rawDate: syncedDate
+        };
+    }
+
     // Live Digital Clock (Jam, Menit, Detik)
     function updateClock() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const { timeFormatted, shortDateFormatted, timezoneLabel } = getEventNow();
         
-        const timeString = `${hours}:${minutes}:${seconds} WIB`;
+        const timeString = `${timeFormatted} ${timezoneLabel}`;
         if (clockTextEl) clockTextEl.textContent = timeString;
+        if (dateTextEl) dateTextEl.textContent = shortDateFormatted;
 
-        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-        const dateString = `${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
-        if (dateTextEl) dateTextEl.textContent = dateString;
-
-        return { timeString, dateString };
+        return { timeString, dateString: shortDateFormatted };
     }
 
     setInterval(updateClock, 1000);
@@ -635,20 +694,11 @@
         // 1. Draw raw photo frame
         ctx.drawImage(sourceElement, 0, 0, width, height);
 
-        // 2. Format Date and Time
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        const timeFormatted = `${hours}:${minutes}:${seconds}`;
-
-        const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-        const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
-        const dayName = days[now.getDay()];
-        const dateFormatted = `${dayName}, ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+        // 2. Format Date and Time according to Event location & timezone
+        const { timeFormatted, dateFormatted, timezoneLabel } = getEventNow();
 
         const volunteerName = "{{ session('customer_username', 'Volunteer') }}";
-        const eventTitle = "{{ $event->title }}";
+        const eventTitle = @json($event->title);
         const statusType = "{{ $typeLabel }}".toUpperCase();
 
         // 3. Floating Frosted Glass Card Geometry (Responsive to aspect ratio)
@@ -715,7 +765,7 @@
         const timeWidth = ctx.measureText(timeFormatted).width;
         ctx.font = `600 ${Math.round(timeFontSize * 0.48)}px system-ui, -apple-system, sans-serif`;
         ctx.fillStyle = '#94a3b8';
-        ctx.fillText('WIB', contentX + timeWidth + 6, timeRowY - 2);
+        ctx.fillText(timezoneLabel, contentX + timeWidth + 6, timeRowY - 2);
 
         // Right side of Time Row: Official Brand Seal
         ctx.font = `600 ${Math.max(11, Math.round(cardHeight * 0.085))}px system-ui, -apple-system, sans-serif`;
@@ -741,10 +791,26 @@
 
         ctx.font = `500 ${Math.max(11, Math.round(cardHeight * 0.088))}px system-ui, -apple-system, sans-serif`;
         ctx.fillStyle = '#cbd5e1';
-        const eventText = `${eventTitle} • Lokasi Resmi`;
-        const eventWidth = ctx.measureText(eventText).width;
-        if (contentRightX - eventWidth > contentX + ctx.measureText(volunteerName).width + 16) {
-            ctx.fillText(eventText, contentRightX - eventWidth, bottomRowY);
+        
+        // Dynamic event location text (Venue + City / Province)
+        const fullEventText = `${eventTitle} • ${eventLocationDisplay}`;
+        const volunteerWidth = ctx.measureText(volunteerName).width;
+        const availableWidth = contentRightX - (contentX + volunteerWidth + 16);
+
+        let printEventText = fullEventText;
+        if (ctx.measureText(printEventText).width > availableWidth) {
+            printEventText = eventLocationDisplay; // fallback to location only
+            if (ctx.measureText(printEventText).width > availableWidth) {
+                while (printEventText.length > 5 && ctx.measureText(printEventText + '...').width > availableWidth) {
+                    printEventText = printEventText.slice(0, -1);
+                }
+                printEventText += '...';
+            }
+        }
+
+        if (availableWidth > 30) {
+            const eventWidth = ctx.measureText(printEventText).width;
+            ctx.fillText(printEventText, contentRightX - eventWidth, bottomRowY);
         }
 
         // Convert to Data URL & Assign to hidden input
@@ -780,7 +846,7 @@
         // Switch button controls
         if (controlBefore) controlBefore.classList.add('hidden');
         if (controlAfter) controlAfter.classList.remove('hidden');
-        if (submitLabel) submitLabel.textContent = `Kirim Bukti (${timeFormatted} WIB)`;
+        if (submitLabel) submitLabel.textContent = `Kirim Bukti (${timeFormatted} ${timezoneLabel})`;
 
         isPhotoTaken = true;
     }
