@@ -118,6 +118,15 @@ Event Details <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full
                     data-tab="access" role="tab">
                     <i class="fas fa-key mr-2"></i> Access & Codes
                 </button>
+                <button class="px-6 py-4 font-semibold text-gray-600 hover:text-gray-800 tab-button"
+                    data-tab="attendance" role="tab">
+                    <i class="fas fa-clipboard-check mr-2"></i> Attendance
+                    @if(isset($totalAttendanceRecords) && $totalAttendanceRecords > 0)
+                        <span class="ml-1.5 px-2 py-0.5 rounded-full text-xs font-bold bg-blue-100 text-blue-800">
+                            {{ $totalAttendanceRecords }}
+                        </span>
+                    @endif
+                </button>
             </div>
         </div>
 
@@ -826,6 +835,202 @@ Event Details <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full
                     </div>
                 </div>
             </div>
+
+            {{-- Attendance Tab --}}
+            <div class="tab-content hidden" id="attendance-tab">
+                {{-- Attendance Summary Cards --}}
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Volunteer Approved</p>
+                            <p class="text-2xl font-extrabold text-gray-900 mt-1">{{ $totalApprovedVolunteers ?? 0 }}</p>
+                            <p class="text-[11px] text-gray-400">Berhak melakukan absensi</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-gray-200/70 text-gray-700 flex items-center justify-center text-lg">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-blue-50/50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">Total Record Absensi</p>
+                            <p class="text-2xl font-extrabold text-blue-800 mt-1">{{ $totalAttendanceRecords ?? 0 }}</p>
+                            <p class="text-[11px] text-blue-600/70">Akumulasi seluruh hari</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-50/50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Selesai (In & Out)</p>
+                            <p class="text-2xl font-extrabold text-emerald-800 mt-1">{{ $completedAttendanceCount ?? 0 }}</p>
+                            <p class="text-[11px] text-emerald-600/70">Check-out tercatat</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
+                            <i class="fas fa-check-double"></i>
+                        </div>
+                    </div>
+
+                    <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-amber-600 uppercase tracking-wider">Check-in Saja</p>
+                            <p class="text-2xl font-extrabold text-amber-800 mt-1">{{ $checkInOnlyAttendanceCount ?? 0 }}</p>
+                            <p class="text-[11px] text-amber-600/70">Belum / tidak check-out</p>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Filter & Search Toolbar --}}
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <div class="flex items-center gap-2">
+                            <label for="filter-attendance-date-sa" class="text-xs font-bold text-gray-600 uppercase">
+                                <i class="fas fa-calendar-alt text-blue-600 mr-1"></i> Tanggal:
+                            </label>
+                            <select id="filter-attendance-date-sa" onchange="filterAttendanceRowsSA()"
+                                    class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="all">Semua Tanggal</option>
+                                @php
+                                    $uniqueAttendanceDates = ($attendances ?? collect())->map(function($att) use ($event) {
+                                        return $att->attendance_date ? $att->attendance_date->format('Y-m-d') : ($att->check_in_at ? $att->check_in_at->timezone($event->timezone)->format('Y-m-d') : null);
+                                    })->filter()->unique()->sortDesc();
+                                @endphp
+                                @foreach($uniqueAttendanceDates as $ad)
+                                    <option value="{{ $ad }}">{{ \Carbon\Carbon::parse($ad)->translatedFormat('d M Y') }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="flex items-center gap-2">
+                            <label for="filter-attendance-status-sa" class="text-xs font-bold text-gray-600 uppercase">
+                                Status:
+                            </label>
+                            <select id="filter-attendance-status-sa" onchange="filterAttendanceRowsSA()"
+                                    class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                                <option value="all">Semua Status</option>
+                                <option value="completed">Completed (In & Out)</option>
+                                <option value="checkin">Check-in Saja</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="relative w-full sm:w-64">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
+                            <i class="fas fa-search text-xs"></i>
+                        </span>
+                        <input type="text" id="filter-attendance-search-sa" oninput="filterAttendanceRowsSA()"
+                               placeholder="Cari nama volunteer..."
+                               class="w-full border border-gray-300 rounded-lg pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                    </div>
+                </div>
+
+                {{-- Attendance Records Table --}}
+                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200 text-sm">
+                            <thead class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500">
+                                <tr>
+                                    <th class="px-4 py-3 text-left">Tanggal</th>
+                                    <th class="px-4 py-3 text-left">Volunteer</th>
+                                    <th class="px-4 py-3 text-left">Status</th>
+                                    <th class="px-4 py-3 text-left">Check-in</th>
+                                    <th class="px-4 py-3 text-left">Check-out</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-100 bg-white" id="attendance-tbody-sa">
+                                @forelse($attendances ?? [] as $att)
+                                    @php
+                                        $attDate = $att->attendance_date ? $att->attendance_date->format('Y-m-d') : ($att->check_in_at ? $att->check_in_at->timezone($event->timezone)->format('Y-m-d') : '');
+                                        $attDateFormatted = $att->attendance_date ? $att->attendance_date->translatedFormat('d M Y') : ($att->check_in_at ? $att->check_in_at->timezone($event->timezone)->translatedFormat('d M Y') : '-');
+                                        $isComplete = ($att->check_out_at !== null);
+                                        $statusKey = $isComplete ? 'completed' : 'checkin';
+                                        $volName = $att->user ? $att->user->name : 'N/A';
+                                    @endphp
+                                    <tr class="row-attendance-sa hover:bg-gray-50 transition"
+                                        data-date="{{ $attDate }}"
+                                        data-status="{{ $statusKey }}"
+                                        data-name="{{ strtolower($volName) }}">
+                                        <td class="px-4 py-3 whitespace-nowrap font-semibold text-gray-900 text-xs">
+                                            {{ $attDateFormatted }}
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            <div class="font-bold text-gray-900 text-xs">{{ $volName }}</div>
+                                            @if($att->user)
+                                                <div class="text-[11px] text-gray-400">{{ $att->user->email }}</div>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            @if($isComplete)
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                                    <i class="fas fa-check-double text-[9px]"></i> Selesai
+                                                </span>
+                                            @else
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                                    <i class="fas fa-clock text-[9px]"></i> Check-in Saja
+                                                </span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            @if($att->check_in_at)
+                                                <div class="flex items-center gap-2">
+                                                    <div>
+                                                        <span class="font-mono font-bold text-gray-800 text-xs">{{ $att->check_in_at->timezone($event->timezone)->format('H:i:s') }}</span>
+                                                        <span class="text-[10px] text-gray-400 font-semibold">{{ $event->timezone_label }}</span>
+                                                    </div>
+                                                    @if($att->check_in_photo_path)
+                                                        <button type="button"
+                                                                onclick="previewAttendancePhotoSA('{{ route('super-admin.events.attendance.photo', ['event' => $event->id, 'attendance' => $att->id, 'type' => 'check-in']) }}', 'Check-in: {{ addslashes($volName) }}', '{{ $attDateFormatted }} {{ $att->check_in_at->timezone($event->timezone)->format('H:i:s') }} {{ $event->timezone_label }}')"
+                                                                class="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold border border-emerald-200 transition flex items-center gap-1">
+                                                            <i class="fas fa-camera"></i> Foto
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="text-gray-300 text-xs">-</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3 whitespace-nowrap">
+                                            @if($att->check_out_at)
+                                                <div class="flex items-center gap-2">
+                                                    <div>
+                                                        <span class="font-mono font-bold text-gray-800 text-xs">{{ $att->check_out_at->timezone($event->timezone)->format('H:i:s') }}</span>
+                                                        <span class="text-[10px] text-gray-400 font-semibold">{{ $event->timezone_label }}</span>
+                                                    </div>
+                                                    @if($att->check_out_photo_path)
+                                                        <button type="button"
+                                                                onclick="previewAttendancePhotoSA('{{ route('super-admin.events.attendance.photo', ['event' => $event->id, 'attendance' => $att->id, 'type' => 'check-out']) }}', 'Check-out: {{ addslashes($volName) }}', '{{ $attDateFormatted }} {{ $att->check_out_at->timezone($event->timezone)->format('H:i:s') }} {{ $event->timezone_label }}')"
+                                                                class="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-bold border border-blue-200 transition flex items-center gap-1">
+                                                            <i class="fas fa-camera"></i> Foto
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="text-gray-300 text-xs">-</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr id="empty-attendance-row-sa">
+                                        <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500">
+                                            Belum ada data absensi untuk event ini.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                                <tr id="no-filtered-attendance-sa" class="hidden">
+                                    <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500">
+                                        Tidak ada catatan absensi yang sesuai filter.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -1080,5 +1285,93 @@ Event Details <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full
             document.body.style.overflow = '';
         }
     }
+
+    // Attendance Filter & Modal (Super Admin)
+    function filterAttendanceRowsSA() {
+        const dateFilter = document.getElementById('filter-attendance-date-sa')?.value || 'all';
+        const statusFilter = document.getElementById('filter-attendance-status-sa')?.value || 'all';
+        const searchFilter = (document.getElementById('filter-attendance-search-sa')?.value || '').toLowerCase().trim();
+
+        const rows = document.querySelectorAll('.row-attendance-sa');
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+            const rowDate = row.getAttribute('data-date');
+            const rowStatus = row.getAttribute('data-status');
+            const rowName = row.getAttribute('data-name');
+
+            const matchDate = (dateFilter === 'all' || rowDate === dateFilter);
+            const matchStatus = (statusFilter === 'all' || rowStatus === statusFilter);
+            const matchSearch = (!searchFilter || rowName.includes(searchFilter));
+
+            if (matchDate && matchStatus && matchSearch) {
+                row.classList.remove('hidden');
+                visibleCount++;
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+
+        const noDataRow = document.getElementById('no-filtered-attendance-sa');
+        if (noDataRow) {
+            if (visibleCount === 0 && rows.length > 0) {
+                noDataRow.classList.remove('hidden');
+            } else {
+                noDataRow.classList.add('hidden');
+            }
+        }
+    }
+
+    function previewAttendancePhotoSA(url, title, subtitle) {
+        const modal = document.getElementById('attendance-photo-modal-sa');
+        const img = document.getElementById('photo-modal-img-sa');
+        const titleEl = document.getElementById('photo-modal-title-sa');
+        const subEl = document.getElementById('photo-modal-subtitle-sa');
+        const linkEl = document.getElementById('photo-modal-link-sa');
+
+        if (!modal || !img) return;
+
+        titleEl.textContent = title || 'Bukti Foto Absensi';
+        subEl.textContent = subtitle || '';
+        img.src = url;
+        linkEl.href = url;
+
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeAttendancePhotoModalSA() {
+        const modal = document.getElementById('attendance-photo-modal-sa');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+    }
 </script>
+
+{{-- Attendance Photo Modal for Super Admin --}}
+<div id="attendance-photo-modal-sa" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs hidden p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <div>
+                <h3 id="photo-modal-title-sa" class="text-base font-bold text-gray-900">Bukti Foto Absensi</h3>
+                <p id="photo-modal-subtitle-sa" class="text-xs text-gray-500 mt-0.5"></p>
+            </div>
+            <button type="button" onclick="closeAttendancePhotoModalSA()" class="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="p-4 bg-gray-950 flex items-center justify-center min-h-[300px] max-h-[70vh] overflow-hidden">
+            <img id="photo-modal-img-sa" src="" alt="Bukti Foto" class="max-h-[65vh] w-auto object-contain rounded-lg shadow-lg">
+        </div>
+        <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+            <span class="text-xs text-gray-500 flex items-center gap-1.5">
+                <i class="fas fa-shield-alt text-emerald-600"></i> Watermark Resmi Terverifikasi
+            </span>
+            <a id="photo-modal-link-sa" href="#" target="_blank" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                <i class="fas fa-external-link-alt"></i> Buka Ukuran Penuh
+            </a>
+        </div>
+    </div>
+</div>
 @endsection

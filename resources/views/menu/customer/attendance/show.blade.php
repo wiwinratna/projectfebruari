@@ -307,8 +307,105 @@
                 
             </div>
         </div>
+
+        {{-- ── Attendance History Section ─────────────────────────── --}}
+        @if($attendanceHistory->count() > 0)
+        <div class="w-full px-3 sm:px-6 lg:px-8 max-w-2xl mx-auto mt-5 pb-6">
+            <div class="bg-white/80 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/60 shadow-xl overflow-hidden p-4 sm:p-6">
+                <h2 class="text-base sm:text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm border border-indigo-100">
+                        <i class="fas fa-history"></i>
+                    </span>
+                    Riwayat Absensi Semua Hari
+                    <span class="ml-auto text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
+                        {{ $attendanceHistory->count() }} Hari
+                    </span>
+                </h2>
+
+                <div class="space-y-3">
+                    @foreach($attendanceHistory as $record)
+                    @php
+                        $recDate = $record->attendance_date ? $record->attendance_date->timezone($event->timezone)->format('d M Y') : ($record->check_in_at ? $record->check_in_at->timezone($event->timezone)->format('d M Y') : '—');
+                        $isToday = ($record->attendance_date ? $record->attendance_date->toDateString() : ($record->check_in_at ? $record->check_in_at->timezone($event->timezone)->toDateString() : null)) === $todayDate;
+                        $isDone  = $record->check_out_at !== null;
+                    @endphp
+                    <div class="rounded-2xl border {{ $isToday ? 'border-indigo-200 bg-indigo-50/40' : 'border-gray-100 bg-gray-50/40' }} p-3.5">
+                        <div class="flex items-center justify-between mb-2.5">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-bold text-gray-900">{{ $recDate }}</span>
+                                @if($isToday)
+                                    <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 border border-indigo-200">Hari ini</span>
+                                @endif
+                            </div>
+                            @if($isDone)
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200"><i class="fas fa-check mr-1"></i>Lengkap</span>
+                            @elseif($record->check_in_at)
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200"><i class="fas fa-clock mr-1"></i>Check-in saja</span>
+                            @else
+                                <span class="text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 border border-gray-200">Belum</span>
+                            @endif
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            {{-- Check-in --}}
+                            <div class="rounded-xl bg-white/70 border border-gray-100 p-2.5">
+                                <p class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 mb-1">Check-in</p>
+                                @if($record->check_in_at)
+                                    <p class="font-bold text-gray-900 text-sm leading-tight">{{ $record->check_in_at->timezone($event->timezone)->format('H:i:s') }}</p>
+                                    <p class="text-gray-400 text-[10px] mt-0.5">{{ $event->timezone_label }}</p>
+                                    @if($record->check_in_photo_path)
+                                    <a href="{{ route('customer.attendance.photo', ['event' => $event->id, 'type' => 'check-in', 'attendance_id' => $record->id]) }}" target="_blank"
+                                       class="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 hover:text-emerald-800 mt-1.5">
+                                        <i class="fas fa-image"></i> Lihat Foto
+                                    </a>
+                                    @endif
+                                    @if($isToday)
+                                    <form action="{{ route('customer.attendance.checkin', $event->id) }}" method="POST" class="mt-1.5">
+                                        @csrf
+                                        <input type="hidden" name="is_retake" value="1">
+                                        <button type="submit" class="text-[10px] font-semibold text-amber-600 hover:text-amber-800 flex items-center gap-1" onclick="return confirm('Ambil ulang foto check-in hari ini?')">
+                                            <i class="fas fa-redo-alt"></i> Foto Ulang
+                                        </button>
+                                    </form>
+                                    @endif
+                                @else
+                                    <p class="text-gray-400 text-xs italic">Belum check-in</p>
+                                @endif
+                            </div>
+                            {{-- Check-out --}}
+                            <div class="rounded-xl bg-white/70 border border-gray-100 p-2.5">
+                                <p class="text-[10px] font-bold uppercase tracking-wider text-blue-600 mb-1">Check-out</p>
+                                @if($record->check_out_at)
+                                    <p class="font-bold text-gray-900 text-sm leading-tight">{{ $record->check_out_at->timezone($event->timezone)->format('H:i:s') }}</p>
+                                    <p class="text-gray-400 text-[10px] mt-0.5">{{ $event->timezone_label }}</p>
+                                    @if($record->check_out_photo_path)
+                                    <a href="{{ route('customer.attendance.photo', ['event' => $event->id, 'type' => 'check-out', 'attendance_id' => $record->id]) }}" target="_blank"
+                                       class="inline-flex items-center gap-1 text-[10px] font-semibold text-blue-600 hover:text-blue-800 mt-1.5">
+                                        <i class="fas fa-image"></i> Lihat Foto
+                                    </a>
+                                    @endif
+                                    @if($isToday)
+                                    <form action="{{ route('customer.attendance.checkout', $event->id) }}" method="POST" class="mt-1.5">
+                                        @csrf
+                                        <input type="hidden" name="is_retake" value="1">
+                                        <button type="submit" class="text-[10px] font-semibold text-amber-600 hover:text-amber-800 flex items-center gap-1" onclick="return confirm('Ambil ulang foto check-out hari ini?')">
+                                            <i class="fas fa-redo-alt"></i> Foto Ulang
+                                        </button>
+                                    </form>
+                                    @endif
+                                @else
+                                    <p class="text-gray-400 text-xs italic">Belum check-out</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
+
 
 @if(!$isComplete)
 @push('scripts')

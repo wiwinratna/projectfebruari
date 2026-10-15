@@ -13,6 +13,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use App\Exports\EventApplicationsExport;
 use Maatwebsite\Excel\Facades\Excel;
+use App\Models\EventAttendance;
+use Illuminate\Support\Facades\Storage;
 
 class SuperAdminDashboardController extends Controller
 {
@@ -313,6 +315,25 @@ class SuperAdminDashboardController extends Controller
         // Get recent applications for this event
         $recentApplications = $applications->take(5);
 
+        // Attendance data for Super Admin
+        $attendances = EventAttendance::where('event_id', $event->id)
+            ->with('user')
+            ->orderBy('attendance_date', 'desc')
+            ->orderBy('check_in_at', 'desc')
+            ->get();
+
+        $approvedAttendanceUserIds = \App\Models\Application::where('status', 'approved')
+            ->whereHas('workerOpening', function ($q) use ($event) {
+                $q->where('event_id', $event->id);
+            })
+            ->pluck('user_id')
+            ->unique();
+
+        $totalApprovedVolunteers = $approvedAttendanceUserIds->count();
+        $totalAttendanceRecords = $attendances->count();
+        $completedAttendanceCount = $attendances->whereNotNull('check_out_at')->count();
+        $checkInOnlyAttendanceCount = $attendances->whereNotNull('check_in_at')->whereNull('check_out_at')->count();
+
         return view('super-admin.events.show', compact(
             'event',
             'totalWorkerOpenings',
@@ -322,8 +343,35 @@ class SuperAdminDashboardController extends Controller
             'rejectedApplications',
             'pendingApplications',
             'applications',
-            'recentApplications'
+            'recentApplications',
+            'attendances',
+            'totalApprovedVolunteers',
+            'totalAttendanceRecords',
+            'completedAttendanceCount',
+            'checkInOnlyAttendanceCount'
         ));
+    }
+
+    public function attendancePhoto(Event $event, EventAttendance $attendance, $type)
+    {
+        abort_unless(session('super_admin_authenticated'), 403);
+
+        if ($attendance->event_id !== $event->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        $path = null;
+        if ($type === 'check-in') {
+            $path = $attendance->check_in_photo_path;
+        } elseif ($type === 'check-out') {
+            $path = $attendance->check_out_photo_path;
+        }
+
+        if (!$path || !Storage::disk('local')->exists($path)) {
+            abort(404, 'Foto tidak ditemukan.');
+        }
+
+        return Storage::disk('local')->response($path);
     }
 
     public function exportApplications(Request $request, Event $event)
