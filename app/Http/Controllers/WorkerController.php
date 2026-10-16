@@ -192,7 +192,7 @@ class WorkerController extends Controller
 
         $opening->accessCodes()->sync($request->input('access_code_ids', []));
 
-        return redirect()->route('admin.workers.index', ['flash' => 'created', 'name' => $opening->title]);
+        return redirect()->route('admin.workers.index')->with('status', 'Job opening "' . $opening->title . '" berhasil dibuat!');
     }
 
     public function edit(WorkerOpening $worker)
@@ -304,7 +304,7 @@ class WorkerController extends Controller
             }
         }
 
-        return redirect()->route('admin.workers.index', ['flash' => 'updated', 'name' => $worker->title]);
+        return redirect()->route('admin.workers.index')->with('status', 'Job opening "' . $worker->title . '" berhasil diupdate!');
     }
 
     public function show(WorkerOpening $worker)

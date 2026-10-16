@@ -294,7 +294,7 @@ class EventController extends Controller
         // Automatically calculate and update status based on updated dates
         EventStatusService::updateStatus($event);
 
-        return redirect()->route('admin.events.index', ['status' => 'all', 'flash' => 'updated', 'name' => $event->title]);
+        return redirect()->route('admin.events.index')->with('status', 'Event "' . $event->title . '" berhasil diupdate!');
     }
 
     /**

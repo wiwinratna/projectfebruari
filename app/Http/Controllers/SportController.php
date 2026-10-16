@@ -57,7 +57,7 @@ class SportController extends Controller
             return response()->json(['success' => true, 'message' => 'Sport created successfully']);
         }
 
-        return redirect()->route('admin.sports.index', ['flash' => 'created', 'name' => $sport->name]);
+        return redirect()->route('admin.sports.index')->with('status', 'Sport "' . $sport->name . '" berhasil dibuat!');
     }
 
     public function edit(Sport $sport)
@@ -90,7 +90,7 @@ class SportController extends Controller
             return response()->json(['success' => true, 'message' => 'Sport updated successfully']);
         }
 
-        return redirect()->route('admin.sports.index', ['flash' => 'updated', 'name' => $sport->name]);
+        return redirect()->route('admin.sports.index')->with('status', 'Sport "' . $sport->name . '" berhasil diupdate!');
     }
 
     public function destroy(Sport $sport)

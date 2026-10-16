@@ -103,4 +103,20 @@
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') hideConfirmModal();
     });
+
+    @if(session('status'))
+        document.addEventListener('DOMContentLoaded', function() {
+            showFlashMessage(@json(session('status')), 'status');
+        });
+    @endif
+    @if(session('success'))
+        document.addEventListener('DOMContentLoaded', function() {
+            showFlashMessage(@json(session('success')), 'status');
+        });
+    @endif
+    @if(session('error'))
+        document.addEventListener('DOMContentLoaded', function() {
+            showFlashMessage(@json(session('error')), 'error');
+        });
+    @endif
 </script>
