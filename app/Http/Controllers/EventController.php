@@ -27,9 +27,18 @@ class EventController extends Controller
         // Get admin's assigned event
         $adminEventId = (int) session('admin_event_id');
 
-        // If admin nicht has assigned event, redirect to login
+        // Session auto-recovery: reload event_id from DB if session is missing/zero
+        if (!$adminEventId && session('admin_id')) {
+            $adminUser = \App\Models\User::find((int) session('admin_id'));
+            if ($adminUser && $adminUser->event_id) {
+                $adminEventId = (int) $adminUser->event_id;
+                session(['admin_event_id' => $adminEventId]);
+            }
+        }
+
+        // If still no event assigned, redirect to dashboard (avoid back() redirect loop)
         if (!$adminEventId) {
-            return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.']);
+            return redirect()->route('admin.dashboard')->with('error', 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.');
         }
 
         // Automatically update all event statuses based on current date
@@ -112,16 +121,17 @@ class EventController extends Controller
             ->where('id', $adminEventId)
             ->first();
 
-        $allEvents = collect([$adminEvent]);
+        $allEvents = collect(array_filter([$adminEvent]));
 
+        // Null-safe stats: avoid fatal error if event was deleted or ID mismatch
         $stats = [
-            'total_events' => 1,
-            'active_events' => in_array($adminEvent->status, ['active']) ? 1 : 0,
-            'upcoming_events' => in_array($adminEvent->status, ['upcoming']) ? 1 : 0,
-            'planning_events' => in_array($adminEvent->status, ['planning']) ? 1 : 0,
-            'completed_events' => in_array($adminEvent->status, ['completed']) ? 1 : 0,
-            'worker_openings' => $adminEvent->worker_openings_count ?? 0,
-            'total_applications' => $adminEvent->applications_count ?? 0,
+            'total_events' => $adminEvent ? 1 : 0,
+            'active_events' => ($adminEvent && in_array($adminEvent->status, ['active'])) ? 1 : 0,
+            'upcoming_events' => ($adminEvent && in_array($adminEvent->status, ['upcoming'])) ? 1 : 0,
+            'planning_events' => ($adminEvent && in_array($adminEvent->status, ['planning'])) ? 1 : 0,
+            'completed_events' => ($adminEvent && in_array($adminEvent->status, ['completed'])) ? 1 : 0,
+            'worker_openings' => $adminEvent?->worker_openings_count ?? 0,
+            'total_applications' => $adminEvent?->applications_count ?? 0,
         ];
 
         $calendarMonth = now()->copy();
