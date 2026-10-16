@@ -103,9 +103,19 @@ Event Details <span class="bg-red-500 text-white text-sm px-2 py-1 rounded-full 
                     <div>
                         <label class="text-sm font-medium text-gray-500 uppercase tracking-wide">Location</label>
                         <p class="text-gray-800 mt-1">
-                            {{ $event->city_name }}
-                            @if($event->city_province)
-                            <span class="text-sm text-gray-500">({{ $event->city_province }})</span>
+                            @if($event->city_name && $event->city_name !== 'Lokasi belum ditentukan')
+                                {{ $event->city_name }}
+                                @if($event->city_province)
+                                <span class="text-sm text-gray-500">({{ $event->city_province }})</span>
+                                @endif
+                            @elseif($event->city_province)
+                                {{ $event->city_province }}
+                            @elseif(!empty($event->venue))
+                                {{ $event->venue }}
+                            @elseif(!empty($event->country))
+                                {{ $event->country }}
+                            @else
+                                Lokasi belum ditentukan
                             @endif
                         </p>
                     </div>

@@ -52,9 +52,14 @@ class Event extends Model
     /**
      * Get the city name with fallback
      */
-    public function getCityNameAttribute()
+    public function getCityNameAttribute(): string
     {
-        if ($this->city && is_object($this->city) && isset($this->city->name)) {
+        $rawCity = trim((string) ($this->attributes['city_name'] ?? ''));
+        if ($rawCity !== '' && $rawCity !== 'Lokasi belum ditentukan') {
+            return $rawCity;
+        }
+
+        if ($this->city && is_object($this->city) && isset($this->city->name) && trim((string) $this->city->name) !== '') {
             return $this->city->name;
         }
 
@@ -64,9 +69,14 @@ class Event extends Model
     /**
      * Get the city province with fallback
      */
-    public function getCityProvinceAttribute()
+    public function getCityProvinceAttribute(): ?string
     {
-        if ($this->city && is_object($this->city) && isset($this->city->province)) {
+        $rawProvince = trim((string) ($this->attributes['province_name'] ?? ''));
+        if ($rawProvince !== '') {
+            return $rawProvince;
+        }
+
+        if ($this->city && is_object($this->city) && isset($this->city->province) && trim((string) $this->city->province) !== '') {
             return $this->city->province;
         }
 
