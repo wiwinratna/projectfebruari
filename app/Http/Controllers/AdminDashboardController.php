@@ -12,11 +12,20 @@ class AdminDashboardController extends Controller
 {
     public function index()
     {
-        $eventId = session('admin_event_id');
+        $eventId = (int) session('admin_event_id');
+
+        // Session auto-recovery: reload from DB if session is missing
+        if (!$eventId && session('admin_id')) {
+            $adminUser = User::find((int) session('admin_id'));
+            if ($adminUser && $adminUser->event_id) {
+                $eventId = (int) $adminUser->event_id;
+                session(['admin_event_id' => $eventId]);
+            }
+        }
 
         if ($eventId) {
             // Admin ditugaskan ke 1 event → tampilkan data event tersebut saja
-            $event = Event::with('city')->findOrFail($eventId);
+            $event = Event::with('city')->find($eventId);
 
             $totalEvents = 1;
             $activeEvents = in_array($event->status, ['upcoming', 'active']) ? 1 : 0;
