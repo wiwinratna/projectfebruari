@@ -1,4 +1,4 @@
-﻿@extends('layouts.app')
+@extends('layouts.app')
 
 @section('title', 'Worker Job Openings - ARISE')
 @section('page-title')
@@ -210,8 +210,6 @@
         </div>
     </div>
 </div>
-
-</script>
 <script>
     // Real-time search with debounce
     let searchTimeout;

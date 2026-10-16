@@ -840,106 +840,121 @@ Event Details <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full
             <div class="tab-content hidden" id="attendance-tab">
                 {{-- Attendance Summary Cards --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-4 flex items-center justify-between">
+                    <div class="bg-white border border-gray-200/90 rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-2xs hover:shadow-xs transition">
                         <div>
-                            <p class="text-xs font-bold text-gray-500 uppercase tracking-wider">Total Volunteer Approved</p>
-                            <p class="text-2xl font-extrabold text-gray-900 mt-1">{{ $totalApprovedVolunteers ?? 0 }}</p>
-                            <p class="text-[11px] text-gray-400">Berhak melakukan absensi</p>
+                            <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Total Volunteer Approved</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-gray-900 mt-1">{{ $totalApprovedVolunteers ?? 0 }}</p>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Berhak melakukan absensi</p>
                         </div>
-                        <div class="w-10 h-10 rounded-xl bg-gray-200/70 text-gray-700 flex items-center justify-center text-lg">
+                        <div class="w-11 h-11 rounded-2xl bg-gray-100 text-gray-600 flex items-center justify-center text-lg shrink-0">
                             <i class="fas fa-users"></i>
                         </div>
                     </div>
 
-                    <div class="bg-blue-50/50 border border-blue-200 rounded-xl p-4 flex items-center justify-between">
+                    <div class="bg-white border border-blue-100 rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-2xs hover:shadow-xs transition bg-gradient-to-br from-white to-blue-50/40">
                         <div>
-                            <p class="text-xs font-bold text-blue-600 uppercase tracking-wider">Total Record Absensi</p>
-                            <p class="text-2xl font-extrabold text-blue-800 mt-1">{{ $totalAttendanceRecords ?? 0 }}</p>
-                            <p class="text-[11px] text-blue-600/70">Akumulasi seluruh hari</p>
+                            <p class="text-[11px] font-bold text-blue-600 uppercase tracking-wider">Total Record Absensi</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-blue-800 mt-1">{{ $totalAttendanceRecords ?? 0 }}</p>
+                            <p class="text-[11px] text-blue-600/70 mt-0.5">Akumulasi seluruh hari</p>
                         </div>
-                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg">
+                        <div class="w-11 h-11 rounded-2xl bg-blue-100 text-blue-700 flex items-center justify-center text-lg shrink-0">
                             <i class="fas fa-clipboard-check"></i>
                         </div>
                     </div>
 
-                    <div class="bg-emerald-50/50 border border-emerald-200 rounded-xl p-4 flex items-center justify-between">
+                    <div class="bg-white border border-emerald-100 rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-2xs hover:shadow-xs transition bg-gradient-to-br from-white to-emerald-50/40">
                         <div>
-                            <p class="text-xs font-bold text-emerald-600 uppercase tracking-wider">Selesai (In & Out)</p>
-                            <p class="text-2xl font-extrabold text-emerald-800 mt-1">{{ $completedAttendanceCount ?? 0 }}</p>
-                            <p class="text-[11px] text-emerald-600/70">Check-out tercatat</p>
+                            <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">Selesai (In & Out)</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-emerald-800 mt-1">{{ $completedAttendanceCount ?? 0 }}</p>
+                            <p class="text-[11px] text-emerald-600/70 mt-0.5">Check-out tercatat</p>
                         </div>
-                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg">
+                        <div class="w-11 h-11 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg shrink-0">
                             <i class="fas fa-check-double"></i>
                         </div>
                     </div>
 
-                    <div class="bg-amber-50/50 border border-amber-200 rounded-xl p-4 flex items-center justify-between">
+                    <div class="bg-white border border-amber-100 rounded-2xl p-4 sm:p-5 flex items-center justify-between shadow-2xs hover:shadow-xs transition bg-gradient-to-br from-white to-amber-50/40">
                         <div>
-                            <p class="text-xs font-bold text-amber-600 uppercase tracking-wider">Check-in Saja</p>
-                            <p class="text-2xl font-extrabold text-amber-800 mt-1">{{ $checkInOnlyAttendanceCount ?? 0 }}</p>
-                            <p class="text-[11px] text-amber-600/70">Belum / tidak check-out</p>
+                            <p class="text-[11px] font-bold text-amber-600 uppercase tracking-wider">Check-in Saja</p>
+                            <p class="text-2xl sm:text-3xl font-extrabold text-amber-800 mt-1">{{ $checkInOnlyAttendanceCount ?? 0 }}</p>
+                            <p class="text-[11px] text-amber-600/70 mt-0.5">Belum / tidak check-out</p>
                         </div>
-                        <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg">
+                        <div class="w-11 h-11 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg shrink-0">
                             <i class="fas fa-clock"></i>
                         </div>
                     </div>
                 </div>
 
-                {{-- Filter & Search Toolbar --}}
-                <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 p-3 bg-gray-50 rounded-xl border border-gray-200">
-                    <div class="flex flex-wrap items-center gap-3">
-                        <div class="flex items-center gap-2">
-                            <label for="filter-attendance-date-sa" class="text-xs font-bold text-gray-600 uppercase">
-                                <i class="fas fa-calendar-alt text-blue-600 mr-1"></i> Tanggal:
-                            </label>
-                            <select id="filter-attendance-date-sa" onchange="filterAttendanceRowsSA()"
-                                    class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                                <option value="all">Semua Tanggal</option>
-                                @php
-                                    $uniqueAttendanceDates = ($attendances ?? collect())->map(function($att) use ($event) {
-                                        return $att->attendance_date ? $att->attendance_date->format('Y-m-d') : ($att->check_in_at ? $att->check_in_at->timezone($event->timezone)->format('Y-m-d') : null);
-                                    })->filter()->unique()->sortDesc();
-                                @endphp
-                                @foreach($uniqueAttendanceDates as $ad)
-                                    <option value="{{ $ad }}">{{ \Carbon\Carbon::parse($ad)->translatedFormat('d M Y') }}</option>
-                                @endforeach
-                            </select>
+                {{-- Filter & Search Toolbar (Single Clean Row) --}}
+                <div class="bg-white rounded-xl border border-gray-200 p-3 mb-5 shadow-2xs">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        {{-- Dropdown Filters (Left) --}}
+                        <div class="flex items-center gap-3 shrink-0">
+                            {{-- Date Filter --}}
+                            <div class="flex items-center gap-2">
+                                <label for="filter-attendance-date-sa" class="text-xs font-semibold text-gray-600 whitespace-nowrap">
+                                    Tanggal:
+                                </label>
+                                <select id="filter-attendance-date-sa" onchange="filterAttendanceRowsSA()"
+                                        class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
+                                    <option value="all">Semua Tanggal</option>
+                                    @php
+                                        $uniqueAttendanceDates = ($attendances ?? collect())->map(function($att) use ($event) {
+                                            return $att->attendance_date ? $att->attendance_date->format('Y-m-d') : ($att->check_in_at ? $att->check_in_at->timezone($event->timezone)->format('Y-m-d') : null);
+                                        })->filter()->unique()->sortDesc();
+                                    @endphp
+                                    @foreach($uniqueAttendanceDates as $ad)
+                                        <option value="{{ $ad }}">{{ \Carbon\Carbon::parse($ad)->translatedFormat('d M Y') }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            {{-- Status Filter --}}
+                            <div class="flex items-center gap-2">
+                                <label for="filter-attendance-status-sa" class="text-xs font-semibold text-gray-600 whitespace-nowrap">
+                                    Status:
+                                </label>
+                                <select id="filter-attendance-status-sa" onchange="filterAttendanceRowsSA()"
+                                        class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs text-gray-700 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer">
+                                    <option value="all">Semua Status</option>
+                                    <option value="completed">Completed (In & Out)</option>
+                                    <option value="checkin">Check-in Saja</option>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="flex items-center gap-2">
-                            <label for="filter-attendance-status-sa" class="text-xs font-bold text-gray-600 uppercase">
-                                Status:
-                            </label>
-                            <select id="filter-attendance-status-sa" onchange="filterAttendanceRowsSA()"
-                                    class="border border-gray-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                                <option value="all">Semua Status</option>
-                                <option value="completed">Completed (In & Out)</option>
-                                <option value="checkin">Check-in Saja</option>
-                            </select>
+                        {{-- Search Input (Right) --}}
+                        <div class="relative w-full sm:w-64" style="position: relative;">
+                            <i class="fas fa-search pointer-events-none" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); font-size: 11px; color: #9ca3af; z-index: 2;"></i>
+                            <input type="text" id="filter-attendance-search-sa" oninput="filterAttendanceRowsSA()"
+                                   placeholder="Cari nama atau email..."
+                                   class="w-full pr-3 py-1.5 text-xs bg-white rounded-lg border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 text-gray-800 placeholder:text-gray-400 transition"
+                                   style="padding-left: 36px;">
                         </div>
-                    </div>
-
-                    <div class="relative w-full sm:w-64">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-gray-400">
-                            <i class="fas fa-search text-xs"></i>
-                        </span>
-                        <input type="text" id="filter-attendance-search-sa" oninput="filterAttendanceRowsSA()"
-                               placeholder="Cari nama volunteer..."
-                               class="w-full border border-gray-300 rounded-lg pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
                     </div>
                 </div>
 
                 {{-- Attendance Records Table --}}
-                <div class="border border-gray-200 rounded-xl overflow-hidden">
+                <div class="bg-white rounded-2xl border border-gray-200/90 shadow-2xs overflow-hidden">
                     <div class="overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 text-sm">
-                            <thead class="bg-gray-50 text-xs font-bold uppercase tracking-wider text-gray-500">
+                            <thead class="bg-gray-50/80 text-[11px] font-bold uppercase tracking-wider text-gray-500 border-b border-gray-200">
                                 <tr>
-                                    <th class="px-4 py-3 text-left">Tanggal</th>
-                                    <th class="px-4 py-3 text-left">Volunteer</th>
-                                    <th class="px-4 py-3 text-left">Status</th>
-                                    <th class="px-4 py-3 text-left">Check-in</th>
-                                    <th class="px-4 py-3 text-left">Check-out</th>
+                                    <th class="px-5 py-3.5 text-left whitespace-nowrap">
+                                        <i class="fas fa-calendar-day text-blue-500 mr-1.5"></i> Tanggal
+                                    </th>
+                                    <th class="px-5 py-3.5 text-left">
+                                        <i class="fas fa-user text-indigo-500 mr-1.5"></i> Volunteer
+                                    </th>
+                                    <th class="px-5 py-3.5 text-left whitespace-nowrap">
+                                        <i class="fas fa-check-circle text-emerald-500 mr-1.5"></i> Status
+                                    </th>
+                                    <th class="px-5 py-3.5 text-left whitespace-nowrap">
+                                        <i class="fas fa-sign-in-alt text-emerald-600 mr-1.5"></i> Check-in
+                                    </th>
+                                    <th class="px-5 py-3.5 text-left whitespace-nowrap">
+                                        <i class="fas fa-sign-out-alt text-blue-600 mr-1.5"></i> Check-out
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100 bg-white" id="attendance-tbody-sa">
@@ -950,42 +965,54 @@ Event Details <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full
                                         $isComplete = ($att->check_out_at !== null);
                                         $statusKey = $isComplete ? 'completed' : 'checkin';
                                         $volName = $att->user ? $att->user->name : 'N/A';
+                                        $volEmail = $att->user ? $att->user->email : '';
+                                        $volInitial = strtoupper(substr($volName, 0, 1));
                                     @endphp
-                                    <tr class="row-attendance-sa hover:bg-gray-50 transition"
+                                    <tr class="row-attendance-sa hover:bg-blue-50/30 transition"
                                         data-date="{{ $attDate }}"
                                         data-status="{{ $statusKey }}"
-                                        data-name="{{ strtolower($volName) }}">
-                                        <td class="px-4 py-3 whitespace-nowrap font-semibold text-gray-900 text-xs">
-                                            {{ $attDateFormatted }}
+                                        data-name="{{ strtolower($volName . ' ' . $volEmail) }}">
+                                        <td class="px-5 py-4 whitespace-nowrap">
+                                            <span class="font-bold text-gray-900 text-xs">{{ $attDateFormatted }}</span>
                                         </td>
-                                        <td class="px-4 py-3">
-                                            <div class="font-bold text-gray-900 text-xs">{{ $volName }}</div>
-                                            @if($att->user)
-                                                <div class="text-[11px] text-gray-400">{{ $att->user->email }}</div>
-                                            @endif
+                                        <td class="px-5 py-4">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                                    {{ $volInitial }}
+                                                </div>
+                                                <div>
+                                                    <div class="font-bold text-gray-900 text-xs leading-snug">{{ $volName }}</div>
+                                                    @if($volEmail)
+                                                        <div class="text-[11px] text-gray-400 leading-snug">{{ $volEmail }}</div>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td class="px-4 py-3 whitespace-nowrap">
+                                        <td class="px-5 py-4 whitespace-nowrap">
                                             @if($isComplete)
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                                                    <i class="fas fa-check-double text-[9px]"></i> Selesai
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                                    <i class="fas fa-check-double text-[10px]"></i> Selesai
                                                 </span>
                                             @else
-                                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                                                    <i class="fas fa-clock text-[9px]"></i> Check-in Saja
+                                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                                                    <i class="fas fa-clock text-[10px]"></i> Check-in Saja
                                                 </span>
                                             @endif
                                         </td>
-                                        <td class="px-4 py-3 whitespace-nowrap">
+                                        <td class="px-5 py-4 whitespace-nowrap">
                                             @if($att->check_in_at)
-                                                <div class="flex items-center gap-2">
+                                                <div class="flex items-center gap-2.5">
                                                     <div>
-                                                        <span class="font-mono font-bold text-gray-800 text-xs">{{ $att->check_in_at->timezone($event->timezone)->format('H:i:s') }}</span>
-                                                        <span class="text-[10px] text-gray-400 font-semibold">{{ $event->timezone_label }}</span>
+                                                        <div class="font-mono font-bold text-gray-900 text-xs leading-tight">
+                                                            {{ $att->check_in_at->timezone($event->timezone)->format('H:i:s') }}
+                                                            <span class="text-[10px] text-gray-400 font-semibold">{{ $event->timezone_label }}</span>
+                                                        </div>
+                                                        <div class="text-[10px] text-gray-400">{{ $att->check_in_at->timezone($event->timezone)->format('d M Y') }}</div>
                                                     </div>
                                                     @if($att->check_in_photo_path)
                                                         <button type="button"
                                                                 onclick="previewAttendancePhotoSA('{{ route('super-admin.events.attendance.photo', ['event' => $event->id, 'attendance' => $att->id, 'type' => 'check-in']) }}', 'Check-in: {{ addslashes($volName) }}', '{{ $attDateFormatted }} {{ $att->check_in_at->timezone($event->timezone)->format('H:i:s') }} {{ $event->timezone_label }}')"
-                                                                class="px-2 py-0.5 rounded-md bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold border border-emerald-200 transition flex items-center gap-1">
+                                                                class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 transition flex items-center gap-1 shrink-0">
                                                             <i class="fas fa-camera"></i> Foto
                                                         </button>
                                                     @endif
@@ -994,17 +1021,20 @@ Event Details <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full
                                                 <span class="text-gray-300 text-xs">-</span>
                                             @endif
                                         </td>
-                                        <td class="px-4 py-3 whitespace-nowrap">
+                                        <td class="px-5 py-4 whitespace-nowrap">
                                             @if($att->check_out_at)
-                                                <div class="flex items-center gap-2">
+                                                <div class="flex items-center gap-2.5">
                                                     <div>
-                                                        <span class="font-mono font-bold text-gray-800 text-xs">{{ $att->check_out_at->timezone($event->timezone)->format('H:i:s') }}</span>
-                                                        <span class="text-[10px] text-gray-400 font-semibold">{{ $event->timezone_label }}</span>
+                                                        <div class="font-mono font-bold text-gray-900 text-xs leading-tight">
+                                                            {{ $att->check_out_at->timezone($event->timezone)->format('H:i:s') }}
+                                                            <span class="text-[10px] text-gray-400 font-semibold">{{ $event->timezone_label }}</span>
+                                                        </div>
+                                                        <div class="text-[10px] text-gray-400">{{ $att->check_out_at->timezone($event->timezone)->format('d M Y') }}</div>
                                                     </div>
                                                     @if($att->check_out_photo_path)
                                                         <button type="button"
                                                                 onclick="previewAttendancePhotoSA('{{ route('super-admin.events.attendance.photo', ['event' => $event->id, 'attendance' => $att->id, 'type' => 'check-out']) }}', 'Check-out: {{ addslashes($volName) }}', '{{ $attDateFormatted }} {{ $att->check_out_at->timezone($event->timezone)->format('H:i:s') }} {{ $event->timezone_label }}')"
-                                                                class="px-2 py-0.5 rounded-md bg-blue-50 hover:bg-blue-100 text-blue-700 text-[11px] font-bold border border-blue-200 transition flex items-center gap-1">
+                                                                class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200 transition flex items-center gap-1 shrink-0">
                                                             <i class="fas fa-camera"></i> Foto
                                                         </button>
                                                     @endif
@@ -1016,14 +1046,30 @@ Event Details <span class="bg-blue-500 text-white text-sm px-2 py-1 rounded-full
                                     </tr>
                                 @empty
                                     <tr id="empty-attendance-row-sa">
-                                        <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500">
-                                            Belum ada data absensi untuk event ini.
+                                        <td colspan="5" class="px-6 py-12 text-center">
+                                            <div class="max-w-xs mx-auto flex flex-col items-center">
+                                                <div class="w-14 h-14 rounded-2xl bg-gray-100 border border-gray-200 flex items-center justify-center text-gray-400 mb-3 shadow-2xs">
+                                                    <i class="fas fa-calendar-times text-2xl text-gray-400"></i>
+                                                </div>
+                                                <h4 class="text-sm font-bold text-gray-800">Belum Ada Data Absensi</h4>
+                                                <p class="text-xs text-gray-500 mt-1 leading-relaxed">
+                                                    Belum ada volunteer yang melakukan absensi atau check-in untuk event ini.
+                                                </p>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforelse
                                 <tr id="no-filtered-attendance-sa" class="hidden">
-                                    <td colspan="5" class="px-4 py-8 text-center text-sm text-gray-500">
-                                        Tidak ada catatan absensi yang sesuai filter.
+                                    <td colspan="5" class="px-6 py-12 text-center">
+                                        <div class="max-w-xs mx-auto flex flex-col items-center">
+                                            <div class="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-500 mb-3 shadow-2xs">
+                                                <i class="fas fa-search text-xl"></i>
+                                            </div>
+                                            <h4 class="text-sm font-bold text-gray-800">Tidak Ada Hasil Ditemukan</h4>
+                                            <p class="text-xs text-gray-500 mt-1 leading-relaxed">
+                                                Tidak ada catatan absensi yang sesuai dengan filter tanggal, status, atau pencarian Anda.
+                                            </p>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>

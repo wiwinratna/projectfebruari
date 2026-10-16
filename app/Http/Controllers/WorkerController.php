@@ -19,7 +19,7 @@ class WorkerController extends Controller
         }
 
         // Get admin's assigned event
-        $adminEventId = session('admin_event_id');
+        $adminEventId = (int) session('admin_event_id');
         if (!$adminEventId) {
             return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.']);
         }
@@ -50,9 +50,7 @@ class WorkerController extends Controller
             'total_openings' => $allOpenings->count(),
             'active_openings' => $openCount,
             'closed_openings' => $closedCount,
-            'total_applications' => Application::whereHas('opening', function($q) use ($adminEventId) {
-                $q->where('event_id', $adminEventId);
-            })->count(),
+            'total_applications' => $allOpenings->sum('applications_count'),
             'positions_filled' => $allOpenings->sum('slots_filled'),
         ];
 
@@ -120,7 +118,7 @@ class WorkerController extends Controller
         }
 
         // Get admin's assigned event
-        $adminEventId = session('admin_event_id');
+        $adminEventId = (int) session('admin_event_id');
         if (!$adminEventId) {
             return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.']);
         }
@@ -148,7 +146,7 @@ class WorkerController extends Controller
         }
 
         // Get admin's assigned event
-        $adminEventId = session('admin_event_id');
+        $adminEventId = (int) session('admin_event_id');
         if (!$adminEventId) {
             return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun.']);
         }
@@ -204,8 +202,8 @@ class WorkerController extends Controller
         }
 
         // Check if opening belongs to admin's assigned event
-        $adminEventId = session('admin_event_id');
-        if ($worker->event_id !== $adminEventId) {
+        $adminEventId = (int) session('admin_event_id');
+        if ((int) $worker->event_id !== $adminEventId) {
             return back()->withErrors(['message' => 'You are not authorized to edit this opening.']);
         }
 
@@ -234,8 +232,8 @@ class WorkerController extends Controller
         }
 
         // Check if opening belongs to admin's assigned event
-        $adminEventId = session('admin_event_id');
-        if ($worker->event_id !== $adminEventId) {
+        $adminEventId = (int) session('admin_event_id');
+        if ((int) $worker->event_id !== $adminEventId) {
             return back()->withErrors(['message' => 'You are not authorized to update this opening.']);
         }
 
@@ -263,37 +261,36 @@ class WorkerController extends Controller
         }
 
         $worker->update([
-            'title' => $validated['title'],
-            'job_category_id' => $validated['job_category_id'],
-            'event_id' => $adminEventId,
-            'description' => $validated['description'],
+            'title'                => $validated['title'],
+            'job_category_id'      => $validated['job_category_id'],
+            'event_id'             => $adminEventId,
+            'description'          => $validated['description'] ?? null,
             'application_deadline' => $validated['application_deadline'],
-            'slots_total' => $validated['slots_total'],
-            'slots_filled' => $validated['slots_filled'] ?? 0,
-            'status' => $validated['status'],
-            'requirements' => $requirements,
-            'required_skills' => $validated['required_skills'] ?? [],
-            'preferred_skills' => $validated['preferred_skills'] ?? [],
-            'benefits' => $validated['benefits'],
+            'slots_total'          => (int) $validated['slots_total'],
+            'slots_filled'         => (int) ($validated['slots_filled'] ?? 0),
+            'status'               => $validated['status'],
+            'requirements'         => $requirements ?: [],
+            'required_skills'      => $validated['required_skills'] ?? [],
+            'preferred_skills'     => $validated['preferred_skills'] ?? [],
+            'benefits'             => $validated['benefits'] ?? null,
         ]);
         $worker->accessCodes()->sync($request->input('access_code_ids', []));
-        // 🔥 AUTO-SYNC AKSES KARTU (kartu yang sudah dibuat dari opening ini)
-        $newAccessIds = $worker->accessCodes()->pluck('event_access_codes.id')->all();
 
-        // cards table is linked through applications (cards.application_id -> applications.id)
-        // Guard sync for current schema: Card model does not necessarily expose accessCodes() relation.
-        if (method_exists(Card::class, 'accessCodes')) {
-            Card::whereHas('application', function ($q) use ($worker) {
-                $q->where('worker_opening_id', $worker->id);
-            })
-                ->get()
-                ->each(function ($card) use ($newAccessIds) {
-                    $card->accessCodes()->sync($newAccessIds);
-                });
-        } else {
-            Log::info('Worker access auto-sync skipped: Card::accessCodes relation not available in current schema.', [
-                'worker_opening_id' => $worker->id,
-            ]);
+        // Auto-sync akses kartu jika model Card memiliki relasi accessCodes
+        try {
+            $newAccessIds = $worker->accessCodes()->pluck('event_access_codes.id')->all();
+
+            if (method_exists(Card::class, 'accessCodes')) {
+                Card::whereHas('application', function ($q) use ($worker) {
+                    $q->where('worker_opening_id', $worker->id);
+                })
+                    ->get()
+                    ->each(function ($card) use ($newAccessIds) {
+                        $card->accessCodes()->sync($newAccessIds);
+                    });
+            }
+        } catch (\Throwable $e) {
+            // Abaikan agar update opening tetap berhasil disimpan
         }
 
 
@@ -317,8 +314,8 @@ class WorkerController extends Controller
         }
 
         // Check if opening belongs to admin's assigned event
-        $adminEventId = session('admin_event_id');
-        if ($worker->event_id !== $adminEventId) {
+        $adminEventId = (int) session('admin_event_id');
+        if ((int) $worker->event_id !== $adminEventId) {
             return back()->withErrors(['message' => 'You are not authorized to view this opening.']);
         }
 

@@ -326,7 +326,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 'admin_username' => $user->username,
                 'admin_role' => $user->role,
                 'admin_login_time' => now(),
-                'admin_event_id' => $user->event_id,
+                'admin_event_id' => (int) $user->event_id,
                 'admin_event_name' => $user->event->title ?? 'Unknown Event',
             ]);
 

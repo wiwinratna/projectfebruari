@@ -18,7 +18,7 @@ class EventAttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        $eventId = session('admin_event_id');
+        $eventId = (int) session('admin_event_id');
         
         if (!$eventId) {
             return redirect()->route('admin.dashboard')
@@ -123,9 +123,9 @@ class EventAttendanceController extends Controller
      */
     public function photo(EventAttendance $attendance, $type)
     {
-        $eventId = session('admin_event_id');
+        $eventId = (int) session('admin_event_id');
         
-        if (!$eventId || $attendance->event_id !== $eventId) {
+        if (!$eventId || (int)$attendance->event_id !== $eventId) {
             abort(403, 'Anda tidak memiliki akses untuk melihat foto absensi event ini.');
         }
 
