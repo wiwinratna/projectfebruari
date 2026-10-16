@@ -50,9 +50,7 @@ class WorkerController extends Controller
             'total_openings' => $allOpenings->count(),
             'active_openings' => $openCount,
             'closed_openings' => $closedCount,
-            'total_applications' => Application::whereHas('opening', function($q) use ($adminEventId) {
-                $q->where('event_id', $adminEventId);
-            })->count(),
+            'total_applications' => $allOpenings->sum('applications_count'),
             'positions_filled' => $allOpenings->sum('slots_filled'),
         ];
 
@@ -277,23 +275,22 @@ class WorkerController extends Controller
             'benefits' => $validated['benefits'],
         ]);
         $worker->accessCodes()->sync($request->input('access_code_ids', []));
-        // 🔥 AUTO-SYNC AKSES KARTU (kartu yang sudah dibuat dari opening ini)
-        $newAccessIds = $worker->accessCodes()->pluck('event_access_codes.id')->all();
 
-        // cards table is linked through applications (cards.application_id -> applications.id)
-        // Guard sync for current schema: Card model does not necessarily expose accessCodes() relation.
-        if (method_exists(Card::class, 'accessCodes')) {
-            Card::whereHas('application', function ($q) use ($worker) {
-                $q->where('worker_opening_id', $worker->id);
-            })
-                ->get()
-                ->each(function ($card) use ($newAccessIds) {
-                    $card->accessCodes()->sync($newAccessIds);
-                });
-        } else {
-            Log::info('Worker access auto-sync skipped: Card::accessCodes relation not available in current schema.', [
-                'worker_opening_id' => $worker->id,
-            ]);
+        // Auto-sync akses kartu jika model Card memiliki relasi accessCodes
+        try {
+            $newAccessIds = $worker->accessCodes()->pluck('event_access_codes.id')->all();
+
+            if (method_exists(Card::class, 'accessCodes')) {
+                Card::whereHas('application', function ($q) use ($worker) {
+                    $q->where('worker_opening_id', $worker->id);
+                })
+                    ->get()
+                    ->each(function ($card) use ($newAccessIds) {
+                        $card->accessCodes()->sync($newAccessIds);
+                    });
+            }
+        } catch (\Throwable $e) {
+            // Abaikan agar update opening tetap berhasil disimpan
         }
 
 
