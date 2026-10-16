@@ -19,7 +19,7 @@ class WorkerController extends Controller
         }
 
         // Get admin's assigned event
-        $adminEventId = session('admin_event_id');
+        $adminEventId = (int) session('admin_event_id');
         if (!$adminEventId) {
             return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.']);
         }
@@ -118,7 +118,7 @@ class WorkerController extends Controller
         }
 
         // Get admin's assigned event
-        $adminEventId = session('admin_event_id');
+        $adminEventId = (int) session('admin_event_id');
         if (!$adminEventId) {
             return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.']);
         }
@@ -146,7 +146,7 @@ class WorkerController extends Controller
         }
 
         // Get admin's assigned event
-        $adminEventId = session('admin_event_id');
+        $adminEventId = (int) session('admin_event_id');
         if (!$adminEventId) {
             return back()->withErrors(['message' => 'Akun admin belum ditugaskan ke event manapun.']);
         }
@@ -202,8 +202,8 @@ class WorkerController extends Controller
         }
 
         // Check if opening belongs to admin's assigned event
-        $adminEventId = session('admin_event_id');
-        if ($worker->event_id !== $adminEventId) {
+        $adminEventId = (int) session('admin_event_id');
+        if ((int) $worker->event_id !== $adminEventId) {
             return back()->withErrors(['message' => 'You are not authorized to edit this opening.']);
         }
 
@@ -232,8 +232,8 @@ class WorkerController extends Controller
         }
 
         // Check if opening belongs to admin's assigned event
-        $adminEventId = session('admin_event_id');
-        if ($worker->event_id !== $adminEventId) {
+        $adminEventId = (int) session('admin_event_id');
+        if ((int) $worker->event_id !== $adminEventId) {
             return back()->withErrors(['message' => 'You are not authorized to update this opening.']);
         }
 
@@ -261,18 +261,18 @@ class WorkerController extends Controller
         }
 
         $worker->update([
-            'title' => $validated['title'],
-            'job_category_id' => $validated['job_category_id'],
-            'event_id' => $adminEventId,
-            'description' => $validated['description'],
+            'title'                => $validated['title'],
+            'job_category_id'      => $validated['job_category_id'],
+            'event_id'             => $adminEventId,
+            'description'          => $validated['description'] ?? null,
             'application_deadline' => $validated['application_deadline'],
-            'slots_total' => $validated['slots_total'],
-            'slots_filled' => $validated['slots_filled'] ?? 0,
-            'status' => $validated['status'],
-            'requirements' => $requirements,
-            'required_skills' => $validated['required_skills'] ?? [],
-            'preferred_skills' => $validated['preferred_skills'] ?? [],
-            'benefits' => $validated['benefits'],
+            'slots_total'          => (int) $validated['slots_total'],
+            'slots_filled'         => (int) ($validated['slots_filled'] ?? 0),
+            'status'               => $validated['status'],
+            'requirements'         => $requirements ?: [],
+            'required_skills'      => $validated['required_skills'] ?? [],
+            'preferred_skills'     => $validated['preferred_skills'] ?? [],
+            'benefits'             => $validated['benefits'] ?? null,
         ]);
         $worker->accessCodes()->sync($request->input('access_code_ids', []));
 
@@ -314,8 +314,8 @@ class WorkerController extends Controller
         }
 
         // Check if opening belongs to admin's assigned event
-        $adminEventId = session('admin_event_id');
-        if ($worker->event_id !== $adminEventId) {
+        $adminEventId = (int) session('admin_event_id');
+        if ((int) $worker->event_id !== $adminEventId) {
             return back()->withErrors(['message' => 'You are not authorized to view this opening.']);
         }
 

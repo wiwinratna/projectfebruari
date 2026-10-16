@@ -317,6 +317,13 @@ $sidebarEventLogoUrl = url('/media/' . ltrim($sidebarEvent->logo_path, '/'));
                     </a>
                 </li>
 
+                <li class="menu-item {{ Request::is('admin/attendance*') ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ route('admin.attendance.index') }}">
+                        <i class="fas fa-calendar-check mr-3"></i>
+                        <span>Attendance</span>
+                    </a>
+                </li>
+
                 {{-- Certificates --}}
                 <li class="px-4 py-1 mt-2.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">Certificates</li>
 

@@ -25,7 +25,7 @@ class EventController extends Controller
         }
 
         // Get admin's assigned event
-        $adminEventId = session('admin_event_id');
+        $adminEventId = (int) session('admin_event_id');
 
         // If admin nicht has assigned event, redirect to login
         if (!$adminEventId) {
@@ -33,7 +33,11 @@ class EventController extends Controller
         }
 
         // Automatically update all event statuses based on current date
-        EventStatusService::updateAllStatuses();
+        try {
+            EventStatusService::updateAllStatuses();
+        } catch (\Throwable $e) {
+            // Abaikan jika status update gagal — halaman tetap tampil
+        }
 
         $searchQuery = $request->get('search');
         $statusFilter = $request->get('status');
@@ -192,8 +196,8 @@ class EventController extends Controller
         }
 
         // Check if admin is allowed to view this event
-        $adminEventId = session('admin_event_id');
-        if ($adminEventId && $event->id !== $adminEventId) {
+        $adminEventId = (int) session('admin_event_id');
+        if ($adminEventId && (int) $event->id !== $adminEventId) {
             return back()->withErrors(['message' => 'You are not authorized to view this event.']);
         }
         $event->load([
@@ -224,8 +228,8 @@ class EventController extends Controller
         }
 
         // Check if admin is allowed to edit this event
-        $adminEventId = session('admin_event_id');
-        if ($adminEventId && $event->id !== $adminEventId) {
+        $adminEventId = (int) session('admin_event_id');
+        if ($adminEventId && (int) $event->id !== $adminEventId) {
             return back()->withErrors(['message' => 'You are not authorized to edit this event.']);
         }
 
@@ -247,8 +251,8 @@ class EventController extends Controller
         }
 
         // Check if admin is allowed to update this event
-        $adminEventId = session('admin_event_id');
-        if ($adminEventId && $event->id !== $adminEventId) {
+        $adminEventId = (int) session('admin_event_id');
+        if ($adminEventId && (int) $event->id !== $adminEventId) {
             return back()->withErrors(['message' => 'You are not authorized to update this event.']);
         }
 
@@ -290,8 +294,8 @@ class EventController extends Controller
         }
 
         // Check if admin is allowed to delete this event
-        $adminEventId = session('admin_event_id');
-        if ($adminEventId && $event->id !== $adminEventId) {
+        $adminEventId = (int) session('admin_event_id');
+        if ($adminEventId && (int) $event->id !== $adminEventId) {
             return response()->json(['success' => false, 'message' => 'You are not authorized to delete this event.'], 403);
         }
 
