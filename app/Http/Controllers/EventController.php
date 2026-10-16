@@ -41,9 +41,12 @@ class EventController extends Controller
             return redirect()->route('admin.dashboard')->with('error', 'Akun admin belum ditugaskan ke event manapun. Hubungi super admin.');
         }
 
-        // Automatically update all event statuses based on current date
+        // Automatically update only the admin's assigned event status based on current date
         try {
-            EventStatusService::updateAllStatuses();
+            $adminEventModel = Event::find($adminEventId);
+            if ($adminEventModel) {
+                EventStatusService::updateStatus($adminEventModel);
+            }
         } catch (\Throwable $e) {
             // Abaikan jika status update gagal — halaman tetap tampil
         }
@@ -291,7 +294,7 @@ class EventController extends Controller
         // Automatically calculate and update status based on updated dates
         EventStatusService::updateStatus($event);
 
-        return redirect()->route('admin.events.index', ['flash' => 'updated', 'name' => $event->title]);
+        return redirect()->route('admin.events.index', ['status' => 'all', 'flash' => 'updated', 'name' => $event->title]);
     }
 
     /**

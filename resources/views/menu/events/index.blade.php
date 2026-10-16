@@ -1,4 +1,4 @@
-﻿@extends('layouts.app') {{-- Memperluas master layout --}}
+@extends('layouts.app') {{-- Memperluas master layout --}}
 
 @section('title', 'Events & Competitions - KOI')
 @section('page-title')
@@ -655,20 +655,12 @@
 
         if (flash === 'created' && name) {
             showFlashMessage(`Event "${name}" created successfully!`, 'status');
-            // Remove parameters from URL and refresh page
-            setTimeout(() => {
-                const newUrl = window.location.pathname;
-                window.history.replaceState({}, document.title, newUrl);
-                window.location.reload();
-            }, 500);
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
         } else if (flash === 'updated' && name) {
             showFlashMessage(`Event "${name}" updated successfully!`, 'status');
-            // Remove parameters from URL and refresh page
-            setTimeout(() => {
-                const newUrl = window.location.pathname;
-                window.history.replaceState({}, document.title, newUrl);
-                window.location.reload();
-            }, 500);
+            const newUrl = window.location.pathname;
+            window.history.replaceState({}, document.title, newUrl);
         }
     }
 

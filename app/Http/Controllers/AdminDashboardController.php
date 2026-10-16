@@ -27,8 +27,8 @@ class AdminDashboardController extends Controller
             // Admin ditugaskan ke 1 event → tampilkan data event tersebut saja
             $event = Event::with('city')->find($eventId);
 
-            $totalEvents = 1;
-            $activeEvents = in_array($event->status, ['upcoming', 'active']) ? 1 : 0;
+            $totalEvents = $event ? 1 : 0;
+            $activeEvents = ($event && in_array($event->status, ['upcoming', 'active'])) ? 1 : 0;
             $totalCandidates = Application::whereHas('opening', function ($q) use ($eventId) {
                 $q->where('event_id', $eventId);
             })->distinct('user_id')->count('user_id');
