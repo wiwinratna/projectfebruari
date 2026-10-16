@@ -349,72 +349,71 @@
                                              data-total="{{ $totalDays }} Hari Hadir"
                                              data-photo="{{ $photoUrl ?? '' }}"
                                              data-initial="{{ strtoupper(substr($p->name, 0, 1)) }}">
-                                            <div class="space-y-3">
+                                            <div class="space-y-2">
                                                 @foreach($userAttendances as $att)
                                                     @php
                                                         $dFormatted = $att->attendance_date ? $att->attendance_date->translatedFormat('l, d F Y') : ($att->check_in_at ? $att->check_in_at->timezone($event->timezone)->translatedFormat('l, d F Y') : '-');
                                                         $isComplete = ($att->check_out_at !== null);
                                                     @endphp
-                                                    <div class="bg-white rounded-2xl border {{ $isComplete ? 'border-blue-100 shadow-2xs' : 'border-emerald-100 shadow-2xs' }} p-4 hover:shadow-xs transition">
-                                                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
-                                                            <div class="flex items-center gap-2.5">
-                                                                <div class="w-8 h-8 rounded-xl {{ $isComplete ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600' }} flex items-center justify-center text-xs font-bold">
+                                                    <div class="bg-white rounded-xl border {{ $isComplete ? 'border-blue-100' : 'border-emerald-100' }} p-3 hover:shadow-xs transition">
+                                                        <div class="flex items-center justify-between pb-2 mb-2 border-b border-gray-100">
+                                                            <div class="flex items-center gap-2">
+                                                                <div class="w-6 h-6 rounded-lg {{ $isComplete ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600' }} flex items-center justify-center text-[10px]">
                                                                     <i class="fas fa-calendar-day"></i>
                                                                 </div>
                                                                 <div>
-                                                                    <span class="text-sm font-bold text-gray-900 block leading-tight">{{ $dFormatted }}</span>
-                                                                    <span class="text-[11px] text-gray-400">Absensi Harian Event</span>
+                                                                    <span class="text-xs font-bold text-gray-900 block leading-tight">{{ $dFormatted }}</span>
                                                                 </div>
                                                             </div>
                                                             @if($isComplete)
-                                                                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
-                                                                    <i class="fas fa-check-double text-[10px]"></i> Lengkap
+                                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-full">
+                                                                    <i class="fas fa-check-double"></i> Lengkap
                                                                 </span>
                                                             @else
-                                                                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-                                                                    <i class="fas fa-sign-in-alt text-[10px]"></i> Check-in Saja
+                                                                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+                                                                    <i class="fas fa-sign-in-alt"></i> Check-in Saja
                                                                 </span>
                                                             @endif
                                                         </div>
 
-                                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                                        <div class="grid grid-cols-2 gap-2">
                                                             {{-- Check-in Box --}}
-                                                            <div class="bg-emerald-50/40 rounded-xl p-3 border border-emerald-100/70">
-                                                                <div class="flex items-center justify-between mb-1.5">
-                                                                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
-                                                                        <i class="fas fa-arrow-right-to-bracket text-[10px]"></i> Check-in
+                                                            <div class="bg-emerald-50/40 rounded-lg p-2 border border-emerald-100/70">
+                                                                <div class="flex items-center justify-between mb-1">
+                                                                    <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
+                                                                        <i class="fas fa-arrow-right-to-bracket text-[9px]"></i> Check-in
                                                                     </span>
                                                                     @if($att->check_in_photo_path)
                                                                         <button type="button"
                                                                                 onclick="previewAttendancePhoto('{{ route('admin.attendance.photo', ['attendance' => $att->id, 'type' => 'check-in']) }}', 'Foto Check-in: {{ addslashes($p->name) }}', '{{ $dFormatted }} • {{ $att->check_in_at ? $att->check_in_at->timezone($event->timezone)->format('H:i:s') : '' }} {{ $event->timezone_label }}')"
-                                                                                class="px-2 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-2xs">
-                                                                            <i class="fas fa-camera text-[10px]"></i> Foto
+                                                                                class="px-1.5 py-0.5 rounded bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold transition flex items-center gap-0.5">
+                                                                            <i class="fas fa-camera text-[9px]"></i> Foto
                                                                         </button>
                                                                     @endif
                                                                 </div>
-                                                                <div class="text-sm font-extrabold text-gray-900 font-mono">
+                                                                <div class="text-xs font-extrabold text-gray-900 font-mono">
                                                                     {{ $att->check_in_at ? $att->check_in_at->timezone($event->timezone)->format('H:i:s') : '-' }}
-                                                                    <span class="text-[10px] font-normal text-gray-500">{{ $att->check_in_at ? $event->timezone_label : '' }}</span>
+                                                                    <span class="text-[9px] font-normal text-gray-400">{{ $att->check_in_at ? $event->timezone_label : '' }}</span>
                                                                 </div>
                                                             </div>
 
                                                             {{-- Check-out Box --}}
-                                                            <div class="bg-blue-50/40 rounded-xl p-3 border border-blue-100/70">
-                                                                <div class="flex items-center justify-between mb-1.5">
-                                                                    <span class="text-[11px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1">
-                                                                        <i class="fas fa-arrow-right-from-bracket text-[10px]"></i> Check-out
+                                                            <div class="bg-blue-50/40 rounded-lg p-2 border border-blue-100/70">
+                                                                <div class="flex items-center justify-between mb-1">
+                                                                    <span class="text-[10px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1">
+                                                                        <i class="fas fa-arrow-right-from-bracket text-[9px]"></i> Check-out
                                                                     </span>
                                                                     @if($att->check_out_photo_path)
                                                                         <button type="button"
                                                                                 onclick="previewAttendancePhoto('{{ route('admin.attendance.photo', ['attendance' => $att->id, 'type' => 'check-out']) }}', 'Foto Check-out: {{ addslashes($p->name) }}', '{{ $dFormatted }} • {{ $att->check_out_at ? $att->check_out_at->timezone($event->timezone)->format('H:i:s') : '' }} {{ $event->timezone_label }}')"
-                                                                                class="px-2 py-0.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-2xs">
-                                                                            <i class="fas fa-camera text-[10px]"></i> Foto
+                                                                                class="px-1.5 py-0.5 rounded bg-blue-600 hover:bg-blue-700 text-white text-[10px] font-bold transition flex items-center gap-0.5">
+                                                                            <i class="fas fa-camera text-[9px]"></i> Foto
                                                                         </button>
                                                                     @endif
                                                                 </div>
-                                                                <div class="text-sm font-extrabold text-gray-900 font-mono">
+                                                                <div class="text-xs font-extrabold text-gray-900 font-mono">
                                                                     {{ $att->check_out_at ? $att->check_out_at->timezone($event->timezone)->format('H:i:s') : '-' }}
-                                                                    <span class="text-[10px] font-normal text-gray-500">{{ $att->check_out_at ? $event->timezone_label : '' }}</span>
+                                                                    <span class="text-[9px] font-normal text-gray-400">{{ $att->check_out_at ? $event->timezone_label : '' }}</span>
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -452,46 +451,46 @@
 </div>
 
 {{-- Attendance History Modal --}}
-<div id="attendance-history-modal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-xs hidden p-3 sm:p-6 overflow-y-auto">
-    <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[85vh] animate-scale-in">
+<div id="attendance-history-modal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-xs hidden p-3 sm:p-4">
+    <div class="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col" style="max-height: min(82vh, 680px);">
         {{-- Header --}}
-        <div class="relative px-6 py-4.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white shrink-0">
-            <button type="button" onclick="closeAttendanceHistoryModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition cursor-pointer">
-                <i class="fas fa-times text-sm"></i>
+        <div class="relative px-5 py-3.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white shrink-0">
+            <button type="button" onclick="closeAttendanceHistoryModal()" class="absolute top-3.5 right-4 w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition cursor-pointer">
+                <i class="fas fa-times text-xs"></i>
             </button>
-            <div class="flex items-center gap-3.5">
-                <div id="history-modal-avatar" class="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-white/30 shrink-0 shadow-md flex items-center justify-center bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-lg">
+            <div class="flex items-center gap-3">
+                <div id="history-modal-avatar" class="w-10 h-10 rounded-xl overflow-hidden ring-2 ring-white/30 shrink-0 shadow-md flex items-center justify-center bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-base">
                 </div>
                 <div class="min-w-0 pr-8">
-                    <div class="flex flex-wrap items-center gap-2">
-                        <h3 id="history-modal-name" class="text-base sm:text-lg font-bold text-white truncate"></h3>
-                        <span id="history-modal-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/15 text-blue-200 border border-white/20"></span>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <h3 id="history-modal-name" class="text-sm font-bold text-white truncate"></h3>
+                        <span id="history-modal-badge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/15 text-blue-200 border border-white/20"></span>
                     </div>
-                    <p id="history-modal-email" class="text-xs text-blue-200/80 mt-0.5 truncate"></p>
-                    <p id="history-modal-username" class="text-[11px] font-mono text-blue-300/70 mt-0.5"></p>
+                    <p id="history-modal-email" class="text-[11px] text-blue-200/80 mt-0.5 truncate"></p>
+                    <p id="history-modal-username" class="text-[10px] font-mono text-blue-300/70 mt-0.5"></p>
                 </div>
             </div>
         </div>
 
         {{-- Subheader / Notice --}}
-        <div class="px-6 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500 shrink-0">
-            <span class="font-bold uppercase tracking-wider text-[11px] text-gray-600 flex items-center gap-1.5">
-                <i class="fas fa-history text-indigo-600"></i> Riwayat Absensi Kehadiran
+        <div class="px-5 py-2 bg-gray-50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500 shrink-0">
+            <span class="font-bold uppercase tracking-wider text-[10px] text-gray-600 flex items-center gap-1.5">
+                <i class="fas fa-history text-indigo-600 text-[10px]"></i> Riwayat Absensi
             </span>
-            <span class="text-[11px] text-gray-500"><i class="fas fa-clock text-gray-400 mr-1"></i>Zona: {{ $event->timezone_label }}</span>
+            <span class="text-[10px] text-gray-500"><i class="fas fa-clock text-gray-400 mr-1"></i>{{ $event->timezone_label }}</span>
         </div>
 
         {{-- Modal Content Body (Scrollable with min-h-0) --}}
-        <div id="history-modal-body" class="p-4 sm:p-6 overflow-y-auto min-h-0 flex-1 bg-gray-50/50 space-y-3">
+        <div id="history-modal-body" class="px-4 py-3 overflow-y-auto min-h-0 flex-1 bg-gray-50/50 space-y-2.5">
             {{-- Content is dynamically cloned from hidden data template --}}
         </div>
 
         {{-- Modal Footer --}}
-        <div class="px-6 py-3.5 bg-white border-t border-gray-100 flex items-center justify-between shrink-0">
-            <span class="text-xs text-gray-500 flex items-center gap-1.5">
-                <i class="fas fa-shield-alt text-emerald-600"></i> Klik tombol <b>Foto</b> untuk melihat bukti check-in/out
+        <div class="px-5 py-2.5 bg-white border-t border-gray-100 flex items-center justify-between shrink-0">
+            <span class="text-[11px] text-gray-500 flex items-center gap-1.5">
+                <i class="fas fa-shield-alt text-emerald-600"></i> Klik <b>Foto</b> untuk bukti absensi
             </span>
-            <button type="button" onclick="closeAttendanceHistoryModal()" class="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition">
+            <button type="button" onclick="closeAttendanceHistoryModal()" class="px-4 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition">
                 Tutup
             </button>
         </div>
