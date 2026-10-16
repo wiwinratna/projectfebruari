@@ -86,13 +86,16 @@ class EventAttendanceController extends Controller
             $notCheckedInCount = max(0, $totalApproved - $uniqueAttendedCount);
         }
 
-        // Ambil data partisipan + eager load absensi
+        // Ambil data partisipan + eager load absensi & profile
         $query = User::whereIn('id', $allRelevantUserIds)
-            ->with(['eventAttendances' => function($q) use ($eventId) {
-                $q->where('event_id', $eventId)
-                  ->orderBy('attendance_date', 'desc')
-                  ->orderBy('check_in_at', 'desc');
-            }]);
+            ->with([
+                'profile',
+                'eventAttendances' => function($q) use ($eventId) {
+                    $q->where('event_id', $eventId)
+                      ->orderBy('attendance_date', 'desc')
+                      ->orderBy('check_in_at', 'desc');
+                }
+            ]);
 
         // Filter pencarian nama / username / email
         if ($search = $request->get('search')) {

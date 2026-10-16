@@ -181,6 +181,17 @@
                             $userAttendances = $p->eventAttendances;
                             $totalDays = $userAttendances->count();
 
+                            // Foto Profil Partisipan
+                            $photo = $p->profile?->profile_photo;
+                            $photoUrl = null;
+                            if ($photo) {
+                                $cleanPhoto = ltrim((string)$photo, '/');
+                                if (!str_starts_with($cleanPhoto, 'http') && !str_starts_with($cleanPhoto, 'profile_photos/')) {
+                                    $cleanPhoto = 'profile_photos/' . $cleanPhoto;
+                                }
+                                $photoUrl = str_starts_with($cleanPhoto, 'http') ? $cleanPhoto : asset('storage/' . $cleanPhoto);
+                            }
+
                             if ($selectedDate !== 'all') {
                                 $currentAttendance = $userAttendances->first(function($att) use ($selectedDate, $event) {
                                     $d = $att->attendance_date ? $att->attendance_date->format('Y-m-d') : ($att->check_in_at ? $att->check_in_at->timezone($event->timezone)->format('Y-m-d') : null);
@@ -192,8 +203,20 @@
                             {{-- Partisipan Info --}}
                             <td class="px-6 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-sm flex items-center justify-center shrink-0 shadow-xs">
-                                        {{ strtoupper(substr($p->name, 0, 1)) }}
+                                    <div class="relative w-10 h-10 shrink-0">
+                                        @if($photoUrl)
+                                            <img src="{{ $photoUrl }}" 
+                                                 alt="{{ $p->name }}" 
+                                                 class="w-10 h-10 rounded-full object-cover shadow-xs border border-gray-200"
+                                                 onerror="this.style.display='none'; document.getElementById('initial-fallback-{{ $p->id }}').style.display='flex';">
+                                            <div id="initial-fallback-{{ $p->id }}" style="display: none;" class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-sm flex items-center justify-center shadow-xs">
+                                                {{ strtoupper(substr($p->name, 0, 1)) }}
+                                            </div>
+                                        @else
+                                            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-sm flex items-center justify-center shadow-xs">
+                                                {{ strtoupper(substr($p->name, 0, 1)) }}
+                                            </div>
+                                        @endif
                                     </div>
                                     <div>
                                         <div class="text-sm font-bold text-gray-900">{{ $p->name }}</div>
@@ -308,81 +331,103 @@
                                     @endif
                                 </td>
 
-                                {{-- Toggle Detail Row Button --}}
+                                {{-- Action / Rincian Pop-up Modal Button --}}
                                 <td class="px-4 py-4 text-center">
                                     @if($totalDays > 0)
-                                        <button type="button" onclick="toggleDetailsRow('detail-row-{{ $p->id }}', this)"
-                                                class="px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition flex items-center justify-center gap-1 mx-auto">
+                                        <button type="button" onclick="openAttendanceHistoryModal({{ $p->id }})"
+                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold border border-blue-200 transition shadow-2xs hover:shadow-xs mx-auto">
+                                            <i class="fas fa-list-check text-[11px]"></i>
                                             <span>Rincian</span>
-                                            <i class="fas fa-chevron-down text-[10px] transition-transform duration-200"></i>
                                         </button>
+
+                                        {{-- Hidden Data Template for Pop-up Modal --}}
+                                        <div id="history-data-{{ $p->id }}" 
+                                             class="hidden text-left"
+                                             data-name="{{ $p->name }}"
+                                             data-email="{{ $p->email }}"
+                                             data-username="{{ $p->username ? '@' . $p->username : '' }}"
+                                             data-total="{{ $totalDays }} Hari Hadir"
+                                             data-photo="{{ $photoUrl ?? '' }}"
+                                             data-initial="{{ strtoupper(substr($p->name, 0, 1)) }}">
+                                            <div class="space-y-3">
+                                                @foreach($userAttendances as $att)
+                                                    @php
+                                                        $dFormatted = $att->attendance_date ? $att->attendance_date->translatedFormat('l, d F Y') : ($att->check_in_at ? $att->check_in_at->timezone($event->timezone)->translatedFormat('l, d F Y') : '-');
+                                                        $isComplete = ($att->check_out_at !== null);
+                                                    @endphp
+                                                    <div class="bg-white rounded-2xl border {{ $isComplete ? 'border-blue-100 shadow-2xs' : 'border-emerald-100 shadow-2xs' }} p-4 hover:shadow-xs transition">
+                                                        <div class="flex items-center justify-between pb-3 mb-3 border-b border-gray-100">
+                                                            <div class="flex items-center gap-2.5">
+                                                                <div class="w-8 h-8 rounded-xl {{ $isComplete ? 'bg-blue-50 text-blue-600' : 'bg-emerald-50 text-emerald-600' }} flex items-center justify-center text-xs font-bold">
+                                                                    <i class="fas fa-calendar-day"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <span class="text-sm font-bold text-gray-900 block leading-tight">{{ $dFormatted }}</span>
+                                                                    <span class="text-[11px] text-gray-400">Absensi Harian Event</span>
+                                                                </div>
+                                                            </div>
+                                                            @if($isComplete)
+                                                                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-700 bg-blue-50 border border-blue-200 px-3 py-1 rounded-full">
+                                                                    <i class="fas fa-check-double text-[10px]"></i> Lengkap
+                                                                </span>
+                                                            @else
+                                                                <span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+                                                                    <i class="fas fa-sign-in-alt text-[10px]"></i> Check-in Saja
+                                                                </span>
+                                                            @endif
+                                                        </div>
+
+                                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                                                            {{-- Check-in Box --}}
+                                                            <div class="bg-emerald-50/40 rounded-xl p-3 border border-emerald-100/70">
+                                                                <div class="flex items-center justify-between mb-1.5">
+                                                                    <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
+                                                                        <i class="fas fa-arrow-right-to-bracket text-[10px]"></i> Check-in
+                                                                    </span>
+                                                                    @if($att->check_in_photo_path)
+                                                                        <button type="button"
+                                                                                onclick="previewAttendancePhoto('{{ route('admin.attendance.photo', ['attendance' => $att->id, 'type' => 'check-in']) }}', 'Foto Check-in: {{ addslashes($p->name) }}', '{{ $dFormatted }} • {{ $att->check_in_at ? $att->check_in_at->timezone($event->timezone)->format('H:i:s') : '' }} {{ $event->timezone_label }}')"
+                                                                                class="px-2 py-0.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-2xs">
+                                                                            <i class="fas fa-camera text-[10px]"></i> Foto
+                                                                        </button>
+                                                                    @endif
+                                                                </div>
+                                                                <div class="text-sm font-extrabold text-gray-900 font-mono">
+                                                                    {{ $att->check_in_at ? $att->check_in_at->timezone($event->timezone)->format('H:i:s') : '-' }}
+                                                                    <span class="text-[10px] font-normal text-gray-500">{{ $att->check_in_at ? $event->timezone_label : '' }}</span>
+                                                                </div>
+                                                            </div>
+
+                                                            {{-- Check-out Box --}}
+                                                            <div class="bg-blue-50/40 rounded-xl p-3 border border-blue-100/70">
+                                                                <div class="flex items-center justify-between mb-1.5">
+                                                                    <span class="text-[11px] font-bold uppercase tracking-wider text-blue-700 flex items-center gap-1">
+                                                                        <i class="fas fa-arrow-right-from-bracket text-[10px]"></i> Check-out
+                                                                    </span>
+                                                                    @if($att->check_out_photo_path)
+                                                                        <button type="button"
+                                                                                onclick="previewAttendancePhoto('{{ route('admin.attendance.photo', ['attendance' => $att->id, 'type' => 'check-out']) }}', 'Foto Check-out: {{ addslashes($p->name) }}', '{{ $dFormatted }} • {{ $att->check_out_at ? $att->check_out_at->timezone($event->timezone)->format('H:i:s') : '' }} {{ $event->timezone_label }}')"
+                                                                                class="px-2 py-0.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-2xs">
+                                                                            <i class="fas fa-camera text-[10px]"></i> Foto
+                                                                        </button>
+                                                                    @endif
+                                                                </div>
+                                                                <div class="text-sm font-extrabold text-gray-900 font-mono">
+                                                                    {{ $att->check_out_at ? $att->check_out_at->timezone($event->timezone)->format('H:i:s') : '-' }}
+                                                                    <span class="text-[10px] font-normal text-gray-500">{{ $att->check_out_at ? $event->timezone_label : '' }}</span>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
+                                        </div>
                                     @else
                                         <span class="text-gray-300 text-xs">-</span>
                                     @endif
                                 </td>
                             @endif
                         </tr>
-
-                        {{-- Collapsible Multi-day Details Sub-table (All Mode) --}}
-                        @if($selectedDate === 'all' && $totalDays > 0)
-                            <tr id="detail-row-{{ $p->id }}" class="hidden bg-gray-50/70 border-b border-gray-100">
-                                <td colspan="4" class="px-6 py-4">
-                                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-2xs">
-                                        <h4 class="text-xs font-bold text-gray-700 uppercase tracking-wider mb-3 flex items-center gap-1.5">
-                                            <i class="fas fa-history text-indigo-600"></i> Riwayat Absensi Lengkap: {{ $p->name }}
-                                        </h4>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                                            @foreach($userAttendances as $att)
-                                                @php
-                                                    $dFormatted = $att->attendance_date ? $att->attendance_date->translatedFormat('l, d M Y') : ($att->check_in_at ? $att->check_in_at->timezone($event->timezone)->translatedFormat('l, d M Y') : '-');
-                                                    $isComplete = ($att->check_out_at !== null);
-                                                @endphp
-                                                <div class="rounded-xl border {{ $isComplete ? 'border-blue-200 bg-blue-50/20' : 'border-emerald-200 bg-emerald-50/20' }} p-3">
-                                                    <div class="flex items-center justify-between mb-2">
-                                                        <span class="text-xs font-bold text-gray-900">{{ $dFormatted }}</span>
-                                                        @if($isComplete)
-                                                            <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">Lengkap</span>
-                                                        @else
-                                                            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">Check-in saja</span>
-                                                        @endif
-                                                    </div>
-                                                    <div class="space-y-1.5 text-xs">
-                                                        {{-- Check-in --}}
-                                                        <div class="flex items-center justify-between text-gray-700">
-                                                            <span class="text-[11px] font-medium text-emerald-600">In:</span>
-                                                            <div class="flex items-center gap-1.5">
-                                                                <span class="font-bold font-mono">{{ $att->check_in_at ? $att->check_in_at->timezone($event->timezone)->format('H:i:s') : '-' }}</span>
-                                                                @if($att->check_in_photo_path)
-                                                                    <button type="button"
-                                                                            onclick="previewAttendancePhoto('{{ route('admin.attendance.photo', ['attendance' => $att->id, 'type' => 'check-in']) }}', 'Check-in: {{ addslashes($p->name) }}', '{{ $dFormatted }} - {{ $att->check_in_at->timezone($event->timezone)->format('H:i:s') }}')"
-                                                                            class="text-emerald-600 hover:text-emerald-800 text-[11px]">
-                                                                        <i class="fas fa-image"></i>
-                                                                    </button>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                        {{-- Check-out --}}
-                                                        <div class="flex items-center justify-between text-gray-700">
-                                                            <span class="text-[11px] font-medium text-blue-600">Out:</span>
-                                                            <div class="flex items-center gap-1.5">
-                                                                <span class="font-bold font-mono">{{ $att->check_out_at ? $att->check_out_at->timezone($event->timezone)->format('H:i:s') : '-' }}</span>
-                                                                @if($att->check_out_photo_path)
-                                                                    <button type="button"
-                                                                            onclick="previewAttendancePhoto('{{ route('admin.attendance.photo', ['attendance' => $att->id, 'type' => 'check-out']) }}', 'Check-out: {{ addslashes($p->name) }}', '{{ $dFormatted }} - {{ $att->check_out_at->timezone($event->timezone)->format('H:i:s') }}')"
-                                                                            class="text-blue-600 hover:text-blue-800 text-[11px]">
-                                                                        <i class="fas fa-image"></i>
-                                                                    </button>
-                                                                @endif
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endif
                     @empty
                         <tr>
                             <td colspan="{{ $selectedDate !== 'all' ? 4 : 4 }}" class="px-6 py-12 text-center text-sm text-gray-500">
@@ -406,8 +451,55 @@
     </div>
 </div>
 
-{{-- Photo Preview Modal --}}
-<div id="attendance-photo-modal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-xs hidden p-4">
+{{-- Attendance History Modal --}}
+<div id="attendance-history-modal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-xs hidden p-4 sm:p-6 overflow-y-auto">
+    <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden my-auto animate-scale-in">
+        {{-- Header --}}
+        <div class="relative px-6 py-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white">
+            <button type="button" onclick="closeAttendanceHistoryModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition cursor-pointer">
+                <i class="fas fa-times text-sm"></i>
+            </button>
+            <div class="flex items-center gap-4">
+                <div id="history-modal-avatar" class="w-14 h-14 rounded-2xl overflow-hidden ring-2 ring-white/30 shrink-0 shadow-md flex items-center justify-center bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xl">
+                </div>
+                <div class="min-w-0 pr-8">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h3 id="history-modal-name" class="text-lg font-bold text-white truncate"></h3>
+                        <span id="history-modal-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/15 text-blue-200 border border-white/20"></span>
+                    </div>
+                    <p id="history-modal-email" class="text-xs text-blue-200/80 mt-0.5 truncate"></p>
+                    <p id="history-modal-username" class="text-[11px] font-mono text-blue-300/70 mt-0.5"></p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Subheader / Notice --}}
+        <div class="px-6 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500">
+            <span class="font-bold uppercase tracking-wider text-[11px] text-gray-600 flex items-center gap-1.5">
+                <i class="fas fa-history text-indigo-600"></i> Riwayat Absensi Kehadiran
+            </span>
+            <span class="text-[11px] text-gray-500"><i class="fas fa-clock text-gray-400 mr-1"></i>Zona: {{ $event->timezone_label }}</span>
+        </div>
+
+        {{-- Modal Content Body --}}
+        <div id="history-modal-body" class="p-6 max-h-[60vh] overflow-y-auto bg-gray-50/50">
+            {{-- Content is dynamically cloned from hidden data template --}}
+        </div>
+
+        {{-- Modal Footer --}}
+        <div class="px-6 py-4 bg-white border-t border-gray-100 flex items-center justify-between">
+            <span class="text-xs text-gray-500 flex items-center gap-1.5">
+                <i class="fas fa-shield-alt text-emerald-600"></i> Klik tombol <b>Foto</b> untuk melihat bukti check-in/out
+            </span>
+            <button type="button" onclick="closeAttendanceHistoryModal()" class="px-5 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- Photo Preview Modal (z-60 for layered pop-up preview) --}}
+<div id="attendance-photo-modal" class="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-xs hidden p-4">
     <div class="bg-white rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl animate-scale-in">
         <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
             <div>
@@ -435,17 +527,48 @@
 
 @push('scripts')
 <script>
-    function toggleDetailsRow(rowId, btn) {
-        const row = document.getElementById(rowId);
-        if (!row) return;
-        const icon = btn.querySelector('i');
-        if (row.classList.contains('hidden')) {
-            row.classList.remove('hidden');
-            if (icon) icon.classList.add('rotate-180');
+    let isHistoryModalOpen = false;
+
+    function openAttendanceHistoryModal(participantId) {
+        const dataContainer = document.getElementById('history-data-' + participantId);
+        if (!dataContainer) return;
+
+        const modal = document.getElementById('attendance-history-modal');
+        const nameEl = document.getElementById('history-modal-name');
+        const emailEl = document.getElementById('history-modal-email');
+        const usernameEl = document.getElementById('history-modal-username');
+        const badgeEl = document.getElementById('history-modal-badge');
+        const avatarEl = document.getElementById('history-modal-avatar');
+        const bodyEl = document.getElementById('history-modal-body');
+
+        nameEl.textContent = dataContainer.dataset.name || '';
+        emailEl.textContent = dataContainer.dataset.email || '';
+        usernameEl.textContent = dataContainer.dataset.username || '';
+        badgeEl.textContent = dataContainer.dataset.total || '';
+
+        const photoUrl = dataContainer.dataset.photo;
+        const initial = dataContainer.dataset.initial || 'U';
+
+        if (photoUrl) {
+            avatarEl.innerHTML = `<img src="${photoUrl}" alt="${dataContainer.dataset.name}" class="w-full h-full object-cover" onerror="this.outerHTML='<span class=\\'font-bold text-xl\\'>${initial}</span>'">`;
         } else {
-            row.classList.add('hidden');
-            if (icon) icon.classList.remove('rotate-180');
+            avatarEl.innerHTML = `<span class="font-bold text-xl">${initial}</span>`;
         }
+
+        bodyEl.innerHTML = dataContainer.innerHTML;
+
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        isHistoryModalOpen = true;
+    }
+
+    function closeAttendanceHistoryModal() {
+        const modal = document.getElementById('attendance-history-modal');
+        if (modal) {
+            modal.classList.add('hidden');
+        }
+        isHistoryModalOpen = false;
+        document.body.style.overflow = '';
     }
 
     function previewAttendancePhoto(url, title, subtitle) {
@@ -470,22 +593,38 @@
         const modal = document.getElementById('attendance-photo-modal');
         if (modal) {
             modal.classList.add('hidden');
+        }
+        // Restore scroll only if history modal is not open
+        if (!isHistoryModalOpen) {
             document.body.style.overflow = '';
         }
     }
 
     // Close on click outside modal content
     document.addEventListener('click', function(e) {
-        const modal = document.getElementById('attendance-photo-modal');
-        if (modal && !modal.classList.contains('hidden') && e.target === modal) {
+        const photoModal = document.getElementById('attendance-photo-modal');
+        if (photoModal && !photoModal.classList.contains('hidden') && e.target === photoModal) {
             closeAttendancePhotoModal();
+            return;
+        }
+        const historyModal = document.getElementById('attendance-history-modal');
+        if (historyModal && !historyModal.classList.contains('hidden') && e.target === historyModal) {
+            closeAttendanceHistoryModal();
         }
     });
 
     // Close on Escape key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
-            closeAttendancePhotoModal();
+            const photoModal = document.getElementById('attendance-photo-modal');
+            if (photoModal && !photoModal.classList.contains('hidden')) {
+                closeAttendancePhotoModal();
+                return;
+            }
+            const historyModal = document.getElementById('attendance-history-modal');
+            if (historyModal && !historyModal.classList.contains('hidden')) {
+                closeAttendanceHistoryModal();
+            }
         }
     });
 </script>
