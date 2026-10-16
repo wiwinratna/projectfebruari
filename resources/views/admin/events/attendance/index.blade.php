@@ -452,19 +452,19 @@
 </div>
 
 {{-- Attendance History Modal --}}
-<div id="attendance-history-modal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-xs hidden p-4 sm:p-6 overflow-y-auto">
-    <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden my-auto animate-scale-in">
+<div id="attendance-history-modal" class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-xs hidden p-3 sm:p-6 overflow-y-auto">
+    <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden flex flex-col max-h-[85vh] animate-scale-in">
         {{-- Header --}}
-        <div class="relative px-6 py-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white">
-            <button type="button" onclick="closeAttendanceHistoryModal()" class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition cursor-pointer">
+        <div class="relative px-6 py-4.5 bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-900 text-white shrink-0">
+            <button type="button" onclick="closeAttendanceHistoryModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition cursor-pointer">
                 <i class="fas fa-times text-sm"></i>
             </button>
-            <div class="flex items-center gap-4">
-                <div id="history-modal-avatar" class="w-14 h-14 rounded-2xl overflow-hidden ring-2 ring-white/30 shrink-0 shadow-md flex items-center justify-center bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xl">
+            <div class="flex items-center gap-3.5">
+                <div id="history-modal-avatar" class="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-white/30 shrink-0 shadow-md flex items-center justify-center bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-lg">
                 </div>
                 <div class="min-w-0 pr-8">
                     <div class="flex flex-wrap items-center gap-2">
-                        <h3 id="history-modal-name" class="text-lg font-bold text-white truncate"></h3>
+                        <h3 id="history-modal-name" class="text-base sm:text-lg font-bold text-white truncate"></h3>
                         <span id="history-modal-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/15 text-blue-200 border border-white/20"></span>
                     </div>
                     <p id="history-modal-email" class="text-xs text-blue-200/80 mt-0.5 truncate"></p>
@@ -474,20 +474,20 @@
         </div>
 
         {{-- Subheader / Notice --}}
-        <div class="px-6 py-3 bg-gray-50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500">
+        <div class="px-6 py-2.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between text-xs text-gray-500 shrink-0">
             <span class="font-bold uppercase tracking-wider text-[11px] text-gray-600 flex items-center gap-1.5">
                 <i class="fas fa-history text-indigo-600"></i> Riwayat Absensi Kehadiran
             </span>
             <span class="text-[11px] text-gray-500"><i class="fas fa-clock text-gray-400 mr-1"></i>Zona: {{ $event->timezone_label }}</span>
         </div>
 
-        {{-- Modal Content Body --}}
-        <div id="history-modal-body" class="p-6 max-h-[60vh] overflow-y-auto bg-gray-50/50">
+        {{-- Modal Content Body (Scrollable with min-h-0) --}}
+        <div id="history-modal-body" class="p-4 sm:p-6 overflow-y-auto min-h-0 flex-1 bg-gray-50/50 space-y-3">
             {{-- Content is dynamically cloned from hidden data template --}}
         </div>
 
         {{-- Modal Footer --}}
-        <div class="px-6 py-4 bg-white border-t border-gray-100 flex items-center justify-between">
+        <div class="px-6 py-3.5 bg-white border-t border-gray-100 flex items-center justify-between shrink-0">
             <span class="text-xs text-gray-500 flex items-center gap-1.5">
                 <i class="fas fa-shield-alt text-emerald-600"></i> Klik tombol <b>Foto</b> untuk melihat bukti check-in/out
             </span>
@@ -499,9 +499,9 @@
 </div>
 
 {{-- Photo Preview Modal (z-60 for layered pop-up preview) --}}
-<div id="attendance-photo-modal" class="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-xs hidden p-4">
-    <div class="bg-white rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl animate-scale-in">
-        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+<div id="attendance-photo-modal" class="fixed inset-0 z-60 flex items-center justify-center bg-black/80 backdrop-blur-xs hidden p-3 sm:p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl animate-scale-in flex flex-col max-h-[88vh]">
+        <div class="px-5 py-3.5 border-b border-gray-100 flex items-center justify-between shrink-0">
             <div>
                 <h3 id="photo-modal-title" class="text-base font-bold text-gray-900">Bukti Foto Absensi</h3>
                 <p id="photo-modal-subtitle" class="text-xs text-gray-500 mt-0.5"></p>
@@ -510,10 +510,10 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-        <div class="p-4 bg-gray-950 flex items-center justify-center min-h-[300px] max-h-[70vh] overflow-hidden">
-            <img id="photo-modal-img" src="" alt="Bukti Foto" class="max-h-[65vh] w-auto object-contain rounded-lg shadow-lg">
+        <div class="p-4 bg-gray-950 flex items-center justify-center flex-1 min-h-0 overflow-hidden">
+            <img id="photo-modal-img" src="" alt="Bukti Foto" class="max-h-[60vh] w-auto object-contain rounded-lg shadow-lg">
         </div>
-        <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+        <div class="px-5 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50 shrink-0">
             <span class="text-xs text-gray-500 flex items-center gap-1.5">
                 <i class="fas fa-shield-alt text-emerald-600"></i> Watermark Resmi Terverifikasi
             </span>
